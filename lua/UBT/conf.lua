@@ -55,7 +55,7 @@ M.presets = {
 
 M.default = "Win64DevelopWithEditor"
 M.shell = "cmd"
-M.notify = false 
+M.notify = true
 M.enable_override_fidget = true
 
 -- ユーザー設定をマージするsetup

@@ -44,7 +44,7 @@ function M.create_command(mode, opts)
   local uproject = util.find_uproject(dir)
   if not uproject then
     log.notify('No uproject file found in: ' .. dir, vim.log.levels.ERROR)
-    return
+    return nil
   end
 
   local project_fullpath = util.to_winpath_quoted(uproject)
@@ -54,7 +54,7 @@ function M.create_command(mode, opts)
   local bat = util.to_winpath_quoted(util.get_ubt_lanch_bat_path())
   if not bat or vim.fn.filereadable(bat) == 0 then
     log.notify(' Launch bat not found.', vim.log.levels.ERROR, 'UBT Error')
-    return
+    return nil
   end
 
   local assoc_type, assoc_value = util.get_engine_association_type_from_uproject(uproject)
@@ -67,7 +67,7 @@ function M.create_command(mode, opts)
     assoc_value = '"' + assoc_value + '"'
   else
     log.notify('No EngineAssociation found in: ' .. uproject, vim.log.levels.ERROR)
-    return
+    return nil
   end
 
   local core_cmd = {
@@ -84,6 +84,11 @@ end
 
 function M.create_command_with_target_platforms(mode, label, opts)
   local core_cmd = M.create_command(mode, {})
+  if not core_cmd then
+    return nil;
+  end
+
+
   local cmd_target_args = create_label_target_args(label)
 
   core_cmd = vim.list_extend(core_cmd, cmd_target_args)

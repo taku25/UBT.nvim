@@ -32,9 +32,8 @@ end
 
 
 local function std_err(_, data)
-  if data and next(data) then
-    log.notify(data, vim.log.levels.ERROR, 'Job StdError' )
-  end
+  if not data then return end
+  log.notify(data, vim.log.levels.ERROR, 'Job StdError' )
   if progress then
     progress:cancel()
     progress = nil

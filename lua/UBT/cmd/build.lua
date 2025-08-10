@@ -10,8 +10,12 @@ function M.start(opts)
 
   local cmd = core.create_command_with_target_platforms("Build", opts.label, {"-engine", "-game"})
 
-  log.notify('build...', vim.log.levels.INFO)
-  job.start("Biuld", cmd)
+  if cmd then
+    log.notify('build...', vim.log.levels.INFO)
+    job.start("Biuld", cmd)
+  else
+    log.notify("not found project", vim.log.levels.ERROR)
+  end
 end
 
 return M

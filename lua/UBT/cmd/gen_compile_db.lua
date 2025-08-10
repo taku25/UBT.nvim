@@ -10,8 +10,13 @@ function M.start(opts)
 
   local cmd = core.create_command_with_target_platforms("GenerateClangDatabase", opts.label, {"-NoExecCodeGenActions"})
 
-  log.notify('Generating compile_commands.json...', vim.log.levels.INFO)
-  job.start("GenerateClangDatabase", cmd)
+  if cmd then
+    log.notify('Generating compile_commands.json...', vim.log.levels.INFO)
+    job.start("GenerateClangDatabase", cmd)
+  else
+    log.notify("not found project", vim.log.levels.ERROR)
+  end
+
 end
 
 return M

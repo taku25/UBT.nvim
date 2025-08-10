@@ -11,8 +11,12 @@ function M.start()
 
   local cmd = core.create_command("GenerateProjectFiles", {"-game -engine"})
 
-  log.notify('Generating Project...', vim.log.levels.INFO)
-  job.start("GenerateProject", cmd)
+  if cmd then
+    log.notify('Generating Project...', vim.log.levels.INFO)
+    job.start("GenerateProject", cmd)
+  else
+    log.notify("not found project", vim.log.levels.ERROR)
+  end
 end
 
 return M
