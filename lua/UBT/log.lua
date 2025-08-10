@@ -19,8 +19,16 @@ function M.notify(message, notifyType, title)
     return nil
   end
 
-  -- テーブルなら整形
-  local formatted = type(message) == "table" and vim.inspect(message) or tostring(message)
+  -- テーブルなら整 == "table" and vim.inspect(message):gsub("\r\n", "\n"):gsub("\r", "\n") or tostring(message)
+  local formatted ="" 
+
+  if type(message) == "table" then
+    formatted = table.concat(message, "\n")
+  else
+    formatted = tostring(message)
+  end
+
+
 
   if notifyType == vim.log.levels.ERROR then
 

@@ -57,14 +57,14 @@ if "%ENGINEPATH%"=="" (
     exit /b 2
 )
 
-set UBTEXE="%ENGINEPATH%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.exe"
-if not exist %UBTEXE% (
-    echo [ERROR] UnrealBuildTool.exe not found at: %UBTEXE%
+set UBTDLL=%ENGINEPATH%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll
+if not exist "%UBTDLL%" (
+    echo [ERROR] UnrealBuildTool.exe not found at: "%UBTDLL%"
     exit /b 3
 )
 
 rem run
-%UBTEXE% -mode=%MODE% -Progress -OutputDir=%OUTPUTDIR% -project=%PROJECT% %OPTIONS%
+dotnet "%UBTDLL%" -mode=%MODE% -Progress -OutputDir=%OUTPUTDIR% -project=%PROJECT% %OPTIONS%
 set EXITCODE=%ERRORLEVEL%
 
 endlocal & exit /b %EXITCODE%
