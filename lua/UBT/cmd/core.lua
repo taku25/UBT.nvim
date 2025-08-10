@@ -63,8 +63,6 @@ function M.create_command(label, mode, opts)
     project_fullpath,
     project_root,
     "-Progress",
-    "-game",
-    "-engine",
     target,
     platform,
     configuration,

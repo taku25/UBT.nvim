@@ -8,7 +8,7 @@ local core = require("UBT.cmd.core")
 --- compile_commands.json生成本体
 function M.generate_compile_commands(opts)
 
-  local cmd = core.create_command(opts.label, "GenerateClangDatabase", {"-NoExecCodeGenActions"})
+  local cmd = core.create_command(opts.label, "Build", {"-NoExecCodeGenActions"})
 
   log.notify('build...', vim.log.levels.INFO)
   job.start("Biuld", cmd)
