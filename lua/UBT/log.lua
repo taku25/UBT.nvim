@@ -23,7 +23,10 @@ function M.notify(message, notifyType, title)
   local formatted = type(message) == "table" and vim.inspect(message) or tostring(message)
 
   if notifyType == vim.log.levels.ERROR then
-    vim.api.nvim_err_writeln(formatted)
+
+
+    vim.api.nvim_echo({{formatted, "ErrorMsg" }}, true, {err=true})
+    -- vim.api.nvim_echo({formatted,"ErrorMsg"}, true)
   elseif notifyType == vim.log.levels.WARNING then
     local escaped = formatted:gsub('"', '\\"')
     vim.cmd('echohl WarningMsg | echomsg "' .. escaped .. '" | echohl None')
