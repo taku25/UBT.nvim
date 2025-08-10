@@ -1,4 +1,4 @@
-#echo off
+@echo off
 setlocal
 
 rem args
@@ -27,12 +27,12 @@ goto loop
 
 
 rem debug
-echo TYPE: %TYPE%
-echo VALUE: %VALUE%
-echo MODE: %MODE%
-echo PROJECT: %PROJECT%
-echo OUTPUTDIR: %OUTPUTDIR%
-echo OPTIONS: %OPTIONS%
+REM echo TYPE: %TYPE%
+REM echo VALUE: %VALUE%
+REM echo MODE: %MODE%
+REM echo PROJECT: %PROJECT%
+REM echo OUTPUTDIR: %OUTPUTDIR%
+REM echo OPTIONS: %OPTIONS%
 
 rem get Unreal Engine path 
 set ENGINEPATH=

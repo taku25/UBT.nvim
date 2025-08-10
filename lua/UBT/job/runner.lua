@@ -7,26 +7,48 @@ local uv = vim.loop
 local log = require("UBT.log")
 
 local progress = nil
+local message_buffer = ""
+
+local function flush_message(msg)
+  msg = msg:match("^%s*(.-)%s*$") -- trim
+
+  if msg == "" then return end
+
+  -- progress
+  local label, percent = msg:match("@progress%s+'([^']+)'%s+(%d+)%%")
+  if label and percent then
+    log.notify(label, vim.log.levels.INFO, 'UBT')
+    if progress then
+      progress:report({
+        message = label,
+        percentage = tonumber(percent),
+      })
+    end
+    return
+  end
+
+  -- error
+  if msg:match("[Ee]rror") or msg:match("failed") or msg:match("fatal") then
+    log.notify(msg, vim.log.levels.ERROR, 'UBT')
+    return
+  end
+
+  -- info
+  log.notify(msg, vim.log.levels.INFO, 'UBT')
+end
 
 local function std_out(_, data)
   if not data then return end
 
-  for _, line in ipairs(data) do
-    -- @progress のみ処理
-    local label, percent = line:match("@progress%s+'([^']+)'%s+(%d+)%%")
-    if label then
-      if label and percent then
-        -- 通常ログ出力（@progress 以外）
-        log.notify(label, vim.log.levels.INFO, 'Job Output')
-        -- シングルクォート除去済みのラベルと数値化されたパーセンテージ
-        if progress then
-          progress:report({
-            message = label,
-            percentage = tonumber(percent),
-          })
-        end
-      end
+  for _, chunk in ipairs(data) do
+    if not chunk or chunk == "" then goto continue end
+
+    -- 改行が含まれているか判定
+    if chunk:find("[\r\n]") then
+        flush_message(chunk)
     end
+
+    ::continue::
   end
 end
 
@@ -62,7 +84,7 @@ end
 
 function M.start(name, cmd)
   local conf = require("UBT.conf")
-
+  message_buffer = ""
   -- Check if fidget.nvim is available
   local fidget_available = pcall(require, 'fidget')
   if fidget_available then
