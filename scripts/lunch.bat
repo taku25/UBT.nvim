@@ -39,9 +39,12 @@ set ENGINEPATH=
 if /I "%TYPE%"=="guid" (
     for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Epic Games\Unreal Engine\Builds" /v "{"%VALUE%"}" 2^>nul`) do set ENGINEPATH=%%A
 ) else if /I "%TYPE%"=="version" (
-    for /f "usebackq skip=2 tokens=3*" %%A in (`reg query "HKLM\SOFTWARE\EpicGames\Unreal Engine" /v InstalledDirectories 2^>nul`) do (
-        echo %%B | findstr /I "%VALUE%" >nul && set ENGINEPATH=%%B
+    set LOC_VALUE=%VALUE:"=%
+    for /f "tokens=3*" %%A in ('reg query "HKLM\SOFTWARE\EpicGames\Unreal Engine\!LOC_VALUE!" /v InstalledDirectory 2^>nul') do (
+        set ENGINEPATH=%%A %%B
+        echo [DEBUG] Retrieved ENGINEPATH from version: !ENGINEPATH!
     )
+
 ) else if /I "%TYPE%"=="row" (
     set ENGINEPATH=%VALUE%
 ) else (
@@ -54,14 +57,14 @@ if "%ENGINEPATH%"=="" (
     exit /b 2
 )
 
-set UBTEXE="%ENGINEPATH%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll"
+set UBTEXE="%ENGINEPATH%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.exe"
 if not exist %UBTEXE% (
     echo [ERROR] UnrealBuildTool.exe not found at: %UBTEXE%
     exit /b 3
 )
 
 rem run
-dotnet %UBTEXE% -mode=%MODE% -Progress -OutputDir=%OUTPUTDIR% -project=%PROJECT% %OPTIONS%
+%UBTEXE% -mode=%MODE% -Progress -OutputDir=%OUTPUTDIR% -project=%PROJECT% %OPTIONS%
 set EXITCODE=%ERRORLEVEL%
 
 endlocal & exit /b %EXITCODE%
