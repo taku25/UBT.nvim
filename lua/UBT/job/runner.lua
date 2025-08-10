@@ -8,26 +8,28 @@ local log = require("UBT.log")
 
 local progress = nil
 
-
 local function std_out(_, data)
   if not data then return end
 
   for _, line in ipairs(data) do
-    -- 通常ログ出力
-    if not progress then
-      log.notify(line, vim.log.levels.INFO, 'Job Output')
-    end
-
-    -- @progress のパース
-    local label, percent = line:match("@generating... %s+'([^']+)'%s+(%d+)%%")
-    if label and percent and progress then
-      progress:report({
-        message = label,
-        percentage = tonumber(percent),
-      })
+    -- @progress のみ処理
+    local label, percent = line:match("@progress%s+'([^']+)'%s+(%d+)%%")
+    if label then
+      if label and percent then
+        -- 通常ログ出力（@progress 以外）
+        log.notify(label, vim.log.levels.INFO, 'Job Output')
+        -- シングルクォート除去済みのラベルと数値化されたパーセンテージ
+        if progress then
+          progress:report({
+            message = label,
+            percentage = tonumber(percent),
+          })
+        end
+      end
     end
   end
 end
+
 
 local function std_err(_, data)
   if data and next(data) then
