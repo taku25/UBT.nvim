@@ -44,6 +44,14 @@ function M.find_ubt_plugin_root()
 end
 
 
+-- is unreal root dir (is contain )
+function M.is_root_dir()
+  if M.find_uproject(vim.fn.getcwd()) then
+    return true
+  end
+  return false
+end
+
 --- erase {}
 function M.normalize_assoc(assoc)
     return assoc:gsub("^%{", ""):gsub("%}$", "")
