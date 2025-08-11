@@ -33,6 +33,12 @@ local function flush_message(msg)
     return
   end
 
+  -- warning
+  if msg:match("[Ww]arning") then
+    log.notify(msg, vim.log.levels.WARN, 'UBT')
+    return
+  end
+
   -- info
   log.notify(msg, vim.log.levels.INFO, 'UBT')
 end

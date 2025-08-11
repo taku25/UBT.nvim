@@ -29,15 +29,10 @@ function M.notify(message, notifyType, title)
   end
 
 
-
   if notifyType == vim.log.levels.ERROR then
-
-
     vim.api.nvim_echo({{formatted, "ErrorMsg" }}, true, {err=true})
-    -- vim.api.nvim_echo({formatted,"ErrorMsg"}, true)
   elseif notifyType == vim.log.levels.WARNING then
-    local escaped = formatted:gsub('"', '\\"')
-    vim.cmd('echohl WarningMsg | echomsg "' .. escaped .. '" | echohl None')
+    vim.api.nvim_echo({{formatted, "WarningMsg" }}, true, {err=true})
   end
 
   local conf = require("UBT.conf")
