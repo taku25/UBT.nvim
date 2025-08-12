@@ -9,11 +9,11 @@ local util = require("UBT.util")
 --- compile_commands.json生成本体
 function M.start(opts)
 
-  local cmd = core.create_command_with_target_platforms("GenerateClangDatabase", opts.label, 
+  local cmd = core.create_command_with_target_platforms(opts.root_dir, "GenerateClangDatabase", opts.label, 
   {
     "-NoExecCodeGenActions",
     '-OutputDir',
-    util.get_uprojct_root_path(),
+    opts.root_dir,
   })
   
   if cmd then

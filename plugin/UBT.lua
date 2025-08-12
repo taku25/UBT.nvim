@@ -1,4 +1,5 @@
 -- Neovim plugin entry: registers user commands for UBT.nvim
+--ubt.lua
 if 1 ~= vim.fn.has "nvim-0.11.3" then
   vim.api.nvim_err_writeln "Telescope.nvim requires at least nvim-0.11.0. See `:h telescope.changelog-2499`"
   return
@@ -20,6 +21,10 @@ vim.api.nvim_create_user_command(
   'UBT',
   function(args)
     local sub = args.fargs[1]
+    local opts = {
+      root_dir = vim.fn.getcwd(),
+      label = "",
+    }
     if sub == nil then
       log.notify('Usage: :UBT GenCompileDB ...', vim.log.levels.ERROR, 'UBT' )
       return
@@ -31,16 +36,19 @@ vim.api.nvim_create_user_command(
       log.notify(sub_args, false, vim.log.levels.INFO, 'UBT')
       local label = sub_args.fargs[1] or conf.default
       log.notify("Executing GenerateClanDatabase: "..label, false, vim.log.levels.INFO, 'UBT')
-      gen_cmd.start({label=label})
+      opts.label = label;
+      gen_cmd.start(opts)
     elseif sub:lower() == 'build' then
       -- Pass only the remaining arguments to the actual function
       local sub_args = vim.tbl_extend('force', args, {fargs = { unpack(args.fargs, 2) }})
       local label = sub_args.fargs[1] or conf.default
       log.notify('Executing Build: ' .. label, false, vim.log.levels.INFO, 'UBT')
-      build_cmd.start({label = label})
+
+      opts.label = label;
+      build_cmd.start(opts)
     elseif sub:lower() == 'genproject' then
       log.notify('Executing GenerateProjectFiles: ', false, vim.log.levels.INFO, 'UBT')
-      proj_cmd.start()
+      proj_cmd.start(opts)
     else
       log.notify('Unknown subcommand: '..sub, true, vim.log.levels.ERROR, 'UBT')
     end

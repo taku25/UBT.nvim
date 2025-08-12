@@ -20,9 +20,8 @@ function M.find_ubt_plugin_root()
 end
 
 
--- is unreal root dir (is contain )
-function M.is_root_dir()
-  if M.find_uproject(vim.fn.getcwd()) then
+function M.is_root_dir(root_dir)
+  if M.find_uproject(root_dir) then
     return true
   end
   return false
@@ -47,32 +46,7 @@ function M.get_project_name(uproject_path)
   return vim.fn.fnamemodify(filename, ":r")
 end
 
---- uprojectファイルのディレクトリパスを取得
-
-function M.get_uprojct_path()
-  local isrootdir = M.is_root_dir()
-  if isrootdir == false then
-    log.notify('not project dir please move project root dir: ' .. dir, true, vim.log.levels.ERROR)
-    return nil
-  end
-  local uproject = M.find_uproject(vim.fn.getcwd())
-  if not uproject then
-    log.notify('No uproject file found in: ' .. dir, true, vim.log.levels.ERROR)
-    return nil
-  end
-  return M.to_winpath_quoted(uproject)
-end
-
---
-function M.get_uprojct_root_path()
-  local project_path = M.get_uprojct_path()
-  if project_path == nil then
-    log.notify('not found uproject file found in: get_uproject_root_path ', true, vim.log.levels.ERROR)
-    return nil
-  end
-  return vim.fn.fnamemodify(project_path, ":p:h")
-end
-
+-- --- uprojec
 --- erase {}
 function M.normalize_assoc(assoc)
     return assoc:gsub("^%{", ""):gsub("%}$", "")

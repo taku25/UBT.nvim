@@ -8,15 +8,13 @@ local core = require("UBT.cmd.core")
 local util = require("UBT.util")
 
 --- compile_commands.json生成本体
-function M.start()
-  local project_root = util.get_uprojct_root_path()
-
-  local cmd = core.create_command("GenerateProjectFiles",
+function M.start(opts)
+  local cmd = core.create_command(opts.root_dir, "GenerateProjectFiles",
   {
     "-game",
     "-engine",
     '-OutputDir',
-    project_root,
+    opts.root_dir,
   })
 
   if cmd then

@@ -8,7 +8,7 @@ local core = require("UBT.cmd.core")
 --- compile_commands.json生成本体
 function M.start(opts)
   
-  local cmd = core.create_command_with_target_platforms("Build", opts.label,
+  local cmd = core.create_command_with_target_platforms(opts.root_dir, "Build", opts.label,
   {
     "-game",
     "-engine",
