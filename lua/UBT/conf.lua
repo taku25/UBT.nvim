@@ -53,9 +53,15 @@ M.presets = {
   },
 }
 
-M.default = "Win64DevelopWithEditor"
+-- default label
+M.preset_target = "Win64DevelopWithEditor"
+-- default lintertype
+M.lint_type = "Default"
+-- default shell
 M.shell = "cmd"
-M.notify = true
+-- enable or dislable notify
+M.notify = false 
+-- override fidget setting
 M.enable_override_fidget = true
 
 -- ユーザー設定をマージするsetup

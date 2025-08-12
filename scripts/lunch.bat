@@ -37,6 +37,13 @@ if /I "%~1"=="-OutputDir" (
   goto :arg_loop
 )
 
+if /I "%~1"=="-StaticAnalyzer" (
+  set "OPTIONS=!OPTIONS! -StaticAnalyzer=%~2"
+  shift
+  shift
+  goto :arg_loop
+)
+
 :: その他の引数はそのまま追加
 set "OPTIONS=!OPTIONS! %~1"
 shift

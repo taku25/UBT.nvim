@@ -74,13 +74,22 @@ function M.create_command(root_dir, mode, opts)
     bat,
     assoc_type,
     assoc_value,
-    '-mode',
-    mode,
     "-project",
     project_fullpath,
     "-Progress",
- }
+  }
 
+
+  local mode_cmd = {}
+  if mode ~= nil then
+    mode_cmd = {
+      '-mode',
+      mode,
+    }
+  end
+
+
+  core_cmd = vim.list_extend(core_cmd, mode_cmd)
 
   return vim.list_extend(core_cmd, opts)
 end
