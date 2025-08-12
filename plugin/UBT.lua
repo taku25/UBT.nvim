@@ -28,21 +28,21 @@ vim.api.nvim_create_user_command(
       -- Pass only the remaining arguments to the actual function
       local sub_args = vim.tbl_extend('force', args, {fargs = { unpack(args.fargs, 2) }})
 
-      log.notify(sub_args, vim.log.levels.INFO, 'UBT')
+      log.notify(sub_args, false, vim.log.levels.INFO, 'UBT')
       local label = sub_args.fargs[1] or conf.default
-      log.notify("Executing GenerateClanDatabase: "..label, vim.log.levels.INFO, 'UBT')
+      log.notify("Executing GenerateClanDatabase: "..label, false, vim.log.levels.INFO, 'UBT')
       gen_cmd.start({label=label})
     elseif sub:lower() == 'build' then
       -- Pass only the remaining arguments to the actual function
       local sub_args = vim.tbl_extend('force', args, {fargs = { unpack(args.fargs, 2) }})
       local label = sub_args.fargs[1] or conf.default
-      log.notify('Executing Build: ' .. label, vim.log.levels.INFO, 'UBT')
+      log.notify('Executing Build: ' .. label, false, vim.log.levels.INFO, 'UBT')
       build_cmd.start({label = label})
     elseif sub:lower() == 'genproject' then
-      log.notify('Executing GenerateProjectFiles: ', vim.log.levels.INFO, 'UBT')
+      log.notify('Executing GenerateProjectFiles: ', false, vim.log.levels.INFO, 'UBT')
       proj_cmd.start()
     else
-      log.notify('Unknown subcommand: '..sub, vim.log.levels.ERROR, 'UBT')
+      log.notify('Unknown subcommand: '..sub, true, vim.log.levels.ERROR, 'UBT')
     end
   end,
   {

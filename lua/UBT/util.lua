@@ -6,30 +6,6 @@ local uv = vim.loop
 
 local log = require("UBT.log")
 
---- uprojectファイルをディレクトリから検出
-function M.find_uproject(dir)
-  local handle = uv.fs_scandir(dir)
-  if not handle then return nil end
-  while true do
-    local name, t = uv.fs_scandir_next(handle)
-    if not name then break end
-    if t == 'file' and name:match('%.uproject$') then
-      return dir .. '/' .. name
-    end
-  end
-  return nil
-end
-
---- uprojectファイルのパスからプロジェクト名（拡張子除去）を取得
-function M.get_project_name(uproject_path)
-  local filename = vim.fn.fnamemodify(uproject_path, ":t")
-  return vim.fn.fnamemodify(filename, ":r")
-end
-
---- uprojectファイルのディレクトリパスを取得
-function M.get_project_root(uproject_path)
-  return vim.fn.fnamemodify(uproject_path, ":p:h")
-end
 
 
 
@@ -50,6 +26,51 @@ function M.is_root_dir()
     return true
   end
   return false
+end
+
+function M.find_uproject(dir)
+  local handle = uv.fs_scandir(dir)
+  if not handle then return nil end
+  while true do
+    local name, t = uv.fs_scandir_next(handle)
+    if not name then break end
+    if t == 'file' and name:match('%.uproject$') then
+      return dir .. '/' .. name
+    end
+  end
+  return nil
+end
+
+--- uprojectファイルのパスからプロジェクト名（拡張子除去）を取得
+function M.get_project_name(uproject_path)
+  local filename = vim.fn.fnamemodify(uproject_path, ":t")
+  return vim.fn.fnamemodify(filename, ":r")
+end
+
+--- uprojectファイルのディレクトリパスを取得
+
+function M.get_uprojct_path()
+  local isrootdir = M.is_root_dir()
+  if isrootdir == false then
+    log.notify('not project dir please move project root dir: ' .. dir, true, vim.log.levels.ERROR)
+    return nil
+  end
+  local uproject = M.find_uproject(vim.fn.getcwd())
+  if not uproject then
+    log.notify('No uproject file found in: ' .. dir, true, vim.log.levels.ERROR)
+    return nil
+  end
+  return M.to_winpath_quoted(uproject)
+end
+
+--
+function M.get_uprojct_root_path()
+  local project_path = M.get_uprojct_path()
+  if project_path == nil then
+    log.notify('not found uproject file found in: get_uproject_root_path ', true, vim.log.levels.ERROR)
+    return nil
+  end
+  return vim.fn.fnamemodify(project_path, ":p:h")
 end
 
 --- erase {}
@@ -77,7 +98,7 @@ function M.detect_engine_association_type(assoc)
   elseif assoc:match("^%a:[\\/].+") then
     return "row"
   else
-    log.notify("Unknown association type: " .. assoc, vim.log.levels.ERROR)
+    log.notify("Unknown association type: " .. assoc, true, vim.log.levels.ERROR)
     return nil
   end
 end
@@ -90,7 +111,7 @@ function M.get_engine_association_type_from_uproject(uproject_path)
   assoc = tostring(assoc)
 
   if type(assoc) ~= "string" then
-    log.notify("assoc is not a string: " .. tostring(assoc), vim.log.levels.ERROR)
+    log.notify("assoc is not a string: " .. tostring(assoc), true, vim.log.levels.ERROR)
     return nil
   end
   return M.detect_engine_association_type(assoc), assoc
@@ -116,7 +137,8 @@ function M.to_winpath_quoted(path)
   path = vim.fn.fnamemodify(path, ":p")
 
   -- / を \ に変換
-  path = path:gsub("/", "\\")
+  path = path:gsub("\\", "/")
+
 
   return path
 end

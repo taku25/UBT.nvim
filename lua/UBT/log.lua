@@ -11,8 +11,8 @@ local function is_empty_string_table(tbl)
 end
 
 
-function M.notify(message, notifyType, title)
-  notifyType = notifyType or vim.log.levels.INFO
+function M.notify(message, write_message_win, notify_type, title)
+  notify_type = notify_type or vim.log.levels.INFO
   title = title or "UBT"
 
   if is_empty_string_table(message) then
@@ -28,11 +28,14 @@ function M.notify(message, notifyType, title)
     formatted = tostring(message)
   end
 
-
-  if notifyType == vim.log.levels.ERROR then
-    vim.api.nvim_echo({{formatted, "ErrorMsg" }}, true, {err=true})
-  elseif notifyType == vim.log.levels.WARNING then
-    vim.api.nvim_echo({{formatted, "WarningMsg" }}, true, {err=true})
+  if write_message_win == true then
+    if notify_type == vim.log.levels.ERROR then
+      vim.api.nvim_echo({{formatted, "ErrorMsg" }}, true, {err=true})
+    elseif notify_type == vim.log.levels.WARNING then
+      vim.api.nvim_echo({{formatted, "WarningMsg" }}, true, {err=true})
+    else
+      vim.api.nvim_echo({{formatted, "Normal" }}, true, {err=false})
+    end
   end
 
   local conf = require("UBT.conf")

@@ -17,7 +17,6 @@ local function flush_message(msg)
   -- progress
   local label, percent = msg:match("@progress%s+'([^']+)'%s+(%d+)%%")
   if label and percent then
-    log.notify(label, vim.log.levels.INFO, 'UBT')
     if progress then
       progress:report({
         message = label,
@@ -28,19 +27,20 @@ local function flush_message(msg)
   end
 
   -- error
-  if msg:match("[Ee]rror") or msg:match("failed") or msg:match("fatal") then
-    log.notify(msg, vim.log.levels.ERROR, 'UBT')
-    return
-  end
+  -- if msg:match("[Ee]rror") or msg:match("failed") or msg:match("fatal") then
+  --   log.notify(msg, true, vim.log.levels.ERROR, 'UBT')
+  --   return
+  -- end
 
   -- warning
-  if msg:match("[Ww]arning") then
-    log.notify(msg, vim.log.levels.WARN, 'UBT')
-    return
-  end
+  -- if msg:match("[Ww]arning") then
+  --   log.notify(msg, true, vim.log.levels.WARN, 'UBT')
+  --   return
+  -- end
+    
 
   -- info
-  log.notify(msg, vim.log.levels.INFO, 'UBT')
+  -- log.notify(msg, false, vim.log.levels.INFO, 'UBT')
 end
 
 local function std_out(_, data)
@@ -61,7 +61,7 @@ end
 
 local function std_err(_, data)
   if not data then return end
-  log.notify(data, vim.log.levels.ERROR, 'Job StdError' )
+  log.notify(data, true, vim.log.levels.ERROR, 'Job StdError' )
   if progress then
     progress:cancel()
     progress = nil
@@ -72,7 +72,8 @@ local function std_exit(_, data)
   vim.schedule(function()
     local msg = ('Job exited with code %d'):format(data)
 
-    log.notify(msg, data == 0 and vim.log.levels.INFO or vim.log.levels.ERROR, 'Job Status')
+    log.notify(msg, data == 0 and false or true,
+                    data == 0 and vim.log.levels.INFO or vim.log.levels.ERROR, 'Job Status')
 
     if progress then
 

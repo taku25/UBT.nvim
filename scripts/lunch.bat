@@ -2,39 +2,50 @@
 setlocal
 
 rem args
-set TYPE=%1
-set VALUE=%2
-set MODE=%3
-set PROJECT=%4
-set OUTPUTDIR=%5
+set "TYPE=%~1"
+shift
+set "VALUE=%~1"
+shift
 
-rem 5shift
-shift
-shift
-shift
-shift
-shift
 
 setlocal EnableDelayedExpansion
-set OPTIONS=
-:loop
-set ARG=%1
-if "!ARG!"=="" goto after_options
-set OPTIONS=!OPTIONS! !ARG!
+set "OPTIONS="
+
+
+:arg_loop
+if "%~1"=="" goto :end_loop
+
+:: 特定のキーに対して次の引数をクォート付きで追加
+if /I "%~1"=="-mode" (
+  set "OPTIONS=!OPTIONS! -mode=%~2"
+  shift
+  shift
+  goto :arg_loop
+)
+
+if /I "%~1"=="-project" (
+  set "OPTIONS=!OPTIONS! -project="%~2""
+  shift
+  shift
+  goto :arg_loop
+)
+
+if /I "%~1"=="-OutputDir" (
+  set "OPTIONS=!OPTIONS! -OutputDir="%~2""
+  shift
+  shift
+  goto :arg_loop
+)
+
+:: その他の引数はそのまま追加
+set "OPTIONS=!OPTIONS! %~1"
 shift
-goto loop
-:after_options
+goto :arg_loop
 
+:end_loop
 
-rem debug
-REM echo TYPE: %TYPE%
-REM echo VALUE: %VALUE%
-REM echo MODE: %MODE%
-REM echo PROJECT: %PROJECT%
-REM echo OUTPUTDIR: %OUTPUTDIR%
-REM echo OPTIONS: %OPTIONS%
+REM echo Final OPTIONS: !OPTIONS!
 
-rem get Unreal Engine path 
 set ENGINEPATH=
 if /I "%TYPE%"=="guid" (
     for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Epic Games\Unreal Engine\Builds" /v "{"%VALUE%"}" 2^>nul`) do set ENGINEPATH=%%A
@@ -64,7 +75,7 @@ if not exist "%UBTDLL%" (
 )
 
 rem run
-dotnet "%UBTDLL%" -mode=%MODE% -Progress -OutputDir=%OUTPUTDIR% -project=%PROJECT% %OPTIONS%
+dotnet "%UBTDLL%" %OPTIONS%
 set EXITCODE=%ERRORLEVEL%
 
 endlocal & exit /b %EXITCODE%

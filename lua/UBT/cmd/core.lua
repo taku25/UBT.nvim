@@ -11,15 +11,16 @@ local function get_config_from_label(label)
   local conf = require("UBT.conf")
   for _, v in ipairs(conf.presets or {}) do
     if v.name == label then
+      local project_name = util.get_project_name(util.find_uproject(vim.fn.getcwd()))
       return {
-        target = v.IsEditor and (util.get_project_name(util.find_uproject(vim.fn.getcwd())) .. "Editor") or util.get_project_name(util.find_uproject(vim.fn.getcwd())),
+        target = v.IsEditor and (project_name .. "Editor") or project_name,
         platform = v.Platform,
         configuration = v.Configuration,
         is_editor = v.IsEditor
       }
     end
   end
-  log.notify('No such config: ' .. tostring(label), vim.log.levels.ERROR, "no config")
+  log.notify('No such config: ' .. tostring(label), true, vim.log.levels.ERROR, "no config")
   return nil
 end
 
@@ -43,17 +44,16 @@ function M.create_command(mode, opts)
   local dir = vim.fn.getcwd()
   local uproject = util.find_uproject(dir)
   if not uproject then
-    log.notify('No uproject file found in: ' .. dir, vim.log.levels.ERROR)
+    log.notify('No uproject file found in: ' .. dir, true, vim.log.levels.ERROR)
     return nil
   end
 
   local project_fullpath = util.to_winpath_quoted(uproject)
-  local project_root = util.to_winpath_quoted(util.get_project_root(uproject))
 
   -- バッチ呼び出し（scripts/UBT_compile_commands.bat）
   local bat = util.to_winpath_quoted(util.get_ubt_lanch_bat_path())
   if not bat or vim.fn.filereadable(bat) == 0 then
-    log.notify(' Launch bat not found.', vim.log.levels.ERROR, 'UBT Error')
+    log.notify(' Launch bat not found.', true, vim.log.levels.ERROR, 'UBT Error')
     return nil
   end
 
@@ -66,7 +66,7 @@ function M.create_command(mode, opts)
   elseif assoc_type == "row" then
     assoc_value = '"' + assoc_value + '"'
   else
-    log.notify('No EngineAssociation found in: ' .. uproject, vim.log.levels.ERROR)
+    log.notify('No EngineAssociation found in: ' .. uproject, true, vim.log.levels.ERROR)
     return nil
   end
 
@@ -74,11 +74,14 @@ function M.create_command(mode, opts)
     bat,
     assoc_type,
     assoc_value,
+    '-mode',
     mode,
+    "-project",
     project_fullpath,
-    project_root,
     "-Progress",
  }
+
+
   return vim.list_extend(core_cmd, opts)
 end
 
@@ -88,11 +91,8 @@ function M.create_command_with_target_platforms(mode, label, opts)
     return nil;
   end
 
-
   local cmd_target_args = create_label_target_args(label)
-
   core_cmd = vim.list_extend(core_cmd, cmd_target_args)
-
   return vim.list_extend(core_cmd, opts)
 
 end
