@@ -12,7 +12,7 @@ vim.g.loaded_ubt = 1
 -- 各コマンドモジュールをrequire
 --.
 local cmd = require("UBT.cmd")
-local log = require("UBT.log")
+local logger = require("UBT.logger")
 local conf = require("UBT.conf")
 
 
@@ -67,7 +67,7 @@ vim.api.nvim_create_user_command(
     local sub_name = fargs[1]
 
     if not sub_name then
-      log.notify("Usage: :UBT <subcommand> ...", vim.log.levels.ERROR, 'UBT')
+      logger.write("Usage: :UBT <subcommand> ...", vim.log.levels.ERROR)
       -- ここで利用可能なサブコマンド一覧を表示するのも親切
       return
     end
@@ -75,7 +75,7 @@ vim.api.nvim_create_user_command(
     -- 入力されたサブコマンド名（小文字）で、定義テーブルを検索
     local command_def = subcommands[sub_name:lower()]
     if not command_def then
-      log.notify("Unknown subcommand: " .. sub_name, vim.log.levels.ERROR, 'UBT')
+      logger.write("Unknown subcommand: " .. sub_name, vim.log.levels.ERROR, 'UBT')
       return
     end
 
@@ -91,7 +91,7 @@ vim.api.nvim_create_user_command(
       opts[arg_def.name] = value
     end
 
-    log.notify("Executing: " .. sub_name .. " with opts: " .. vim.inspect(opts), vim.log.levels.INFO, 'UBT')
+    logger.write("Executing: " .. sub_name .. " with opts: " .. vim.inspect(opts), vim.log.levels.INFO, 'UBT')
 
     -- 対応するハンドラの .start() 関数を呼び出す
     command_def.handler.start(opts)

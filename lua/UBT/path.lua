@@ -1,10 +1,10 @@
 -- UBT.nvim: Neovim command registration module
--- util.lua
+-- path.lua
 
 local M = {}
 local uv = vim.loop
 
-local log = require("UBT.log")
+local conf = require("UBT.conf")
 
 
 
@@ -46,50 +46,6 @@ function M.get_project_name(uproject_path)
   return vim.fn.fnamemodify(filename, ":r")
 end
 
--- --- uprojec
---- erase {}
-function M.normalize_assoc(assoc)
-    return assoc:gsub("^%{", ""):gsub("%}$", "")
-end
-
---- uprojectから読み込んだengine associationのタイプを取得する
-function M.detect_engine_association_type(assoc)
-  -- Accept GUID with or without curly braces
-
-  assoc = assoc:match("^%s*(.-)%s*$") -- trim whitespace
-
-  local x = "%x"
-  local t = { x:rep(8), x:rep(4), x:rep(4), x:rep(4), x:rep(12) }
-  local pattern = table.concat(t, '%-')
-
-  local pattern_plain = "^" .. pattern .. "$"
-  local pattern_curly = "^{" .. pattern .. "}$"
-
-  if assoc:match(pattern_plain) or assoc:match(pattern_curly) then
-    return "guid"
-  elseif assoc:match("^%d+%.%d+$") or assoc:match("^UE_%d+%.%d+$") then
-    return "version"
-  elseif assoc:match("^%a:[\\/].+") then
-    return "row"
-  else
-    log.notify("Unknown association type: " .. assoc, true, vim.log.levels.ERROR)
-    return nil
-  end
-end
---- uprjectを読み込んでengine  associationを取得する
-function M.get_engine_association_type_from_uproject(uproject_path)
-  local content = vim.fn.readfile(uproject_path)
-  local json = vim.fn.json_decode(table.concat(content, "\n"))
-
-  local assoc = json and json.EngineAssociation
-  assoc = tostring(assoc)
-
-  if type(assoc) ~= "string" then
-    log.notify("assoc is not a string: " .. tostring(assoc), true, vim.log.levels.ERROR)
-    return nil
-  end
-  return M.detect_engine_association_type(assoc), assoc
-end
 
 --- lanch script batの取得
 function M.get_ubt_lanch_bat_path()
@@ -115,6 +71,40 @@ function M.to_winpath_quoted(path)
 
 
   return path
+end
+
+--- UBT.nvimのキャッシュディレクトリを取得し、なければ作成する
+function M.get_cache_dir()
+  -- nvimの標準的なキャッシュディレクトリのパスを取得
+  local cache_dir = vim.fn.stdpath('cache')
+  local ubt_cache_dir = cache_dir .. '/UBT'
+  
+  -- ディレクトリが存在しない場合は作成する
+  -- vim.fn.isdirectory() はディレクトリなら1を返す
+  if vim.fn.isdirectory(ubt_cache_dir) ~= 1 then
+    -- 'p' オプションは、親ディレクトリもまとめて作成してくれる (mkdir -p と同じ)
+    vim.fn.mkdir(ubt_cache_dir, 'p')
+  end
+  
+  return ubt_cache_dir
+end
+
+
+function M.get_cache_dir()
+  local cache_dir = vim.fn.stdpath('cache')
+  local ubt_cache_dir = cache_dir .. '/UBT'
+  if vim.fn.isdirectory(ubt_cache_dir) ~= 1 then
+    vim.fn.mkdir(ubt_cache_dir, 'p')
+  end
+  return ubt_cache_dir
+end
+
+function M.get_log_file_path()
+  return M.get_cache_dir() .. '/' .. conf.log_file_name
+end
+
+function M.get_progress_log_file_path()
+  return M.get_cache_dir() .. '/' .. conf.progress_file_name
 end
 
 return M

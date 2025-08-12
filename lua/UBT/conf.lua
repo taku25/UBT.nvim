@@ -60,9 +60,15 @@ M.lint_type = "Default"
 -- default shell
 M.shell = "cmd"
 -- enable or dislable notify
-M.notify = false 
+M.enable_notify = true 
+M.enable_message = false 
 -- override fidget setting
 M.enable_override_fidget = true
+
+M.enable_log_file = true
+-- override fidget setting
+M.log_file_name = "output.log"
+M.progress_file_name = "progress.lug"
 
 -- ユーザー設定をマージするsetup
 function M.setup(user_conf)

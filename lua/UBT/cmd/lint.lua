@@ -1,7 +1,6 @@
 -- UBT.nvim: Neovim command registration module
 -- lint.lua
 local M = {}
-local log = require("UBT.log")
 local job = require("UBT.job.runner")
 local core = require("UBT.cmd.core")
 
@@ -16,12 +15,7 @@ function M.start(opts)
     opts.lint_type
   })
   --
-  if cmd then
-    log.notify('lint...', false, vim.log.levels.INFO)
-    job.start("StaticAnalyzer", cmd)
-  else
-    log.notify("not found project", true, vim.log.levels.ERROR)
-  end
+  job.start("StaticAnalyzer", cmd)
 end
 
 return M

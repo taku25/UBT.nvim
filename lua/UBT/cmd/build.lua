@@ -1,7 +1,6 @@
 -- UBT.nvim: Neovim command registration module
 -- gen_compile_db.lua
 local M = {}
-local log = require("UBT.log")
 local job = require("UBT.job.runner")
 local core = require("UBT.cmd.core")
 
@@ -14,12 +13,7 @@ function M.start(opts)
     "-engine",
   })
 
-  if cmd then
-    log.notify('build...', false, vim.log.levels.INFO)
-    job.start("Biuld", cmd)
-  else
-    log.notify("not found project", true, vim.log.levels.ERROR)
-  end
+  job.start("Biuld", cmd)
 end
 
 return M

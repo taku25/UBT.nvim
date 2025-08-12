@@ -1,9 +1,9 @@
 -- UBT.nvim: Neovim command registration module
 -- cmd.core.lua
 local M = {}
-local util = require("UBT.util")
+local path = require("UBT.path")
 local job = require("UBT.job.runner")
-local log = require("UBT.log")
+local logger = require("UBT.logger")
 
 --- Extracts configuration details from a given label.
 --- Returns a table containing target, platform, editor, and configuration.
@@ -11,7 +11,7 @@ local function get_config_from_label(root_dir, label)
   local conf = require("UBT.conf")
   for _, v in ipairs(conf.presets or {}) do
     if v.name == label then
-      local project_name = util.get_project_name(util.find_uproject(root_dir))
+      local project_name = path.get_project_name(path.find_uproject(root_dir))
       return {
         target = v.IsEditor and (project_name .. "Editor") or project_name,
         platform = v.Platform,
@@ -20,7 +20,7 @@ local function get_config_from_label(root_dir, label)
       }
     end
   end
-  log.notify('No such config: ' .. tostring(label), true, vim.log.levels.ERROR, "no config")
+  logger.write ('No such config: ' .. tostring(label),  vim.log.levels.ERROR)
   return nil
 end
 
@@ -38,35 +38,77 @@ function create_label_target_args(root_dir, label)
   return args
 end
 
+function M.normalize_assoc(assoc)
+    return assoc:gsub("^%{", ""):gsub("%}$", "")
+end
+
+--- uprojectから読み込んだengine associationのタイプを取得する
+function M.detect_engine_association_type(assoc)
+  -- Accept GUID with or without curly braces
+
+  assoc = assoc:match("^%s*(.-)%s*$") -- trim whitespace
+
+  local x = "%x"
+  local t = { x:rep(8), x:rep(4), x:rep(4), x:rep(4), x:rep(12) }
+  local pattern = table.concat(t, '%-')
+
+  local pattern_plain = "^" .. pattern .. "$"
+  local pattern_curly = "^{" .. pattern .. "}$"
+
+  if assoc:match(pattern_plain) or assoc:match(pattern_curly) then
+    return "guid"
+  elseif assoc:match("^%d+%.%d+$") or assoc:match("^UE_%d+%.%d+$") then
+    return "version"
+  elseif assoc:match("^%a:[\\/].+") then
+    return "row"
+  else
+    logger.write("Unknown association type: " .. assoc, vim.log.levels.ERROR)
+    return nil
+  end
+end
+--- uprjectを読み込んでengine  associationを取得する
+function M.get_engine_association_type_from_uproject(uproject_path)
+  local content = vim.fn.readfile(uproject_path)
+  local json = vim.fn.json_decode(table.concat(content, "\n"))
+
+  local assoc = json and json.EngineAssociation
+  assoc = tostring(assoc)
+
+  if type(assoc) ~= "string" then
+    logger.write("assoc is not a string: " .. tostring(assoc), vim.log.levels.ERROR)
+    return nil
+  end
+  return M.detect_engine_association_type(assoc), assoc
+end
 
 --cr
 function M.create_command(root_dir, mode, opts)
   local dir = root_dir
-  local uproject = util.find_uproject(dir)
+  local uproject = path.find_uproject(dir)
   if not uproject then
-    log.notify('No uproject file found in: ' .. dir, true, vim.log.levels.ERROR)
+    logger.write('No uproject file found in: ' .. dir, vim.log.levels.ERROR)
     return nil
   end
 
-  local project_fullpath = util.to_winpath_quoted(uproject)
+  local project_fullpath = path.to_winpath_quoted(uproject)
 
   -- バッチ呼び出し（scripts/UBT_compile_commands.bat）
-  local bat = util.to_winpath_quoted(util.get_ubt_lanch_bat_path())
+  local bat = path.to_winpath_quoted(path.get_ubt_lanch_bat_path())
   if not bat or vim.fn.filereadable(bat) == 0 then
-    log.notify(' Launch bat not found.', true, vim.log.levels.ERROR, 'UBT Error')
+    logger.write(' Launch bat not found.', vim.log.levels.ERROR)
     return nil
   end
 
-  local assoc_type, assoc_value = util.get_engine_association_type_from_uproject(uproject)
+  local assoc_type, assoc_value = M.get_engine_association_type_from_uproject(uproject)
 
   if assoc_type == "guid" then
-    assoc_value = util.normalize_assoc(assoc_value)
+    assoc_value = M.normalize_assoc(assoc_value)
   elseif assoc_type == "version" then
     assoc_value = assoc_value
   elseif assoc_type == "row" then
     assoc_value = '"' + assoc_value + '"'
   else
-    log.notify('No EngineAssociation found in: ' .. uproject, true, vim.log.levels.ERROR)
+    logger.write('No EngineAssociation found in: ' .. uproject, vim.log.levels.ERROR)
     return nil
   end
 
@@ -105,6 +147,9 @@ function M.create_command_with_target_platforms(root_dir, mode, label, opts)
   return vim.list_extend(core_cmd, opts)
 
 end
+
+
+
 
 return M
 
