@@ -7,7 +7,7 @@ local core = require("UBT.cmd.core")
 
 --- compile_commands.json生成本体
 function M.start(opts)
-  local cmd = core.create_command(opts.root_dir, "GenerateProjectFiles",
+  local cmd,error = core.create_command(opts.root_dir, "GenerateProjectFiles",
   {
     "-game",
     "-engine",
@@ -15,7 +15,11 @@ function M.start(opts)
     opts.root_dir,
   })
 
-  job.start("GenerateProject", cmd)
+  if error ~= nil then
+    return nil, error
+  end
+
+  return job.start("GenerateProject", cmd),nil 
 end
 
 return M

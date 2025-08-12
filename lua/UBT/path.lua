@@ -37,7 +37,7 @@ function M.find_uproject(dir)
       return dir .. '/' .. name
     end
   end
-  return nil
+  return nil, "not found project file in " .. dir
 end
 
 --- uprojectファイルのパスからプロジェクト名（拡張子除去）を取得

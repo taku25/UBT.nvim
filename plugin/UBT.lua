@@ -94,7 +94,10 @@ vim.api.nvim_create_user_command(
     logger.write("Executing: " .. sub_name .. " with opts: " .. vim.inspect(opts), vim.log.levels.INFO, 'UBT')
 
     -- 対応するハンドラの .start() 関数を呼び出す
-    command_def.handler.start(opts)
+    local handle, error = command_def.handler.start(opts)
+    if error ~= nil then
+      logger.write(error, vim.log.levels.ERROR, 'UBT')
+    end
   end,
   {
     nargs = '*',

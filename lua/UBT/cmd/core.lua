@@ -20,8 +20,7 @@ local function get_config_from_label(root_dir, label)
       }
     end
   end
-  logger.write ('No such config: ' .. tostring(label),  vim.log.levels.ERROR)
-  return nil
+  return nil, 'No such config: ' .. tostring(label)
 end
 
 function create_label_target_args(root_dir, label)
@@ -62,8 +61,7 @@ function M.detect_engine_association_type(assoc)
   elseif assoc:match("^%a:[\\/].+") then
     return "row"
   else
-    logger.write("Unknown association type: " .. assoc, vim.log.levels.ERROR)
-    return nil
+    return nil, "Unknown association type: " .. assoc
   end
 end
 --- uprjectを読み込んでengine  associationを取得する
@@ -75,19 +73,17 @@ function M.get_engine_association_type_from_uproject(uproject_path)
   assoc = tostring(assoc)
 
   if type(assoc) ~= "string" then
-    logger.write("assoc is not a string: " .. tostring(assoc), vim.log.levels.ERROR)
-    return nil
+    return nil, nil, "assoc is not a string: " .. tostring(assoc)
   end
-  return M.detect_engine_association_type(assoc), assoc
+  return M.detect_engine_association_type(assoc), assoc, nil
 end
 
 --cr
 function M.create_command(root_dir, mode, opts)
   local dir = root_dir
-  local uproject = path.find_uproject(dir)
-  if not uproject then
-    logger.write('No uproject file found in: ' .. dir, vim.log.levels.ERROR)
-    return nil
+  local uproject, error = path.find_uproject(dir)
+  if error ~= nil then
+    return nil, error
   end
 
   local project_fullpath = path.to_winpath_quoted(uproject)
@@ -95,11 +91,13 @@ function M.create_command(root_dir, mode, opts)
   -- バッチ呼び出し（scripts/UBT_compile_commands.bat）
   local bat = path.to_winpath_quoted(path.get_ubt_lanch_bat_path())
   if not bat or vim.fn.filereadable(bat) == 0 then
-    logger.write(' Launch bat not found.', vim.log.levels.ERROR)
-    return nil
+    return nil, ' Launch bat not found.'
   end
 
-  local assoc_type, assoc_value = M.get_engine_association_type_from_uproject(uproject)
+  local assoc_type, assoc_value, error = M.get_engine_association_type_from_uproject(uproject)
+  if error ~= nil then
+    return nil, error
+  end
 
   if assoc_type == "guid" then
     assoc_value = M.normalize_assoc(assoc_value)
@@ -108,8 +106,7 @@ function M.create_command(root_dir, mode, opts)
   elseif assoc_type == "row" then
     assoc_value = '"' + assoc_value + '"'
   else
-    logger.write('No EngineAssociation found in: ' .. uproject, vim.log.levels.ERROR)
-    return nil
+    return nil, 'No EngineAssociation found in: ' .. uproject
   end
 
   local core_cmd = {
@@ -133,18 +130,18 @@ function M.create_command(root_dir, mode, opts)
 
   core_cmd = vim.list_extend(core_cmd, mode_cmd)
 
-  return vim.list_extend(core_cmd, opts)
+  return vim.list_extend(core_cmd, opts), nil
 end
 
 function M.create_command_with_target_platforms(root_dir, mode, label, opts)
-  local core_cmd = M.create_command(root_dir, mode, {})
-  if not core_cmd then
-    return nil;
+  local core_cmd, error = M.create_command(root_dir, mode, {})
+  if error ~= nil then
+    return nil, error
   end
 
   local cmd_target_args = create_label_target_args(root_dir, label)
   core_cmd = vim.list_extend(core_cmd, cmd_target_args)
-  return vim.list_extend(core_cmd, opts)
+  return vim.list_extend(core_cmd, opts), nil
 
 end
 

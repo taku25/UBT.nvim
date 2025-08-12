@@ -84,7 +84,7 @@ function M.start(name, cmd)
     on_exit = on_exit,
   }
 
-  vim.fn.jobstart(cmd, job_opts)
+  return vim.fn.jobstart(cmd, job_opts)
 end
 
 return M
