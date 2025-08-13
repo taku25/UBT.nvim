@@ -41,7 +41,7 @@ local function parse_log_line(line)
   return result
 end
 
-local function show_diagnostics(opts)
+local function diagnostics(opts)
   opts = opts or {}
 
   local log_file = ubt_path.get_progress_log_file_path()
@@ -75,4 +75,4 @@ local function show_diagnostics(opts)
   }):find()
 end
 
-return show_diagnostics
+return diagnostics
