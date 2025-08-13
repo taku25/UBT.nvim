@@ -27,7 +27,7 @@ local subcommands = {
     desc = "Generate compile database.",
     -- このコマンドが取る引数の定義
     args = {
-      { name = "label", default = function() return conf.preset_target end },
+      { name = "label", default = function() return conf.active_config.preset_target end },
     },
   },
 
@@ -36,7 +36,7 @@ local subcommands = {
     handler = cmd.build,
     desc = "Build the project.",
     args = {
-      { name = "label", default = function() return conf.preset_target end },
+      { name = "label", default = function() return conf.active_config.preset_target end },
     },
   },
 
@@ -52,8 +52,8 @@ local subcommands = {
     handler = cmd.lint,
     desc = "Run static analyzer.",
     args = {
-      { name = "lintType", default = function() return conf.lint_type end },
-      { name = "label", default = function() return conf.preset_target end },
+      { name = "lintType", default = function() return conf.active_config.lint_type end },
+      { name = "label", default = function() return conf.active_config.preset_target end },
     },
   },
 }
@@ -79,9 +79,14 @@ vim.api.nvim_create_user_command(
       return
     end
 
+
+  
+    local root_dir = vim.fn.getcwd()
+    conf.load_config(root_dir)
+
     -- === 引数解析ロジック ===
     local opts = {
-      root_dir = vim.fn.getcwd(),
+      root_dir = root_dir,
     }
     local user_args = { unpack(fargs, 2) } -- ユーザーが入力した引数 (サブコマンド名を除く)
 

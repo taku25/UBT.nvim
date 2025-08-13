@@ -4,12 +4,12 @@ local M = {}
 local path = require("UBT.path")
 local job = require("UBT.job.runner")
 local logger = require("UBT.logger")
+local conf = require("UBT.conf")
 
 --- Extracts configuration details from a given label.
 --- Returns a table containing target, platform, editor, and configuration.
 local function get_config_from_label(root_dir, label)
-  local conf = require("UBT.conf")
-  for _, v in ipairs(conf.presets or {}) do
+  for _, v in ipairs(conf.active_config.presets or {}) do
     if v.name == label then
       local project_name = path.get_project_name(path.find_uproject(root_dir))
       return {
@@ -64,8 +64,11 @@ function M.detect_engine_association_type(assoc)
     return nil, "Unknown association type: " .. assoc
   end
 end
+
 --- uprjectを読み込んでengine  associationを取得する
 function M.get_engine_association_type_from_uproject(uproject_path)
+
+
   local content = vim.fn.readfile(uproject_path)
   local json = vim.fn.json_decode(table.concat(content, "\n"))
 
@@ -94,25 +97,41 @@ function M.create_command(root_dir, mode, opts)
     return nil, ' Launch bat not found.'
   end
 
-  local assoc_type, assoc_value, error = M.get_engine_association_type_from_uproject(uproject)
-  if error ~= nil then
-    return nil, error
+
+
+  local final_assoc_type = nil
+  local final_assoc_value = nil
+
+  --値が入っていたらそちらを優先
+  if conf.active_config.engine_path ~= nil and not conf.active_config.engine_path ~= "" then
+    
+    final_assoc_type = "row" -- 直接パスを指定するので、タイプは "row" になる
+    final_assoc_value = conf.active_config.engine_path
+  else
+    local uproj_type, uproj_value, err = M.get_engine_association_type_from_uproject(uproject)
+    if err ~= nil then
+      return nil, err
+    end
+    final_assoc_type = uproj_type
+    final_assoc_value = uproj_value
   end
 
-  if assoc_type == "guid" then
-    assoc_value = M.normalize_assoc(assoc_value)
-  elseif assoc_type == "version" then
-    assoc_value = assoc_value
-  elseif assoc_type == "row" then
-    assoc_value = '"' + assoc_value + '"'
+
+
+  if final_assoc_type == "guid" then
+    final_assoc_value = M.normalize_assoc(final_assoc_value)
+  elseif final_assoc_type == "version" then
+    final_assoc_value = final_assoc_value
+  elseif final_assoc_type == "row" then
+    final_assoc_value = '"' .. final_assoc_value .. '"'
   else
     return nil, 'No EngineAssociation found in: ' .. uproject
   end
 
   local core_cmd = {
     bat,
-    assoc_type,
-    assoc_value,
+    final_assoc_type,
+    final_assoc_value,
     "-project",
     project_fullpath,
     "-Progress",

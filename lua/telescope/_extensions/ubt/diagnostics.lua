@@ -45,7 +45,6 @@ local function diagnostics(opts)
   opts = opts or {}
 
   local log_file = ubt_path.get_progress_log_file_path()
-  -- ubt_conf.progress_file_name)
   local lines = vim.fn.readfile(log_file)
   if not lines or vim.tbl_isempty(lines) then
     vim.notify("UBT: No diagnostics found.", vim.log.levels.INFO)

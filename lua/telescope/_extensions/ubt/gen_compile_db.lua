@@ -2,7 +2,7 @@
 
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
-local conf = require("telescope.config").values
+local tconf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
@@ -11,12 +11,13 @@ local gen_compile_cmd = require("UBT.cmd.gen_compile_db")
 
 local function build(opts)
   opts = opts or {}
+
+  ubt_conf.load_config(vim.fn.getcwd())
   
   pickers.new(opts, {
     prompt_title = "UBT Build Targets",
     finder = finders.new_table({
-      -- ★★★ ファインダーのソースが、ログファイルではなくconfテーブルになる ★★★
-      results = ubt_conf.presets,
+      results = ubt_conf.active_config.presets,
       entry_maker = function(preset)
         return {
           -- 表示されるのはプリセットの名前
@@ -27,7 +28,7 @@ local function build(opts)
         }
       end,
     }),
-    sorter = conf.generic_sorter(opts),
+    sorter = tconf.generic_sorter(opts),
     -- このピッカーに、ファイルプレビューは不要
 
     attach_mappings = function(prompt_bufnr, map)
@@ -36,7 +37,6 @@ local function build(opts)
         actions.close(prompt_bufnr)
         
         if selection then
-          -- ★★★ 選択されたプリセットの名前を使って、ビルドを開始する！ ★★★
           gen_compile_cmd.start({
             root_dir = vim.fn.getcwd(),
             label = selection.value.name,

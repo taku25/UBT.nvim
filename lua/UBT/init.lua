@@ -11,7 +11,7 @@ function M.setup(user_conf)
 
   local fidget_available = pcall(require, 'fidget')
   if fidget_available then
-    if conf.enable_override_fidget == true then
+    if conf.active_config.enable_override_fidget == true then
       local fidget = require("fidget")
       -- 安定してモジュールが初期化された後に呼ぶ
       local display = require("fidget.progress.display")

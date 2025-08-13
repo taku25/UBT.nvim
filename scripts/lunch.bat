@@ -64,7 +64,7 @@ if /I "%TYPE%"=="guid" (
     )
 
 ) else if /I "%TYPE%"=="row" (
-    set ENGINEPATH=%VALUE%
+    set ENGINEPATH=!VALUE!
 ) else (
     echo [ERROR] Unknown type: %TYPE%
     exit /b 1
@@ -74,6 +74,7 @@ if "%ENGINEPATH%"=="" (
     echo [ERROR] Engine path not found
     exit /b 2
 )
+
 
 set UBTDLL=%ENGINEPATH%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll
 if not exist "%UBTDLL%" (

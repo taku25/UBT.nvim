@@ -28,7 +28,7 @@ local function write_to_file(condition, text)
     file:write(text .. "\n")
     file:close()
   else
-    vim.api.nvim_err_writeln("UBT.nvim: Failed to clear progress log file: " .. tostring(err))
+    vim.api.nvim_echo({{"UBT.nvim: Failed to clear progress log file: " .. tostring(err), "ErrorMsg" }}, true, {err=true})
   end
 end
 -- ジョブ開始時に、親となるメインのプログレスバーを作成する
@@ -104,7 +104,7 @@ function M.write(message, level)
 
   if fidget_available then
     --progressはstateをみて
-    if conf.progress_level ~= "NONE" and util.should_display(level, conf.progress_level) then
+    if conf.active_config.progress_level ~= "NONE" and util.should_display(level, conf.active_config.progress_level) then
       local handle_to_update = active_handles[last_updated_label]
       if handle_to_update then
         handle_to_update:report({ message = formatted_message })

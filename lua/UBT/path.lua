@@ -100,11 +100,11 @@ function M.get_cache_dir()
 end
 
 function M.get_log_file_path()
-  return M .get_cache_dir() .. '/' .. conf.log_file_name
+  return M .get_cache_dir() .. '/' .. conf.active_config.log_file_name
 end
 
 function M.get_progress_log_file_path()
-  return M .get_cache_dir() .. '/' .. conf.progress_file_name
+  return M .get_cache_dir() .. '/' .. conf.active_config.progress_file_name
 end
 
 return M

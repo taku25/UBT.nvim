@@ -5,7 +5,6 @@ local M = {}
 
 local path = require("UBT.path")
 local util = require("UBT.writer.util")
-local conf = require("UBT.conf")
 
 local log_path = nil
 
@@ -16,7 +15,7 @@ local function write_to_file(text)
     file:write(text .. "\n")
     file:close()
   else
-    vim.api.nvim_err_writeln("UBT.nvim: Failed to write to log file: " .. tostring(err))
+    vim.api.nvim_echo({{"UBT.nvim: Failed to write to log file: " .. tostring(err), "ErrorMsg" }}, true, {err=true})
   end
 end
 
@@ -34,7 +33,7 @@ function M.on_plugin_setup(config)
     file:write(string.format("\n--- UBT.nvim Session Started at %s ---\n", os.date()))
     file:close()
   else
-    vim.api.nvim_err_writeln("UBT.nvim: Failed to open persistent log file: " .. tostring(err))
+    vim.api.nvim_echo({{"UBT.nvim: Failed to open persistent log file: " .. tostring(err), "ErrorMsg" }}, true, {err=true})
   end
 end
 

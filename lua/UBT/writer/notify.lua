@@ -17,7 +17,7 @@ function M.on_job_exit(code)
   local status_message = (code == 0) and "Succeeded" or "Failed"
   local message = string.format("Job finished: %s (code %d)", status_message, code)
 
-  if conf.enable_notify == true then
+  if conf.active_config.enable_notify == true then
     -- fidgetが使えればそちらを優先、なければvim.notifyを使う
     local fidget_ok, fidget = pcall(require, 'fidget')
     if fidget_ok then
@@ -27,7 +27,7 @@ function M.on_job_exit(code)
     end
   end
 
-  if conf.enable_message == true then
+  if conf.active_config.enable_message == true then
     if level == vim.log.levels.ERROR then
       vim.api.nvim_echo({{message, "ErrorMsg" }}, true, {err=true})
     elseif level == vim.log.levels.WARNING then
@@ -42,10 +42,10 @@ function M.on_progress_update(label, percentage)
   if fidget_ok then
     fidget.notify(message, level, { title = "UBT" })
   else
-    if conf.enable_notify == true then
+    if conf.active_config.enable_notify == true then
       vim.notify(message, level, { title = "UBT" })
     end
-    if conf.enable_message == true then
+    if conf.active_config.enable_message == true then
       if level == vim.log.levels.ERROR then
         vim.api.nvim_echo({{message, "ErrorMsg" }}, true, {err=true})
       elseif level == vim.log.levels.WARNING then
@@ -72,11 +72,11 @@ function M.write(message, level)
 
 
 
-  if conf.notify_level ~= "NONE" and util.should_display(level, conf.notify_level) then
+  if conf.active_config.notify_level ~= "NONE" and util.should_display(level, conf.active_config.notify_level) then
     notify(message, level)
   end
 
-  if conf.message_level ~= "NONE" and util.should_display(level, conf.message_level) then
+  if conf.active_config.message_level ~= "NONE" and util.should_display(level, conf.active_config.message_level) then
 
     local hl = util.level_to_highlight(level)
     vim.api.nvim_echo({{message, hl}}, level ~= vim.log.levels.INFO, {err = level ~= vim.log.levels.INFO})
