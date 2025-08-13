@@ -1,6 +1,10 @@
 # UBT.nvim
 
 UBT.nvim is a Neovim plugin that integrates with Unreal Build Tool (UBT) to facilitate operations like generating `compile_commands.json` and building Unreal Engine projects directly from Neovim.
+<img width=50%  alt="screenshot-20250813-234936" src="https://github.com/user-attachments/assets/233d1f07-78d6-4fef-838d-e72fadea20cd" />
+
+
+
 
 ## Features
 
