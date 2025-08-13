@@ -94,13 +94,6 @@ end
 function M.on_plugin_setup(config)
   progress_log_path = path.get_progress_log_file_path()
 
-  local file, err = io.open(progress_log_path, "w")
-  if file then
-    file:write(string.format("\n--- UBT.nvim Progress Session Started at %s ---\n", os.date()))
-    file:close()
-  else
-    vim.api.nvim_err_writeln("UBT.nvim: Failed to open persistent log file: " .. tostring(err))
-  end
 end
 
 -- 通常のログメッセージ書き込み時に呼ばれる
