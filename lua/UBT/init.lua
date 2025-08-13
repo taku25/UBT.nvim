@@ -3,11 +3,12 @@
 
 local M = {}
 local conf = require("UBT.conf")
+local logger = require("UBT.logger")
 
 function M.setup(user_conf)
   conf.setup(user_conf)
-  -- コマンド登録はcommands.luaで行う（必要ならここでrequire）
-  --
+  logger.on_plugin_setup(user_conf)
+
   local fidget_available = pcall(require, 'fidget')
   if fidget_available then
     if conf.enable_override_fidget == true then

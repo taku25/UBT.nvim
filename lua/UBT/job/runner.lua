@@ -28,7 +28,6 @@ local function process_line(line)
   local label, percent_str = line:match("@progress%s+'([^']+)'%s+(%d+)%%")
   if label and percent_str then
     logger.on_progress_update(label, tonumber(percent_str))
-    return -- この行の役割は終わった
   end
 
   -- 4. 上記のいずれでもなければ、それは通常のINFOレベルのログ

@@ -4,6 +4,7 @@
 local M = {}
 
 local path = require("UBT.path")
+local util = require("UBT.writer.util")
 local conf = require("UBT.conf")
 
 local log_path = nil
@@ -24,7 +25,7 @@ end
 ---
 function M.on_plugin_setup(config)
   -- 自分のログファイルのパスを確定させる
-  log_path = path.get_log_file_path(config.log_file_name)
+  log_path = path.get_log_file_path()
   
   -- これにより、ファイルが存在すれば、続きから書き始める
   -- Neovimを再起動しても、ログは消えない！
@@ -57,7 +58,7 @@ end
 function M.write(message, level)
   if not log_path then return end
   
-  local level_str = vim.log.levels[level] or "UNKNOWN"
+  local level_str = util.level_to_string(level)
   local timestamp = os.date("[%Y-%m-%d %H:%M:%S]")
   local formatted_message = string.format("%s [%s] %s", timestamp, level_str, message)
   

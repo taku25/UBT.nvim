@@ -65,15 +65,17 @@ M.shell = "cmd"
 --ALL
 --WARN
 --ERROR.
-M.notify_level = "ALL" 
-M.message_level = "ERROR"
+M.notify_level = "NONE" 
+M.progress_level = "ALL" 
+M.message_level = "NONE"
+-- M.message_level = "ERROR"
 -- override fidget setting
 M.enable_override_fidget = true
 
 M.enable_log_file = true
 -- override fidget setting
-M.log_file_name = "output.log"
-M.progress_file_name = "progress.lug"
+M.log_file_name = "diagnostics.log"
+M.progress_file_name = "progress.log"
 
 -- ユーザー設定をマージするsetup
 function M.setup(user_conf)

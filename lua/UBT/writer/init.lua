@@ -6,6 +6,7 @@
 -- into a single list for the main logger to consume.
 
 local writers = {
+  require("UBT.writer.util"),
   require("UBT.writer.log"),
   require("UBT.writer.notify"),
   require("UBT.writer.progress"),

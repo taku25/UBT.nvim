@@ -5,6 +5,7 @@
 local M = {}
 
 local conf = require("UBT.conf")
+local util = require("UBT.writer.util")
 -- "Writer" interface implementation
 -------------------------------------
 
@@ -69,32 +70,15 @@ function M.write(message, level)
   end
        
 
-  local should_display = function (level, config_level)
-    local levels = {
-      ERROR = { "ERROR", "WARN", "ALL" },
-      WARN  = { "WARN", "ALL" },
-      INFO  = { "ALL" },
-    }
-
-    local level_names = {
-      [vim.log.levels.ERROR] = "ERROR",
-      [vim.log.levels.WARN]  = "WARN",
-      [vim.log.levels.INFO]  = "INFO",
-    }
-
-    local name = level_names[level]
-    return name and vim.tbl_contains(levels[name], config_level)
-  end
 
 
-  if conf.notify_level ~= "NONE" and should_display(level, conf.notify_level) then
+  if conf.notify_level ~= "NONE" and util.should_display(level, conf.notify_level) then
     notify(message, level)
   end
 
-  if conf.message_level ~= "NONE" and should_display(level, conf.message_level) then
-    local hl = (level == vim.log.levels.ERROR and "ErrorMsg")
-            or (level == vim.log.levels.WARN and "WarningMsg")
-            or "Normal"
+  if conf.message_level ~= "NONE" and util.should_display(level, conf.message_level) then
+
+    local hl = util.level_to_highlight(level)
     vim.api.nvim_echo({{message, hl}}, level ~= vim.log.levels.INFO, {err = level ~= vim.log.levels.INFO})
   end
 end
