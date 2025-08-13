@@ -59,9 +59,14 @@ M.preset_target = "Win64DevelopWithEditor"
 M.lint_type = "Default"
 -- default shell
 M.shell = "cmd"
--- enable or dislable notify
-M.enable_notify = true 
-M.enable_message = false 
+
+
+--NONE = dont show
+--ALL
+--WARN
+--ERROR.
+M.notify_level = "ALL" 
+M.message_level = "ERROR"
 -- override fidget setting
 M.enable_override_fidget = true
 
