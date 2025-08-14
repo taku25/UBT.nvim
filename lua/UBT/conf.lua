@@ -68,7 +68,7 @@ local defaults = {
   --ALL
   --WARN
   --ERROR.
-  notify_level = "ERROR",
+  notify_level = "NONE",
   progress_level = "ALL",
   message_level = "ERROR",
   -- M.message_level = "ERROR"
