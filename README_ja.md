@@ -187,7 +187,7 @@ opts = {
 ```
 ## ⚡ 使い方 (Usage)
 
-** neovimで.uprojectがあるディレクトリに移動してからコマンドを実行してください **
+**neovimで.uprojectがあるディレクトリに移動してからコマンドを実行してください**
 
 
 ``` viml
@@ -197,6 +197,68 @@ opts = {
 :UBT Lint [linterタイプ] [ターゲット名] " 静的解析を実行します。
 ``` 
 
+## 🤖 API & 自動化 (Automation Examples)
+
+`UBT.nvim` は、Lua APIを提供しているため、`autocmd`と組み合わせることで、開発ワークフローを少し楽にできます。
+すべてのAPIはdocumentで確認してください
+```viml
+:help ubt
+```
+
+### 📂 プロジェクトルートへ移動(auto cd)
+Unreal Engineのソースファイルを開いたとき、自動的にそのファイルのプロジェクトルート（`.uproject`があるディレクトリ）にカレントディレクトリを変更します
+
+```lua
+-- init.lua or any setup file
+
+local ubt_auto_cd_group = vim.api.nvim_create_augroup("UBT_AutoCD", { clear = true })
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = ubt_auto_cd_group,
+  pattern = { "*.cpp", "*.h", "*.hpp", "*.cs" },
+  callback = function(args)
+    local ok, ubt_api = pcall(require, "UBT.api")
+    if not ok then
+      return
+    end
+    -- プロジェクトルートを検索
+    local project_root, err = ubt_api.find_project_root(args.file)
+
+    if project_root and project_root ~= vim.fn.getcwd() then
+      vim.cmd.cd(project_root)
+    end
+  end,
+})
+```
+
+### 📰 保存時のプロジェクト更新(auto make projct)
+
+C++ヘッダーファイル (`.h`) やソースファイル (`.cpp`) を保存した際に、自動的に `:UBT GenProject` を実行します。
+APIをつかってファイル保存時にビルドすることもできますが、**パフォーマンスに影響を与える可能性があります。**
+
+```lua
+-- init.lua or any setup file
+
+local ubt_auto_build_group = vim.api.nvim_create_augroup("UBT_AutoBuildOnSave", { clear = true })
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+  group = ubt_auto_build_group,
+  pattern = { "*.cpp", "*.h", "*.hpp" },
+  callback = function(args)
+    local ok, ubt_api = pcall(require, "UBT.api")
+    if not ok then
+      return
+    end
+
+    local project_root, _ = ubt_api.find_project_root(args.file)
+    if not project_root then
+      return
+    end
+    
+    ubt_api.gen_project()
+  end,
+})
+```
 
 ### 🔭 Telescope連携 
 

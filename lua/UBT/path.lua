@@ -99,7 +99,26 @@ function M.get_cache_dir()
   return ubt_cache_dir
 end
 
-
+-- @param base string: ベースとなるディレクトリパス
+-- @param name string: 結合したいファイルまたはディレクトリ名
+-- @return string: 正しく結合されたパス
+local function join_path(base, name)
+  if not base or not name then return nil end
+  -- Windowsかどうかを判定
+  if vim.fn.has("win32") == 1 then
+    -- Windowsの場合、末尾が \ でなければ \ を追加する
+    if not base:match(".*\\$") then
+      return base .. "\\" .. name
+    end
+    return base .. name
+  else
+    -- UnixライクなOSの場合、末尾が / でなければ / を追加する
+    if not base:match(".*/$") then
+      return base .. "/" .. name
+    end
+    return base .. name
+  end
+end
 --- Checks a single directory for the existence of a .uproject file.
 -- This is a private helper function.
 -- @param dir string: The directory to check.
@@ -115,7 +134,7 @@ local function find_uproject_in_dir(dir)
     local name, ftype = vim.loop.fs_scandir_next(handle)
     if not name then break end
     if ftype == 'file' and name:match('%.uproject$') then
-      return vim.fs.join(dir, name)
+      return join_path(dir, name)
     end
   end
   return nil

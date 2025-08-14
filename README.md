@@ -185,6 +185,68 @@ Example `.ubtrc`:
 :UBT GenProject                     " Generates project files for Visual Studio, etc.
 :UBT Lint [linter_type] [target_name] " Runs static analysis.
 ``` 
+## 🤖 API & Automation Examples
+
+`UBT.nvim` provides a Lua API that you can combine with `autocmd` to streamline your development workflow.
+See the help document for a full API reference:
+```viml
+:help ubt
+You can add the following recipes to your init.lua or a dedicated autocommand file.
+```
+
+### 📂 Auto CD to Project Root ###
+Automatically change the current directory to the project root (the directory containing the .uproject file) whenever you open an Unreal Engine source file. This ensures that :UBT commands are always run from the correct location.
+
+```Lua
+-- in init.lua or any setup file
+
+local ubt_auto_cd_group = vim.api.nvim_create_augroup("UBT_AutoCD", { clear = true })
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = ubt_auto_cd_group,
+  pattern = { "*.cpp", "*.h", "*.hpp", "*.cs" },
+  callback = function(args)
+    local ok, ubt_api = pcall(require, "UBT.api")
+    if not ok then
+      return
+    end
+    -- Find the project root
+    local project_root, err = ubt_api.find_project_root(args.file)
+
+    if project_root and project_root ~= vim.fn.getcwd() then
+      vim.cmd.cd(project_root)
+    end
+  end,
+})
+```
+
+### 📰 Auto Generate Project on Save ###
+Automatically run :UBT GenProject whenever you save a C++ header (.h) or source (.cpp) file.
+While you can also use the API to trigger a build on save, please be aware that this can have performance implications.
+
+```Lua
+-- in init.lua or any setup file
+
+local ubt_auto_build_group = vim.api.nvim_create_augroup("UBT_AutoBuildOnSave", { clear = true })
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+  group = ubt_auto_build_group,
+  pattern = { "*.cpp", "*.h", "*.hpp" },
+  callback = function(args)
+    local ok, ubt_api = pcall(require, "UBT.api")
+    if not ok then
+      return
+    end
+
+    local project_root, _ = ubt_api.find_project_root(args.file)
+    if not project_root then
+      return
+    end
+    
+    ubt_api.gen_project()
+  end,
+})
+```
 
 ### 🔭 Telescope Integration 
 
