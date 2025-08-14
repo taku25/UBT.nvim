@@ -27,12 +27,32 @@
 
 <table>
   <tr>
-   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build.gif" /></div></td>
-   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-gencompile-db.gif" /></div></td>
+   <td>
+    <div align=center>
+      <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build.gif" />
+      UBT Build Command
+    </div>
+  </td>
+   <td>
+    <div align=center>
+      <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-gencompile-db.gif" />
+      UBT GenCompileDB Command
+    </div>
+    </td>
   </tr>
   <tr>
-   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-telescope-diagnostics.gif" /></div></td>
-   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/telescope-build-select.gif" /></div></td>
+   <td>
+    <div align=center>
+      <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-telescope-diagnostics.gif" />
+      UBT Build And Telescope UI Search Build Error
+    </div>
+   </td>
+   <td>
+   <div align=center>
+    <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/telescope-build-select.gif" />
+     UBT Build Command on Telescope UI
+    </div>
+    </td>
   </tr>
 </table>
 
