@@ -1,0 +1,308 @@
+*UBT.txt*       For UBT.nvim                          vim: ft=help
+
+==============================================================================
+目次                                                     *UBT-contents*
+
+  1. はじめに..................................... |UBT-introduction|
+  2. 使い方....................................... |UBT-usage|
+     - コマンド................................... |UBT-commands|
+     - Telescope連携.............................. |UBT-telescope|
+  3. 設定......................................... |UBT-configuration|
+     - セットアップ............................... |UBT-setup|
+     - プロジェクト固有の設定 (.ubtrc)............ |UBT-ubtrc|
+     - フルコンフィグ............................. |UBT-default-configuration|
+  4. ライセンス................................... |UBT-license|
+
+==============================================================================
+1. はじめに                                         *UBT-introduction*
+
+*UBT.nvim* は、Unreal Engine のビルド、プロジェクトファイル生成、静的解析など
+強力な機能を、Neovimから直接、非同期で実行するためのプラグインです。
+
+主な機能:
+- UBTの非同期実行
+- fidget.nvimによるリアルタイムな進捗表示
+- Telescope連携による対話的なエラーブラウジング
+- プロジェクト固有の設定を`.ubtrc`で管理
+
+==============================================================================
+2. 使い方                                                     *UBT-usage*
+
+------------------------------------------------------------------------------
+コマンド                                                   *UBT-commands*
+
+全てのコマンドは、`.uproject`ファイルが存在するディレクトリで実行する必要があります。
+
+:UBT Build {target_name}
+    プロジェクトをビルドします。{target_name}を省略した場合、設定された
+    `preset_target`が使用されます。
+
+:UBT GenCompileDB {target_name}
+    `compile_commands.json`を生成します。{target_name}の扱いは|:UBT Build|
+    と同様です。
+
+:UBT GenProject
+    Visual Studioなどのプロジェクトファイルを生成します。
+
+:UBT Lint {linter_type} {target_name}
+    静的解析を実行します。引数を省略した場合、設定された`lint_type`と
+    `preset_target`が使用されます。
+
+------------------------------------------------------------------------------
+Telescope連携                                            *UBT-telescope*
+
+Telescope拡張をロードすることで、以下のピッカーが利用可能になります。
+
+:Telescope ubt diagnostics
+    直近のジョブ実行で発生したエラーやワーニングを一覧表示します。
+    項目を選択すると、ファイルのプレビューが表示され、<CR>で該当箇所に
+    ジャンプできます。
+
+:Telescope ubt targets
+    設定されているビルドターゲットを一覧表示し、選択するだけでビルドを
+    開始できます。
+
+:Telescope ubt gencompiledb
+    ビルドターゲットを選択し、`compile_commands.json`の生成を開始します。
+
+==============================================================================
+3. 設定                                               *UBT-configuration*
+
+------------------------------------------------------------------------------
+セットアップ                                                   *UBT-setup*
+
+`lazy.nvim`を使っている場合、`opts`キーに設定テーブルを渡します。
+
+例:
+>lua
+  require("UBT").setup({
+    preset_target = "Win64DebugGameWithEditor",
+    engine_path = "C:/Program Files/Epic Games/UE_5.4",
+  })
+<
+
+利用可能な全てのオプションは以下の通りです。
+
+`presets`                                                 *'UBT.presets'*
+    Type: `table`
+    ビルドターゲットの定義プリセットのリスト。
+    デフォルトのプリセットに追加、または同じ`name`で上書きできます。
+
+`preset_target`                                           *'UBT.preset_target'*
+    Type: `string`
+    Default: `"Win64DevelopWithEditor"`
+    コマンドでターゲット名を省略した際に使われる、デフォルトのターゲット。
+
+`lint_type`                                               *'UBT.lint_type'*
+    Type: `string`
+    Default: `"Default"`
+    `:UBT Lint`でlinterタイプを省略した際に使われる、デフォルトのタイプ。
+
+`engine_path`
+    Type: `string`
+    Default: `nil`
+    UnrealEngineのルートディレクトリを指定
+    特定の環境で.uprojectにUnrealEngineを含まない場合に使用
+
+`notify_level`
+    Type: `string`
+    Default: `"NONE"`
+    プラグイン全体の通知出力レベル
+    vim.notify
+
+`message_level`
+    Type: `string`
+    Default: `"ERROR"`
+    プラグイン全体のメッセージ出力レベル
+    vim.echo
+
+`progress_level`
+    Type: `string`
+    Default: `"ALL"`
+    コマンド実行中の出力レベル
+    fidget.nvim使用時に使われます
+
+`progress_file_name`
+    Type: `string`
+    Default: `"progress.log"`
+    コマンド実行時のログファイル名 
+    telescope.nvim などで使用されます
+
+`log_file_name`
+    Type: `string`
+    Default: `"diagnostics.log"`
+    プラグイン全体のログファイル名 
+
+`enable_override_fidget`
+    Type: `bool`
+    Default: `true`
+    UBT.nvimがfidgetのプラグイン設定を上書きするか
+    上書きするのはLsp UBTです
+
+`shell`
+    Type: `string`
+    Default: `cmd`
+    unreal build toolを起動するためのbatを起動するshell
+
+------------------------------------------------------------------------------
+プロジェクト固有の設定 (.ubtrc)                               *UBT-ubtrc*
+
+プロジェクトのルートディレクトリに`.ubtrc`という名前のJSONファイルを作成する
+ことで、グローバルな設定を上書きできます。
+
+`.ubtrc`で設定可能な項目は、|UBT-setup|で説明されているオプションと同じです。
+
+例:
+>json
+  {
+    "preset_target": "StreamOS",
+    "engine_path": "C:/Program Files/Epic Games/UE_5.6"
+  }
+
+     
+
+------------------------------------------------------------------------------
+フルコンフィグ                                       *UBT-default-configuration*
+
+デフォルトのフルコンフィグです
+
+conf.lua:
+>lua
+ {
+   -- 標準プリセット
+   -- コマンド実行時はnameを指定ください
+   presets = {
+     {
+       name = "Win64Debug",
+       Platform = "Win64",
+       IsEditor = false,
+       Configuration = "Debug",
+     },
+     {
+       name = "Win64DebugGame",
+       Platform = "Win64",
+       IsEditor = false,
+       Configuration = "DebugGame",
+     },
+     {
+       name = "Win64Develop",
+       Platform = "Win64",
+       IsEditor = false,
+       Configuration = "Development",
+     },
+     {
+       name = "Win64Shipping",
+       Platform = "Win64",
+       IsEditor = false,
+       Configuration = "Shipping",
+     },
+     {
+       name = "Win64Test",
+       Platform = "Win64",
+       IsEditor = false,
+       Configuration = "Test",
+     },
+     {
+       name = "Win64DebugWithEditor",
+       Platform = "Win64",
+       IsEditor = true,
+       Configuration = "Debug",
+     },
+     {
+       name = "Win64DebugGameWithEditor",
+       Platform = "Win64",
+       IsEditor = true,
+       Configuration = "DebugGame",
+     },
+     {
+       name = "Win64DevelopWithEditor",
+       Platform = "Win64",
+       IsEditor = true,
+       Configuration = "Development",
+     },
+   },
+ 
+   -- コマンドに引数がない場合のデフォルト引数
+   preset_target = "Win64DevelopWithEditor",
+
+   -- default lintertype
+   -- 静的解析のタイプ
+   -- Default
+   -- VisualCpp,
+   -- PVSStudio
+   -- Clang
+   lint_type = "Default",
+   -- unreal build toolを起動するためのshell
+   shell = "cmd",
+
+   -- unreal engineのパス
+   -- unrealeditor.exeではなく
+   -- UnrealEngineのルートディレクトリを指定
+  -- 例: "C:/Program Files/Epic Games/UE_5.4"
+   engine_path = nil,
+ 
+   -- UBT プラグイン全体の通知出力レベル
+   -- NONE
+   -- ALL
+   -- WARN
+   -- ERROR.
+   notify_level = "NONE",
+ 
+   -- UBT コマンド実行中の出力レベル
+   -- NONE
+   -- ALL
+   -- WARN
+   -- ERROR.
+   progress_level = "ALL",
+ 
+   -- UBT プラグイン全体のメッセージ出力レベル
+   -- NONE
+   -- ALL
+   -- WARN
+   -- ERROR.
+   message_level = "ERROR",
+ 
+   -- fidgetの設定をUBT.nvimで上書きするかのフラグ
+   -- lsp type UBT
+   enable_override_fidget = true,
+ 
+ 
+   -- ログファイルの出力
+   enable_log_file = true,
+ 
+   -- ログファイルの名前
+   log_file_name = "diagnostics.log",
+ 
+   -- progress ファイルの名前
+   progress_file_name = "progress.log",
+ }
+     
+
+==============================================================================
+4. ライセンス                                                 *UBT-license*
+
+MIT License
+
+Copyright (c) 2025 taku25
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
