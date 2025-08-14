@@ -1,42 +1,27 @@
--- UBT.nvim: Unreal Engine compile_commands.json generator for Neovim
--- setup only
-
+--- UBT.nvim: Main plugin entry point for setup.
+-- This file is responsible for initializing the plugin.
+-- To access the Lua API, please `require("UBT.api")`.
 local M = {}
+
 local conf = require("UBT.conf")
 local logger = require("UBT.logger")
 
+--- The main setup function for the plugin.
+-- Must be called to initialize the plugin.
+-- @param user_conf table|nil: The user's configuration table.
 function M.setup(user_conf)
-  conf.setup(user_conf)
-  logger.on_plugin_setup(user_conf)
-
-  local fidget_available = pcall(require, 'fidget')
-  if fidget_available then
-    if conf.active_config.enable_override_fidget == true then
-      local fidget = require("fidget")
-      -- 安定してモジュールが初期化された後に呼ぶ
-      local display = require("fidget.progress.display")
-      local ubtOpts = {
-        format_group_name = function(group)
-          return "UBT:" .. tostring(group)
-        end,
-        overrides = {
-          UBT = {
-            name = "Unreal Build Tool",
-            icon = fidget.progress.display.for_icon(fidget.spinner.animate("dots", 2.5), "✔️"),
-            update_hook = function(item)
-              require("fidget.notification").set_content_key(item)
-              if item.hidden == nil and string.match(item.annote, "clippy") then
-                item.hidden = true
-              end
-            end,
-          }
-        },
-      }
-      require("fidget.options").declare(display, "progress.display", ubtOpts)
-    end
+  local err = conf.setup(user_conf)
+  if err then
+    -- Logger might not be fully set up, so use vim.notify directly as a fallback.
+    vim.notify("UBT.nvim Configuration Error: " .. err, vim.log.levels.ERROR)
   end
-  --
+
+  logger.on_plugin_setup(conf.active_config)
+  
+  local telescope_ok, telescope = pcall(require, "telescope")
+  if telescope_ok then
+    telescope.load_extension("ubt")
+  end
 end
 
 return M
-

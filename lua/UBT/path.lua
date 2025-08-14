@@ -99,6 +99,64 @@ function M.get_cache_dir()
   return ubt_cache_dir
 end
 
+
+--- Checks a single directory for the existence of a .uproject file.
+-- This is a private helper function.
+-- @param dir string: The directory to check.
+-- @return string|nil: The full path to the .uproject file if found, otherwise nil.
+local function find_uproject_in_dir(dir)
+  -- Use pcall for safety against permission errors etc.
+  local ok, handle = pcall(vim.loop.fs_scandir, dir)
+  if not ok or not handle then
+    return nil
+  end
+
+  while true do
+    local name, ftype = vim.loop.fs_scandir_next(handle)
+    if not name then break end
+    if ftype == 'file' and name:match('%.uproject$') then
+      return vim.fs.join(dir, name)
+    end
+  end
+  return nil
+end
+
+
+--- Searches upwards from a given path to find the project root directory.
+-- The project root is defined as the directory containing a .uproject file.
+-- @param start_path string: The file or directory path to start searching from.
+-- @return string|nil: The absolute path to the project root directory if found.
+-- @return string|nil: An error message if not found or on failure.
+function M.find_project_root(start_path)
+  -- 1. 開始パスを、絶対パスに正規化する
+  local current_path = vim.fn.fnamemodify(start_path, ":p")
+  if not current_path then
+    return nil, "Invalid starting path provided."
+  end
+
+  -- 2. もし開始パスがファイルなら、その親ディレクトリから始める
+  if not vim.fn.isdirectory(current_path) then
+    current_path = vim.fn.fnamemodify(current_path, ":h")
+  end
+
+  -- 3. ファイルシステムのルートに到達するまで、親ディレクトリを遡るループ
+  local previous_path = ""
+  while current_path and current_path ~= previous_path do
+    -- 現在のディレクトリに .uproject ファイルがあるかチェック
+    if find_uproject_in_dir(current_path) then
+      -- 見つかった！このディレクトリがプロジェクトルートだ
+      return current_path, nil
+    end
+    -- 親ディレクトリに移動
+    previous_path = current_path
+    current_path = vim.fn.fnamemodify(current_path, ":h")
+  end
+
+  -- ループを抜けた = ルートまで探しても見つからなかった
+  return nil, "No .uproject file found in parent directories."
+end
+
+
 function M.get_log_file_path()
   return M .get_cache_dir() .. '/' .. conf.active_config.log_file_name
 end
