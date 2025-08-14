@@ -11,7 +11,13 @@
      - セットアップ............................... |UBT-setup|
      - プロジェクト固有の設定 (.ubtrc)............ |UBT-ubtrc|
      - フルコンフィグ............................. |UBT-default-configuration|
-  4. ライセンス................................... |UBT-license|
+  4. Lua API...................................... |UBT-api|
+     - build...................................... |UBT-api-build| 
+     - gen_compile_db............................. |UBT.api.gen_compile_db|
+     - lint....................................... |UBT.api.lint|
+     - gen_project................................ |UBT.api.gen_project|
+     - find_project_root.......................... |UBT.api.find_project_root|
+  5. ライセンス................................... |UBT-license|
 
 ==============================================================================
 1. はじめに                                         *UBT-introduction*
@@ -259,9 +265,82 @@ conf.lua:
    progress_file_name = "progress.log",
  }
      
+==============================================================================
+4. Lua API                                                     *UBT-api*
+
+UBT.nvimは、あなたの設定や他のプラグインから呼び出せる、安定したLua APIを
+提供します。
+
+APIモジュールを`require`する:
+>lua
+  local ubt = require("UBT.api")
+<
+
+------------------------------------------------------------------------------
+API関数                                                  *UBT-api-functions*
+
+------------------------------------------------------------------------------
+
+*build*                                                       *UBT.api.build*
+ubt.build({opts})
+    プロジェクトをビルドします。
+    `opts`テーブルで、コマンドの引数を上書きできます。
+    例:
+>lua
+  -- デフォルトのターゲットでビルド
+  require("UBT.api").build()
+
+  -- 特定のターゲットでビルド
+  require("UBT.api").build({ label = "Win64Debug" })
+
+*gen_compile_db*                                            *UBT.api.gen_compile_db*
+ubt.gen_compile_db({opts})
+    compile_commands.jsonを作成します
+    `opts`テーブルで、コマンドの引数を上書きできます。
+    例:
+>lua
+  -- デフォルトのターゲットでcompile_commands.jsonを作成します
+  require("UBT.api").gen_compile_db()
+
+  -- 特定のターゲットでcompile_commands.jsonを作成します
+  require("UBT.api").gen_compile_db({ label = "Win64Debug" })
+
+*lint*                                                       *UBT.api.lint*
+ubt.lint({opts})
+    静的解析を行います
+    `opts`テーブルで、コマンドの引数を上書きできます。
+    例:
+>lua
+  -- デフォルトのターゲットでcompile_commands.jsonを作成します
+  require("UBT.api").lint()
+
+  -- 特定のターゲットでcompile_commands.jsonを作成します
+  require("UBT.api").lint({ lint_type = "VisualCpp" })
+
+*gen_project*                                              *UBT.api.gen_project*
+ubt.gen_project()
+    プロジェクトを作成します
+    例:
+>lua
+  -- root dirにあるuprjectのプロジェクトを作成します
+  require("UBT.api").gen_project()
+
+*find_project_root*                                *UBT.api.find_project_root*
+ubt.find_project_root({start_path})
+    指定されたパスから親ディレクトリを遡り、`.uproject`ファイルが存在する
+    プロジェクトルートのパスを返します。
+    返り値: `(string|nil, string|nil)` -- `(root_path, err_msg)`
+    例:
+>lua
+  local ubt_api = require("UBT.api")
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local root, err = ubt_api.find_project_root(current_file)
+  if root then
+    print("Project root is:", root)
+  end
 
 ==============================================================================
-4. ライセンス                                                 *UBT-license*
+5. ライセンス                                                 *UBT-license*
 
 MIT License
 

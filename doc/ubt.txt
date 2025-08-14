@@ -11,7 +11,13 @@ CONTENTS                                                 *UBT-contents*
      - Setup...................................... |UBT-setup|
      - Project-Specific Settings (.ubtrc)......... |UBT-ubtrc|
      - Full Default Configuration................. |UBT-default-configuration|
-  4. License...................................... |UBT-license|
+  4. Lua API...................................... |UBT-api|
+     - build...................................... |UBT-api-build| 
+     - gen_compile_db............................. |UBT.api.gen_compile_db|
+     - lint....................................... |UBT.api.lint|
+     - gen_project................................ |UBT.api.gen_project|
+     - find_project_root.......................... |UBT.api.find_project_root|
+  5. License...................................... |UBT-license|
 
 ==============================================================================
 1. INTRODUCTION                                     *UBT-introduction*
@@ -259,9 +265,74 @@ In `conf.lua`:
    progress_file_name = "progress.log",
  }
 <
-     
+------------------------------------------------------------------------------
+4. API FUNCTIONS                                            *UBT-api-functions*
+
+------------------------------------------------------------------------------
+
+*build*                                                       *UBT.api.build*
+ubt.build({opts})
+    Builds the project.
+    You can override command arguments with the `opts` table.
+    Examples:
+>lua
+  -- Build with the default target
+  require("UBT.api").build()
+
+  -- Build with a specific target
+  require("UBT.api").build({ label = "Win64Debug" })
+<
+
+*gen_compile_db*                                    *UBT.api.gen_compile_db*
+ubt.gen_compile_db({opts})
+    Generates `compile_commands.json`.
+    You can override command arguments with the `opts` table.
+    Examples:
+>lua
+  -- Generate compile_commands.json with the default target
+  require("UBT.api").gen_compile_db()
+
+  -- Generate compile_commands.json with a specific target
+  require("UBT.api").gen_compile_db({ label = "Win64Debug" })
+<
+
+*lint*                                                       *UBT.api.lint*
+ubt.lint({opts})
+    Runs static analysis.
+    You can override command arguments with the `opts` table.
+    Examples:
+>lua
+  -- Run the linter with the default target
+  require("UBT.api").lint()
+
+  -- Run the linter with a specific linter type
+  require("UBT.api").lint({ lint_type = "VisualCpp" })
+<
+
+*gen_project*                                          *UBT.api.gen_project*
+ubt.gen_project()
+    Generates project files.
+    Example:
+>lua
+  -- Generate project files for the .uproject in the root directory
+  require("UBT.api").gen_project()
+<
+
+*find_project_root*                                 *UBT.api.find_project_root*
+ubt.find_project_root({start_path})
+    Searches upwards from the given path to find the project root
+    directory, which is the directory containing a `.uproject` file.
+    Returns: `(string|nil, string|nil)` -- `(root_path, err_msg)`
+    Example:
+>lua
+  local ubt_api = require("UBT.api")
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local root, err = ubt_api.find_project_root(current_file)
+  if root then
+    print("Project root is:", root)
+  end     
 ==============================================================================
-4. LICENSE                                                    *UBT-license*
+5. LICENSE                                                    *UBT-license*
 
 MIT License
 
