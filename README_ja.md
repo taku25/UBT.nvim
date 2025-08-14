@@ -4,8 +4,8 @@
 
 <table>
   <tr>
-   <td><img width="100%" alt="image" src="https://github.com/user-attachments/assets/edb41521-11c7-4ceb-a2f8-1b316f3d4893" /></td>
-   <td><img width="100%" alt="image" src="https://github.com/user-attachments/assets/be138d48-e172-4591-b34d-679776636124" /></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/main-image.png" /></div></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/main-image-gen-compile-db.png" /></div></td>
   </tr>
 </table>
 
@@ -27,20 +27,14 @@
     *   ビルドターゲットや`compile_commands.json`生成ターゲットをTelescopeから選択して実行
 
 <table>
-   <tr>
-      <td>
-         <div align="center">
-   <img width="70%" alt="image" src="https://github.com/user-attachments/assets/0f5b50f5-a27e-4ace-a1e1-66897cf055b8" /><br>
-      build error and telescope search error
-         </div>
-      </td>
-      <td>
-          <div align="center">
-   <img width="70%" alt="image" src="https://github.com/user-attachments/assets/aa504bfc-2848-4316-92e5-99af2c8d97a9" /><br>
-      telescope select build target
-          </div>
-      </td>
-   </tr>
+  <tr>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build.gif" /></div></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-gencompile-db.gif" /></div></td>
+  </tr>
+  <tr>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-telescope-diagnostics.gif" /></div></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/telescope-build-select.gif" /></div></td>
+  </tr>
 </table>
 
 ## 🔧 必要要件 (Requirements)
@@ -235,6 +229,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
 
 C++ヘッダーファイル (`.h`) やソースファイル (`.cpp`) を保存した際に、自動的に `:UBT GenProject` を実行します。
 APIをつかってファイル保存時にビルドすることもできますが、**パフォーマンスに影響を与える可能性があります。**
+
+  <div align=center><img width="50%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/auto-cmd-gen-project.gif" /></div>
 
 ```lua
 -- init.lua or any setup file

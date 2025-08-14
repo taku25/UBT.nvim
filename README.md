@@ -4,8 +4,8 @@
 
 <table>
   <tr>
-   <td><img width="100%" alt="image" src="https://github.com/user-attachments/assets/edb41521-11c7-4ceb-a2f8-1b316f3d4893" /></td>
-   <td><img width="100%" alt="image" src="https://github.com/user-attachments/assets/be138d48-e172-4591-b34d-679776636124" /></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/main-image.png" /></div></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/main-image-gen-compile-db.png" /></div></td>
   </tr>
 </table>
 
@@ -26,20 +26,14 @@
     *   Select build targets or `compile_commands.json` generation targets directly from a Telescope picker.
 
 <table>
-   <tr>
-      <td>
-         <div align="center">
-   <img width="70%" alt="image" src="https://github.com/user-attachments/assets/0f5b50f5-a27e-4ace-a1e1-66897cf055b8" /><br>
-      build error and telescope search error
-         </div>
-      </td>
-      <td>
-          <div align="center">
-   <img width="70%" alt="image" src="https://github.com/user-attachments/assets/aa504bfc-2848-4316-92e5-99af2c8d97a9" /><br>
-      telescope select build target
-          </div>
-      </td>
-   </tr>
+  <tr>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build.gif" /></div></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-gencompile-db.gif" /></div></td>
+  </tr>
+  <tr>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-telescope-diagnostics.gif" /></div></td>
+   <td><div align=center><img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/telescope-build-select.gif" /></div></td>
+  </tr>
 </table>
 
 ## 🔧 Requirements
@@ -223,6 +217,9 @@ vim.api.nvim_create_autocmd("BufEnter", {
 ### 📰 Auto Generate Project on Save ###
 Automatically run :UBT GenProject whenever you save a C++ header (.h) or source (.cpp) file.
 While you can also use the API to trigger a build on save, please be aware that this can have performance implications.
+   
+  <div align=center><img width="50%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/auto-cmd-gen-project.gif" /></div>
+  
 
 ```Lua
 -- in init.lua or any setup file
