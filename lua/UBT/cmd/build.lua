@@ -9,8 +9,8 @@ function M.start(opts)
   
   local cmd, error = core.create_command_with_target_platforms(opts.root_dir, "Build", opts.label,
   {
-    "-game",
-    "-engine",
+    "-WaitMutex",
+    "-FromMSBuild"
   })
 
   if error ~= nil then
