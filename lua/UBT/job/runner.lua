@@ -83,6 +83,8 @@ function M.start(name, cmd)
     on_exit = on_exit,
   }
 
+  logger.write("Job args: ".. table.concat(cmd, ","), vim.log.levels.INFO)
+
   return vim.fn.jobstart(cmd, job_opts)
 end
 

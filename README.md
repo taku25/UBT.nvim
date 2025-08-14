@@ -95,8 +95,8 @@ opts = {
   -- Pre-defined build targets.
   presets = {
     -- The available built-in presets are:
-    --  Win64Debug, Win64DebugGame, Win64Develop, Win64Test, Win64Shipping, 
-    --  Win64DebugWithEditor, Win64DebugGameWithEditor, Win64DevelopWithEditor
+    --  Win64DebugGame, Win64Develop, Win64Shipping, 
+    --  Win64DebugGameWithEditor, Win64DevelopWithEditor
     -- To add new presets or override existing ones, write as follows:
     -- Override an existing preset
     { name = "Win64DevelopWithEditor", Platform = "Win64", IsEditor = true, Configuration = "Development" },

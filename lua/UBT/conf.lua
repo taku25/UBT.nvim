@@ -6,12 +6,6 @@ local defaults = {
   -- 標準プリセット
   presets = {
     {
-      name = "Win64Debug",
-      Platform = "Win64",
-      IsEditor = false,
-      Configuration = "Debug",
-    },
-    {
       name = "Win64DebugGame",
       Platform = "Win64",
       IsEditor = false,
@@ -28,18 +22,6 @@ local defaults = {
       Platform = "Win64",
       IsEditor = false,
       Configuration = "Shipping",
-    },
-    {
-      name = "Win64Test",
-      Platform = "Win64",
-      IsEditor = false,
-      Configuration = "Test",
-    },
-    {
-      name = "Win64DebugWithEditor",
-      Platform = "Win64",
-      IsEditor = true,
-      Configuration = "Debug",
     },
     {
       name = "Win64DebugGameWithEditor",

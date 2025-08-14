@@ -2,6 +2,12 @@
 
 # Unreal Build Tool 💓 Neovim
 
+<table>
+  <tr>
+   <td><img width="100%" alt="image" src="https://github.com/user-attachments/assets/edb41521-11c7-4ceb-a2f8-1b316f3d4893" /></td>
+   <td><img width="100%" alt="image" src="https://github.com/user-attachments/assets/be138d48-e172-4591-b34d-679776636124" /></td>
+  </tr>
+</table>
 
 `UBT.nvim` は、Unreal Engine のcompile_commands.json、Build、GenerateProject、静的解析などの機能を、Neovimから直接、非同期で実行するためのプラグインです。
 
@@ -19,6 +25,23 @@
     *   ビルドエラーやワーニングをTelescopeでファジー検索。
     *   エラー箇所をプレビューし、Enterキー一発で該当ファイル・行へジャンプ。
     *   ビルドターゲットや`compile_commands.json`生成ターゲットをTelescopeから選択して実行
+
+<table>
+   <tr>
+      <td>
+         <div align="center">
+   <img width="70%" alt="image" src="https://github.com/user-attachments/assets/0f5b50f5-a27e-4ace-a1e1-66897cf055b8" /><br>
+      build error and telescope search error
+         </div>
+      </td>
+      <td>
+          <div align="center">
+   <img width="70%" alt="image" src="https://github.com/user-attachments/assets/aa504bfc-2848-4316-92e5-99af2c8d97a9" /><br>
+      telescope select build target
+          </div>
+      </td>
+   </tr>
+</table>
 
 ## 🔧 必要要件 (Requirements)
 
@@ -75,8 +98,8 @@ opts = {
   -- ビルドターゲットの定義プリセット
   presets = {
     -- 用意されているプリセットは
-    --  Win64Debug, Win64DebugGame, Win64Develop, Win64Test, Win64Shipping, 
-    --  Win64DebugWithEditor, Win64DebugGameWithEditor, Win64DevelopWithEditor
+    --  Win64DebugGame, Win64Develop, Win64Shipping, 
+    --  Win64DebugGameWithEditor, Win64DevelopWithEditor
     -- になります
     -- 新しいプリセットを追加したり既存のものを上書きする場合は下記のように書いてください
     -- 上書き
