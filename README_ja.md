@@ -179,7 +179,7 @@ opts = {
 
 ``` viml
 :Telescope ubt diagnostics          " 直近のジョブ実行で発生した情報を一覧表示します
-:Telescope ubt targets              " 設定されているビルドターゲットを一覧表示し、選択するだけでビルドを開始できます
+:Telescope ubt build                " 設定されているビルドターゲットを一覧表示し、選択するだけでビルドを開始できます
 :Telescope ubt gencompiledb         " ビルドターゲットを選択し、compile_commands.jsonの生成を開始します。
 ```
 

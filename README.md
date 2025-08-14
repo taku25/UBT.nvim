@@ -166,7 +166,7 @@ Example `.ubtrc`:
 
 ```viml
 :Telescope ubt diagnostics          " Lists information from the last job run.
-:Telescope ubt targets              " Lists configured build targets and starts a build on selection.
+:Telescope ubt build                " Lists configured build targets and starts a build on selection.
 :Telescope ubt gencompiledb         " Select a build target to start generating compile_commands.json.
 ```
 
