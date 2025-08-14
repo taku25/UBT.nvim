@@ -1,100 +1,195 @@
 # UBT.nvim
 
-UBT.nvim is a Neovim plugin that integrates with Unreal Build Tool (UBT) to facilitate operations like generating `compile_commands.json` and building Unreal Engine projects directly from Neovim.
-<img width=50%  alt="screenshot-20250813-234936" src="https://github.com/user-attachments/assets/233d1f07-78d6-4fef-838d-e72fadea20cd" />
+# Unreal Build Tool 💓 Neovim
 
+`UBT.nvim` is a plugin that allows you to run Unreal Engine's features like `compile_commands.json` generation, builds, project file generation, and static analysis directly from Neovim, asynchronously.
 
+[**English**](./README.md) | [Japanese](./README_ja.md)
 
+---
 
-## Features
+## ✨ Features
 
-- Generate `compile_commands.json` for Unreal Engine projects.
-- Build Unreal Engine projects with specified configurations.
-- Seamlessly integrates with Neovim's command system.
-- Optionally integrates with [fidget.nvim](https://github.com/j-hui/fidget.nvim) for job progress visualization.
+*   **Asynchronous Execution**: Runs the Unreal Build Tool in the background asynchronously using Neovim's native job control.
+*   **Flexible Configuration System**: In addition to global settings, automatically loads project-specific configurations from a `.ubtrc` file in the project root.
+*   **Rich UI Feedback**: (Optional) Integrates with [fidget.nvim](https://github.com/j-hui/fidget.nvim) to display real-time build progress.
+*   **Interactive Error Browsing**: (Optional) Powerful integration with [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim).
+    *   Fuzzy find through build errors and warnings.
+    *   Preview the code location of an error and jump to the file and line with a single keypress.
+    *   Select build targets or `compile_commands.json` generation targets directly from a Telescope picker.
 
-## Installation
+## 🔧 Requirements
 
-Use [lazy.nvim](https://github.com/folke/lazy.nvim) to install UBT.nvim along with its dependency [fidget.nvim](https://github.com/j-hui/fidget.nvim):
+*   Neovim v0.11.3 or higher
+*   [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (**Optional**)
+*   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**Optional**)
+*   An environment where Unreal Build Tool is usable (`dotnet` command, etc.).
+*   Visual Studio 2022 with the Clang compiler component installed via the Visual Studio Installer.
+*   Currently only supports the Windows environment. Support for other OSes is planned once I have access to the necessary environments.
 
-```lua
-require("lazy").setup({
-  {
-    "your-repo/UBT.nvim",
-    dependencies = {
-      "j-hui/fidget.nvim", -- Optional: For job progress visualization
-    },
-    config = function()
-      require("UBT").setup {
-        notify = true, -- Set to false to disable notifications.
-        presets = {
-          { name = "Win64Debug", Platform = "Win64", IsEditor = false, Configuration = "Debug" },
-          { name = "Win64Develop", Platform = "Win64", IsEditor = false, Configuration = "Development" },
-        },
-        default = "Win64DevelopWithEditor", -- Default configuration to use.
-      }
-    end,
-  }
-})
-```
+## 🚀 Installation
 
-## Platform Support
+Install with your favorite plugin manager.
 
-This plugin currently supports **Windows 11** only.
-
-## Configuration
-
-UBT.nvim can be configured by calling its `setup` function. Example configuration:
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
-require('UBT').setup {
-  notify = true, -- Set to false to disable notifications.
-  presets = {
-    { name = "Win64Debug", Platform = "Win64", IsEditor = false, Configuration = "Debug" },
-    { name = "Win64Develop", Platform = "Win64", IsEditor = false, Configuration = "Development" },
-    -- Add more build presets as needed.
+-- plugins/ubt.lua
+
+return {
+  'taku25/UBT.nvim',
+  dependencies = {
+      "j-hui/fidget.nvim", -- (Optional)
   },
-  default = "Win64DevelopWithEditor", -- Default configuration to use.
+  opts = {},
 }
 ```
 
-## Usage
+> **Note**: To enable the Telescope extension, it is recommended to add `UBT.nvim` as a dependency in your Telescope configuration and load the extension.
 
-**Note**: Make sure to run all commands from the root directory of your Unreal Engine project.
-
-UBT.nvim provides the following commands:
-
-### Generate Compile Commands
-
-To generate `compile_commands.json` for your Unreal Engine project, run:
-
-```vim
-:UBT GenCompileDB
+```lua
+-- plugins/telescope.lua
+return {
+  "nvim-telescope/telescope.nvim",
+  dependencies = { "taku25/UBT.nvim" },
+  config = function()
+    local telescope = require("telescope")
+    telescope.setup({ /* ... */ })
+    telescope.load_extension("ubt")
+  end,
+}
 ```
 
-You can also specify a build configuration (e.g., `Win64Debug`):
+## ⚙️ Configuration
+You can customize the plugin's behavior by passing a table to the `setup()` function. If you are using `lazy.nvim`, pass this table to the `opts` key.
+The following shows all available options and their default values.
 
-```vim
-:UBT GenCompileDB Win64Debug
+```lua
+-- in your init.lua or config block for the plugin
+
+opts = {
+  -- Pre-defined build targets.
+  presets = {
+    -- The available built-in presets are:
+    --  Win64Debug, Win64DebugGame, Win64Develop, Win64Test, Win64Shipping, 
+    --  Win64DebugWithEditor, Win64DebugGameWithEditor, Win64DevelopWithEditor
+    -- To add new presets or override existing ones, write as follows:
+    -- Override an existing preset
+    { name = "Win64DevelopWithEditor", Platform = "Win64", IsEditor = true, Configuration = "Development" },
+    -- Add a new preset
+    { name = "StreamOSShipping", Platform = "Stream", IsEditor = false, Configuration = "Shipping" },
+  },
+
+  -- The default target name used when the argument is omitted for :UBT Build or :UBT GenCompileDB.
+  preset_target = "Win64DevelopWithEditor",
+
+  -- The default linter type for :UBT Lint.
+  -- Available options: Default, VisualCpp, PVSStudio, Clang
+  -- For the differences between each type, please check the UnrealBuildTool documentation.
+  lint_type = "Default",
+  
+  -- UBT.nvim's basic operation is to read the .uproject file and use EngineAssociation
+  -- to automatically find the Unreal Build Tool. Use this option if you want to
+  -- explicitly specify the engine path.
+  -- Example: "C:/Program Files/Epic Games/UE_5.4"
+  engine_path = nil,
+
+  -- === Logging and Notification Settings ===
+
+  -- Determines which message level is displayed as a notification (uses `vim.notify`).
+  -- Available options: "NONE", "ERROR", "WARN", "ALL"
+  notify_level = "NONE",
+
+  -- Determines which output level from the running Unreal Build Tool is displayed (uses `fidget.nvim`).
+  -- Available options: "NONE", "ERROR", "WARN", "ALL"
+  progress_level = "ALL",
+
+  -- Determines which message level is displayed in the message area (uses `vim.echo`).
+  -- Available options: "NONE", "ERROR", "WARN", "ALL"
+  message_level = "ERROR",
+
+  -- Log file names (created within Neovim's cache directory).
+  -- Format: <neovim cache dir>/UBT/<logfile_name>
+  log_file_name = "diagnostics.log",   -- Persistent log for all UBT.nvim activity
+  progress_file_name = "progress.log", -- Temporary log for the latest UBT run
+
+  -- Whether to customize the fidget.nvim display.
+  -- This plugin internally customizes the LSP type "UBT".
+  -- If you want to use your own settings, set this to false and configure
+  -- the style for LSP type "UBT" in your fidget.nvim opts.
+  enable_override_fidget = true,
+
+  -- The shell used to run `vim.job`. Currently, only "cmd" is supported.
+  -- Even if you start Neovim from PowerShell, lunch.bat will be started with the specified shell.
+  shell = "cmd",
+}
 ```
 
-If no configuration is specified, the default configuration from the setup will be used.
+## ⚙️ Project-Specific Settings (.ubtrc) 
+You can define settings that are only active for a specific project by creating a JSON file named `.ubtrc` in the project's root directory (the current directory of Neovim when you run a UBT command).
+`.ubtrc` settings take precedence over global `setup()` settings.
 
-### Build
-
-To build your Unreal Engine project with a specific configuration, run:
-
-```vim
-:UBT Build Win64Debug
+Example `.ubtrc`:
+```json
+{
+  "preset_target": "StreamOS",
+  "engine_path": "C:/Program Files/Epic Games/UE_5.6",
+  "presets": [
+    {
+      "name": "StreamOSTest",
+      "Platform": "Win64",
+      "IsEditor": true,
+      "Configuration": "Test"
+    },
+    {
+      "name": "StreamOSShipping",
+      "Platform": "Stream",
+      "IsEditor": false,
+      "Configuration": "Shipping"
+    }
+  ]
+}
 ```
 
-## Dependencies
+## ⚡ Usage
 
-- Neovim 0.11.3 or newer.
-- Unreal Build Tool (UBT).
-- Optionally, [fidget.nvim](https://github.com/j-hui/fidget.nvim) for progress visualization.
+**Please `cd` into the directory containing your `.uproject` file before executing commands.**
 
-## License
+```viml
+:UBT GenCompileDB [target_name]     " Generates compile_commands.json.
+:UBT Build [target_name]            " Builds the project with the specified (or default) target.
+:UBT GenProject                     " Generates project files for Visual Studio, etc.
+:UBT Lint [linter_type] [target_name] " Runs static analysis.
+``` 
 
-This plugin is licensed under the MIT License. See LICENSE for details.
+### 🔭 Telescope Integration 
 
+```viml
+:Telescope ubt diagnostics          " Lists information from the last job run.
+:Telescope ubt targets              " Lists configured build targets and starts a build on selection.
+:Telescope ubt gencompiledb         " Select a build target to start generating compile_commands.json.
+```
+
+## 📜 License
+MIT License
+
+Copyright (c) 2025 taku25
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
