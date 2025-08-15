@@ -24,6 +24,8 @@
     *   Fuzzy find through build errors and warnings.
     *   Preview the code location of an error and jump to the file and line with a single keypress.
     *   Select build targets or `compile_commands.json` generation targets directly from a Telescope picker.
+*   **fzf-lua 💓 UBT.nvim**: Integrates with [fzf-lua](https://github.com/ibhagwan/fzf-lua) to provide functionality similar to the Telescope integration (**Optional**).
+    *   The fzf-lua integration uses **Lua coroutines** to ensure the UI remains responsive, even when opening large diagnostics logs.
 
 <table>
   <tr>
@@ -61,6 +63,7 @@
 *   Neovim v0.11.3 or higher
 *   [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (**Optional**)
 *   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**Optional**)
+*   [fzf-lua](https://github.com/ibhagwan/fzf-lua) (**Optional**)
 *   An environment where Unreal Build Tool is usable (`dotnet` command, etc.).
 *   Visual Studio 2022 with the Clang compiler component installed via the Visual Studio Installer.
 *   Currently only supports the Windows environment. Support for other OSes is planned once I have access to the necessary environments.
@@ -97,7 +100,40 @@ return {
   end,
 }
 ```
+> **Note:** To ensure the fzf-lua integration loads correctly, it's recommended to define `UBT.nvim` as a dependency of `fzf-lua`. This guarantees that the picker modules are available when you define commands or keymaps.
 
+```lua
+{
+  "ibhagwan/fzf-lua",
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+    "taku25/UBT.nvim",
+  },
+  config = function(_, opts)
+    -- It's good practice to run the plugin's setup function first
+    require("fzf-lua").setup(opts)
+
+    -- Define user commands after setup
+    vim.api.nvim_create_user_command("UBTFzfBuild",
+      function() require("fzf-lua.ubt").build.exec() end,
+      { desc = "UBT: Open fzf picker to select a build target", nargs = 0 }
+    )
+    vim.api.nvim_create_user_command("UBTFzfGenCompileDB",
+      function() require("fzf-lua.ubt").gen_compile_db.exec() end,
+      { desc = "UBT: Open fzf picker to generate compile_commands.json", nargs = 0 }
+    )
+    vim.api.nvim_create_user_command("UBTFzfDiagnostics",
+      function() require("fzf-lua.ubt").diagnostics.exec() end,
+      { desc = "UBT: Open fzf to view process logs", nargs = 0 }
+    )
+
+    -- It's cleaner to map to the commands you just created
+    vim.keymap.set('n', '<leader>ub', '<cmd>UBTFzfBuild<cr>', { desc = "UBT: Build (fzf)" })
+    vim.keymap.set('n', '<leader>uc', '<cmd>UBTFzfGenCompileDB<cr>', { desc = "UBT: Compile DB (fzf)" })
+    vim.keymap.set('n', '<leader>ud', '<cmd>UBTFzfDiagnostics<cr>', { desc = "UBT: Diagnostics (fzf)" })
+  end
+}
+```
 ## ⚙️ Configuration
 You can customize the plugin's behavior by passing a table to the `setup()` function. If you are using `lazy.nvim`, pass this table to the `opts` key.
 The following shows all available options and their default values.
@@ -271,6 +307,51 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 :Telescope ubt diagnostics          " Lists information from the last job run.
 :Telescope ubt build                " Lists configured build targets and starts a build on selection.
 :Telescope ubt gencompiledb         " Select a build target to start generating compile_commands.json.
+```
+  
+### 💓 fzf-lua Integration
+
+You can use the provided functions to freely define your own commands and keymaps for launching the fzf-lua pickers.
+
+#### Command Definitions
+
+It's recommended to create user commands to easily access the pickers. You can place this code anywhere that runs after startup (e.g., in your `init.lua` or a dedicated setup file).
+
+```lua
+-- Define user commands for fzf-lua pickers
+vim.api.nvim_create_user_command( "UBTFzfBuild",
+  function() require("fzf-lua.ubt").build.exec() end,
+  { desc = "UBT: Open fzf picker to select a build target", nargs = 0 }
+)
+vim.api.nvim_create_user_command("UBTFzfGenCompileDB",
+  function() require("fzf-lua.ubt").gen_compile_db.exec() end,
+  { desc = "UBT: Open fzf picker to generate compile_commands.json", nargs = 0 }
+)
+vim.api.nvim_create_user_command("UBTFzfDiagnostics",
+  function() require("fzf-lua.ubt").diagnostics.exec() end,
+  { desc = "UBT: Open fzf to view process logs", nargs = 0 }
+)
+```
+
+#### Keymaps
+
+Once the commands are defined, you can easily map them to your preferred keys.
+
+```lua
+-- Example keymaps
+vim.keymap.set('n', '<leader>ub', '<cmd>UBTFzfBuild<cr>', { desc = "UBT: Build Target (fzf)" })
+vim.keymap.set('n', '<leader>uc', '<cmd>UBTFzfGenCompileDB<cr>', { desc = "UBT: Gen Compile DB (fzf)" })
+vim.keymap.set('n', '<leader>ud', '<cmd>UBTFzfDiagnostics<cr>', { desc = "UBT: Diagnostics (fzf)" })
+```
+
+#### Usage
+
+After setting up, you can use the commands directly or via your keymaps:
+
+```viml
+:UBTFzfDiagnostics          " Lists diagnostics from the last job execution.
+:UBTFzfBuild                " Lists configured build targets and starts a build upon selection.
+:UBTFzfGenCompileDB         " Select a build target to start generating compile_commands.json.
 ```
 
 ## 📜 License

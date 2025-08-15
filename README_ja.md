@@ -25,6 +25,10 @@
     *   ビルドエラーやワーニングをTelescopeでファジー検索。
     *   エラー箇所をプレビューし、Enterキー一発で該当ファイル・行へジャンプ。
     *   ビルドターゲットや`compile_commands.json`生成ターゲットをTelescopeから選択して実行
+*   **fzf-lua 💓 UBT.nvim** [fzf-lua](https://github.com/ibhagwan/fzf-lua)と連携しTelescopeと連携した時と同様の操作が可能です(**オプション**)
+    *   fzf-lua用の連携にはすべて**lua coroutine** をつかっているのでサイズの大きなDiagnosticsを開いてもUIが止まりません
+
+    
 
 <table>
   <tr>
@@ -62,9 +66,11 @@
 *   Neovim v0.11.3 以上
 *   [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (**オプション**)
 *   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**オプション**)
+*   [fzf-lua](https://github.com/ibhagwan/fzf-lua) (**オプション**)
 *   Unreal Build Tool が利用可能な環境 (`dotnet` コマンドなど)
 *   Visual Studio 2022とVisual Studio Installerからインストールされたclang
 *   Windows環境でのみサポート(その他のOSは環境がなくて対応できていませんが環境ができれば対応する予定)
+
 
 ## 🚀 インストール (Installation)
 
@@ -100,6 +106,37 @@ return {
 }
 ```
 
+Note: fzf-lua拡張を有効にするために、fzf側で依存関係を持たせた状態でコマンドやキーマップを設定することをお勧めします
+
+``` lua
+{
+  "ibhagwan/fzf-lua",
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+    "~/Documents/git/UBT.nvim",
+  },
+  opts={},
+  config = function ()
+    require("fzf-lua").setup(opts)
+
+    vim.api.nvim_create_user_command( "UBTFzfBuild", function() require("fzf-lua.ubt").build.exec() end,
+      { desc = "UBT: ビルドターゲットを選択するためのfzfピッカーを開く", nargs = 0, }
+    )
+    vim.api.nvim_create_user_command("UBTFzfGenCompileDB", function() require("fzf-lua.ubt").gen_compile_db.exec() end,
+      { desc = "UBT: compile_command.jsonを作るためにターゲットを選択するfzfピッカーを開く", nargs = 0, }
+    )
+    vim.api.nvim_create_user_command("UBTFzfDiagnostics", function() require("fzf-lua.ubt").diagnostics.exec() end,
+      { desc = "UBT: プロセスログを確認するためにfzfを開く",  nargs = 0,}
+    )
+
+    vim.api.nvim_set_keymap('n', '<c-b>', '<cmd>lua require("fzf-lua.ubt").build.exec()<cr>',  { noremap = true, silent = true })
+    vim.api.nvim_set_keymap('n', '<c-c>', '<cmd>lua require("fzf-lua.ubt").gen_compile_db.exec()<cr>',  { noremap = true, silent = true })
+    vim.api.nvim_set_keymap('n', '<c-d>', '<cmd>lua require("fzf-lua.ubt").diagnostics.exec()<cr>',  { noremap = true, silent = true })
+
+      
+  end
+}
+```
 
 ## ⚙️ 設定 (Configuration)
 Setup 関数にテーブルを渡すことで、プラグインの挙動をカスタマイズできます。 lazyでプラグインをインストールしている場合はoptsに書いてください
@@ -283,6 +320,35 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 :Telescope ubt build                " 設定されているビルドターゲットを一覧表示し、選択するだけでビルドを開始できます
 :Telescope ubt gencompiledb         " ビルドターゲットを選択し、compile_commands.jsonの生成を開始します。
 ```
+
+### 💓 fzf-lua連携
+
+fzf-lua用のapiを使ってキーマッピングやコマンドを自由に定義してfzf-luaを呼び出すことが可能です
+  
+
+コマンドの定義
+``` lua
+      vim.api.nvim_create_user_command( "UBTFzfBuild",
+        function() require("fzf-lua.ubt").build.exec() end,
+        { desc = "UBT: ビルドターゲットを選択するためのfzfピッカーを開く", nargs = 0, }
+      )
+      vim.api.nvim_create_user_command("UBTFzfGenCompileDB",
+        function() require("fzf-lua.ubt").gen_compile_db.exec() end,
+        { desc = "UBT: compile_command.jsonを作るためにターゲットを選択するfzfピッカーを開く", nargs = 0, }
+      )
+      vim.api.nvim_create_user_command("UBTFzfDiagnostics",
+        function() require("fzf-lua.ubt").diagnostics.exec() end,
+        { desc = "UBT: プロセスログを確認するためにfzfを開く",  nargs = 0,}
+      )
+```
+
+コマンド使用時
+```viml
+:UBTFzfDiagnostics          " 直近のジョブ実行で発生した情報を一覧表示します
+:UBTFzfBuild                " 設定されているビルドターゲットを一覧表示し、選択するだけでビルドを開始できます
+:UBTFzfGenCompileDB         " ビルドターゲットを選択し、compile_commands.jsonの生成を開始します。
+```
+
 
 ## 📜 ライセンス (License)
 MIT License
