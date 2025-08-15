@@ -59,6 +59,20 @@
     </div>
     </td>
   </tr>
+  <tr>
+   <td>
+    <div align=center>
+      <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua-diagnostics.gif" />
+      fzf-luaからUBT Build ログ検索
+    </div>
+   </td>
+   <td>
+   <div align=center>
+    <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua.gif" />
+      fzf-luaでUBT Buildターゲット選択
+    </div>
+    </td>
+  </tr>
 </table>
 
 ## 🔧 必要要件 (Requirements)

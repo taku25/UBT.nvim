@@ -56,6 +56,20 @@
     </div>
     </td>
   </tr>
+  <tr>
+   <td>
+    <div align=center>
+      <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua-diagnostics.gif" />
+      UBT Build And fzf-lua UI Search Build Error
+    </div>
+   </td>
+   <td>
+   <div align=center>
+    <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua.gif" />
+     UBT Build Command on fzf-lua UI
+    </div>
+    </td>
+  </tr>
 </table>
 
 ## 🔧 Requirements
