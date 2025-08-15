@@ -48,8 +48,7 @@ M.exec = function()
       end)()
     end,
     {
-      -- プレビュー機能を追加するとさらに強力になります（オプション）
-      -- previewer = "bat", -- or "cat"
+
       prompt = "  UBT Diagnostics>",
       previewer = diagnostics_Previewer,
       actions = {
