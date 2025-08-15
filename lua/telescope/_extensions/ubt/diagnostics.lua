@@ -7,7 +7,7 @@ local ubt_picker_model = require("UBT.picker_model")
 local function diagnostics(opts)
   opts = opts or {}
 
-  local lines,err = ubt_picker_model.get_diagnostics()
+  local lines,err = ubt_picker_model.get_row_data()
 
   if err then
     vim.notify("UBT: No diagnostics found.", vim.log.levels.INFO)

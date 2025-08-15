@@ -51,7 +51,7 @@ goto :arg_loop
 
 :end_loop
 
-REM echo Final OPTIONS: !OPTIONS!
+echo Final OPTIONS: !OPTIONS!
 
 set ENGINEPATH=
 if /I "%TYPE%"=="guid" (
