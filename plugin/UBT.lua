@@ -88,7 +88,10 @@ vim.api.nvim_create_user_command(
     local opts = {
       root_dir = root_dir,
     }
-    local user_args = { unpack(fargs, 2) } -- ユーザーが入力した引数 (サブコマンド名を除く)
+    local _unpack = table.unpack or unpack
+    local user_args = { 
+      _unpack(fargs, 2)
+    } -- ユーザーが入力した引数 (サブコマンド名を除く)
 
     -- 定義された各引数について、ユーザーからの入力値またはデフォルト値を取得
     for i, arg_def in ipairs(command_def.args) do
