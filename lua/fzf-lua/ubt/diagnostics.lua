@@ -1,6 +1,6 @@
 local fzf_lua = require("fzf-lua")
 local fzf_actions = require("fzf-lua.actions") 
-local model = require("UBT.picker_model")
+local model = require("UBT.model")
 local path = require("UBT.path")
 local builtin = require("fzf-lua.previewer.builtin")
 

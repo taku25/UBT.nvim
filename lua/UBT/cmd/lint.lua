@@ -1,26 +1,24 @@
--- UBT.nvim: Neovim command registration module
--- lint.lua
-local M = {}
-local job = require("UBT.job.runner")
-local core = require("UBT.cmd.core")
+-- lua/UBT/cmd/lint.lua
 
---- compile_commands.json生成本体
+local core = require("UBT.cmd.core")
+local runner = require("UBT.job.runner")
+local log = require("UBT.logger")
+local unl_finder = require("UNL.finder")
+
+local M = {}
+
 function M.start(opts)
-  
-  local cmd,error = core.create_command_with_target_platforms(opts.root_dir, nil, opts.label,
-  {
+  local cmd, err = core.create_command_with_target_platforms(opts.root_dir, nil, opts.label, {
     "-game",
     "-engine",
-    "-StaticAnalyzer",
-    opts.lint_type
+    "-StaticAnalyzer=" .. opts.lintType,
   })
 
-  if error ~= nil then
-    return nil, error
+  if err then
+    return log.get().error(err)
   end
-  --
-  return job.start("StaticAnalyzer", cmd), nil
+
+  runner.start("StaticAnalyzer", cmd)
 end
 
 return M
-

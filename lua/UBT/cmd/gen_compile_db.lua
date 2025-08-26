@@ -1,24 +1,48 @@
--- UBT.nvim: Neovim command registration module
--- gen_compile_db.lua
-local M = {}
-local job = require("UBT.job.runner")
+-- lua/UBT/cmd/gen_compile_db.lua (UI判断ロジックを含む最終版)
+
 local core = require("UBT.cmd.core")
+local runner = require("UBT.job.runner") -- ジョブランナー
+local unl_picker = require("UNL.backend.picker")
+local model = require("UBT.model") -- プリセット取得用
+local log = require("UBT.logger")
+local unl_finder = require("UNL.finder")
 
---- compile_commands.json生成本体
-function M.start(opts)
+local M = {}
 
-  local cmd, error= core.create_command_with_target_platforms(opts.root_dir, "GenerateClangDatabase", opts.label, 
-  {
+-- ジョブを実際に実行するコア部分
+local function run_job(opts)
+
+  local cmd, err = core.create_command_with_target_platforms(opts.root_dir, "GenerateClangDatabase", opts.label, {
     "-NoExecCodeGenActions",
-    '-OutputDir',
-    opts.root_dir,
+    "-OutputDir=" .. opts.root_dir,
   })
-  if error ~= nil then
-    return nil, error
+
+  if err then
+    return log.get().error(err)
   end
-  
-  return job.start("GenerateClangDatabase", cmd), nil
+  runner.start("GenerateClangDatabase", cmd)
+end
+
+function M.start(opts)
+  if opts.has_bang then
+    -- `!`付きの場合は、UIピッカーを起動
+    unl_picker.pick({
+      kind = "ubt_gencompiledb",
+      title = "UBT Generate Compile DB Targets",
+      conf = require("UNL.config").get("UBT"),
+      items = picker_model.get_presets(),
+      format = function(entry) return entry.name end,
+      on_submit = function(selected)
+        if selected then
+          opts.label = selected.name
+          run_job(opts)
+        end
+      end,
+    })
+  else
+    -- `!`がなければ、そのままジョブを実行
+    run_job(opts)
+  end
 end
 
 return M
-

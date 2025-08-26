@@ -1,45 +1,57 @@
---- UBT.nvim: Public Lua API.
--- These functions are the stable, intended way to interact with UBT.nvim
--- programmatically from your own configurations or other plugins.
+-- lua/UBT/api.lua (シンプルになったAPI)
+
+local unl_finder = require("UNL.finder")
+local log = require("UBT.logger")
+local cmd = {
+  build = require("UBT.cmd.build"),
+  gencompiledb = require("UBT.cmd.gen_compile_db"),
+  genproject = require("UBT.cmd.gen_proj"),
+  lint = require("UBT.cmd.lint"),
+  diagnostics = require("UBT.cmd.diagnostics"),
+}
+
 local M = {}
 
--- Require the internal engine room.
-local internal = require("UBT.internal")
-local path = require("UBT.path")
+---
+-- optsにroot_dirがなければ自動で設定するヘルパー関数
+-- この関数を全てのAPI関数より先に定義します
+local function ensure_root_dir(opts)
+  opts = opts or {}
+  if not opts.root_dir then
+    opts.root_dir = unl_finder.project.find_project_root(vim.loop.cwd())
+  end
+  return opts
+end
 
---- Builds the project using a specified target.
--- @param opts table|nil: Options table, e.g., { label = "Win64Debug", root_dir = "/path/to/project" }.
--- If `label` is omitted, the configured default will be used.
 function M.build(opts)
-  internal.execute_command("build", opts)
+  opts = ensure_root_dir(opts)
+  if not opts.root_dir then return log.get().error("Not inside a valid Unreal project.") end
+  
+  cmd.build.start(opts)
 end
 
---- Generates compile_commands.json for a specified target.
--- @param opts table|nil: Options table, e.g., { label = "Win64Debug" }.
 function M.gen_compile_db(opts)
-  internal.execute_command("gencompiledb", opts)
+  opts = ensure_root_dir(opts)
+  if not opts.root_dir then return log.get().error("Not inside a valid Unreal project.") end
+
+  cmd.gencompiledb.start(opts)
 end
 
---- Generates project files (e.g., for Visual Studio).
--- @param opts table|nil: Options table, e.g., { root_dir = "/path/to/project" }.
 function M.gen_project(opts)
-  internal.execute_command("genproject", opts)
+  opts = ensure_root_dir(opts)
+  if not opts.root_dir then return log.get().error("Not inside a valid Unreal project.") end
+  cmd.genproject.start(opts)
 end
 
---- Runs the static analyzer (linter).
--- @param opts table|nil: Options table, e.g., { lintType = "Clang", label = "Win64Debug" }.
 function M.lint(opts)
-  internal.execute_command("lint", opts)
+  opts = ensure_root_dir(opts)
+  if not opts.root_dir then return log.get().error("Not inside a valid Unreal project.") end
+  cmd.lint.start(opts)
 end
 
-
---- Searches upwards from a given path to find the project root directory.
--- The project root is defined as the directory containing a .uproject file.
--- @param start_path string: The file or directory path to start searching from.
--- @return string|nil: The absolute path to the project root directory if found.
--- @return string|nil: An error message if not found or on failure.
-function M.find_project_root(start_path)
-  return path.find_project_root(start_path)
+function M.diagnostics(opts)
+  opts = ensure_root_dir(opts) -- root_dirを保証
+  log.get().debug("API call: diagnostics")
+  cmd.diagnostics.start(opts)
 end
-
 return M

@@ -1,126 +1,72 @@
--- ubt.lua (リファクタリング後)
+-- plugin/ubt.lua (デバッグ最終版)
 
-if 1 ~= vim.fn.has "nvim-0.11.3" then
-  vim.api.nvim_err_writeln "UBT.nvim at least nvim-0.11.3"
-  return 
-end
-if vim.g.loaded_ubt == 1 then
+if vim.g.loaded_ubt then
   return
 end
-vim.g.loaded_ubt = 1
+vim.g.loaded_ubt = true
 
--- 各コマンドモジュールをrequire
---.
-local cmd = require("UBT.cmd")
-local logger = require("UBT.logger")
-local conf = require("UBT.conf")
+-- requireを安全に実行し、失敗したらエラーを明確に表示するヘルパー
+local function safe_require(name)
+  local ok, mod = pcall(require, name)
+  if not ok then
+    -- pcallが失敗した場合、`mod`にはエラーメッセージが入っている
+    print("UBT.nvim: !!! FATAL ERROR! require('" .. name .. "') failed!")
+    -- vim.api.nvim_err_writeln("UBT.nvim FATAL ERROR while requiring '" .. name .. "':")
+    -- vim.api.nvim_err_writeln(tostring(mod))
+    return nil
+  end
+  return mod
+end
 
+local builder = safe_require("UNL.command.builder")
+if not builder then return end
+local ubt_api = safe_require("UBT.api")
+if not ubt_api then return end
+local log = safe_require("UBT.logger")
+if not log then return end
 
--- =================================================================
---  コマンド定義テーブル
--- =================================================================
--- 各サブコマンドの動作をここで一元管理する
-local subcommands = {
-  -- :UBT GenCompileDB [label]
-  gencompiledb = {
-    handler = cmd.gen_compile_db,
-    desc = "Generate compile database.",
-    -- このコマンドが取る引数の定義
-    args = {
-      { name = "label", default = function() return conf.active_config.preset_target end },
+local function get_config()
+  return require("UNL.config").get("UBT")
+end
+
+builder.create({
+  plugin_name = "UBT",
+  cmd_name = "UBT",
+  desc = "UBT: Unreal Build Tool commands",
+  subcommands = {
+    ["build"] = {
+      handler = function(opts) ubt_api.build(opts) end,
+      desc = "Build a target. Use 'build!' to open a UI picker.",
+      bang = true,
+      args = {
+        { name = "label", required = false, default = function() return get_config().preset_target end },
+      },
+    },
+    ["gencompiledb"] = {
+      handler = function(opts) ubt_api.gen_compile_db(opts) end,
+      desc = "Generate compile_commands.json. Use 'gencompiledb!' to open a UI picker.",
+      bang = true,
+      args = {
+        { name = "label", required = false, default = function() return get_config().preset_target end },
+      },
+    },
+    ["genproject"] = {
+      handler = function(opts) ubt_api.gen_project(opts) end,
+      desc = "Generate project files.",
+      args = {},
+    },
+    ["lint"] = {
+      handler = function(opts) ubt_api.lint(opts) end,
+      desc = "Run static analyzer for a target.",
+      args = {
+        { name = "label", required = false, default = function() return get_config().preset_target end },
+        { name = "lintType", required = false, default = function() return get_config().lint_type end },
+      },
+    },
+    ["diagnostics"] = {
+      handler = function(opts) ubt_api.diagnostics(opts) end,
+      desc = "Show build diagnostics from the last run.",
+      args = {}, -- 引数は取らない
     },
   },
-
-  -- :UBT Build [label]
-  build = {
-    handler = cmd.build,
-    desc = "Build the project.",
-    args = {
-      { name = "label", default = function() return conf.active_config.preset_target end },
-    },
-  },
-
-  -- :UBT GenProject
-  genproject = {
-    handler = cmd.gen_proj,
-    desc = "Generate project files.",
-    args = {}, -- このコマンドは追加の引数を取らない
-  },
-
-  -- :UBT Lint [lintType] [targetType]
-  lint = {
-    handler = cmd.lint,
-    desc = "Run static analyzer.",
-    args = {
-      { name = "lintType", default = function() return conf.active_config.lint_type end },
-      { name = "label", default = function() return conf.active_config.preset_target end },
-    },
-  },
-}
--- =================================================================
-
-
-vim.api.nvim_create_user_command(
-  'UBT',
-  function(args)
-    local fargs = args.fargs
-    local sub_name = fargs[1]
-
-    if not sub_name then
-      logger.write("Usage: :UBT <subcommand> ...", vim.log.levels.ERROR)
-      -- ここで利用可能なサブコマンド一覧を表示するのも親切
-      return
-    end
-
-    -- 入力されたサブコマンド名（小文字）で、定義テーブルを検索
-    local command_def = subcommands[sub_name:lower()]
-    if not command_def then
-      logger.write("Unknown subcommand: " .. sub_name, vim.log.levels.ERROR, 'UBT')
-      return
-    end
-
-
-  
-    local root_dir = vim.fn.getcwd()
-    conf.load_config(root_dir)
-
-    -- === 引数解析ロジック ===
-    local opts = {
-      root_dir = root_dir,
-    }
-    local _unpack = table.unpack or unpack
-    local user_args = { 
-      _unpack(fargs, 2)
-    } -- ユーザーが入力した引数 (サブコマンド名を除く)
-
-    -- 定義された各引数について、ユーザーからの入力値またはデフォルト値を取得
-    for i, arg_def in ipairs(command_def.args) do
-      local value = user_args[i] or arg_def.default()
-      opts[arg_def.name] = value
-    end
-
-    logger.write("Executing: " .. sub_name .. " with opts: " .. vim.inspect(opts), vim.log.levels.INFO, 'UBT')
-
-    -- 対応するハンドラの .start() 関数を呼び出す
-    local handle, error = command_def.handler.start(opts)
-    if error ~= nil then
-      logger.write(error, vim.log.levels.ERROR, 'UBT')
-    end
-  end,
-  {
-    nargs = '*',
-    desc = 'UBT command launcher. Use :UBT <subcommand>',
-    -- 補完機能も、定義テーブルを使って自動的に生成する
-    complete = function(_, line)
-      local split = vim.split(line, "%s+")
-      if #split <= 2 then
-        local available_cmds = vim.tbl_keys(subcommands)
-        return vim.tbl_filter(function(cmd)
-          return vim.startswith(cmd, split[2] or "")
-        end, available_cmds)
-      end
-      -- TODO: 将来的には、各コマンドの引数の補完もここに追加できる
-      return {}
-    end,
-  }
-)
+})

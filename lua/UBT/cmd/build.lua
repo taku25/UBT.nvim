@@ -1,24 +1,48 @@
--- UBT.nvim: Neovim command registration module
--- gen_compile_db.lua
-local M = {}
-local job = require("UBT.job.runner")
+-- lua/UBT/cmd/build.lua (UI判断ロジックを含む最終版)
+
 local core = require("UBT.cmd.core")
+local runner = require("UBT.job.runner") -- ジョブランナー
+local unl_picker = require("UNL.backend.picker")
+local model = require("UBT.model") -- プリセット取得用
+local log = require("UBT.logger")
+local unl_finder = require("UNL.finder")
 
---- compile_commands.json生成本体
-function M.start(opts)
-  
-  local cmd, error = core.create_command_with_target_platforms(opts.root_dir, "Build", opts.label,
-  {
+local M = {}
+
+-- ジョブを実際に実行するコア部分
+local function run_job(opts)
+  local cmd, err = core.create_command_with_target_platforms(opts.root_dir, "Build", opts.label, {
     "-WaitMutex",
-    "-FromMSBuild"
+    "-FromMSBuild", --これどうにかしたい
   })
-
-  if error ~= nil then
-    return nil, error
+  if err then
+    return log.get().error(err)
   end
+  runner.start("Build", cmd)
+end
 
-  return job.start("Biuld", cmd), nil
+function M.start(opts)
+  if opts.has_bang then
+    -- `!`付きの場合は、UIピッカーを起動
+    unl_picker.pick({
+      kind = "ubt_build",
+      title = "UBT Build Targets",
+      conf = require("UNL.config").get("UBT"),
+      items = model.get_presets(),
+      format = function(entry) return entry.name end,
+      on_submit = function(selected)
+        if selected then
+          -- ピッカーで選択されたものでジョブを実行
+          opts.label = selected.name
+          run_job(opts)
+        end
+      end,
+    })
+  else
+    -- `!`がなければ、そのままジョブを実行
+    -- (opts.labelには、ユーザーが入力した値か、builderが設定したデフォルト値が入っている)
+    run_job(opts)
+  end
 end
 
 return M
-

@@ -1,7 +1,7 @@
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local conf = require("telescope.config").values
-local ubt_picker_model = require("UBT.picker_model")
+local ubt_picker_model = require("UBT.model")
 
 
 local function diagnostics(opts)

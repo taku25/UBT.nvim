@@ -7,7 +7,7 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
 local ubt_api = require("UBT.api")
-local ubt_picker_model = require("UBT.picker_model")
+local ubt_picker_model = require("UBT.model")
 
 local function build(opts)
   opts = opts or {}

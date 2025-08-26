@@ -1,5 +1,5 @@
 local fzf_lua = require("fzf-lua")
-local model = require("UBT.picker_model")
+local model = require("UBT.model")
 local api = require("UBT.api")
 
 local M={}
