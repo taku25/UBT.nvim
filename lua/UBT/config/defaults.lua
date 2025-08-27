@@ -2,7 +2,7 @@
 local M = {
   ui = {
     picker = {
-      mode = "fzf-lua",
+      mode = "auto",
       prefer = { "telescope", "fzf-lua", "native", "dummy" },
     },
     progress = {

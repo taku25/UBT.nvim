@@ -9,7 +9,9 @@
   </tr>
 </table>
 
-`UBT.nvim` は、Unreal Engine のcompile_commands.json、Build、GenerateProject、静的解析などの機能を、Neovimから直接、非同期で実行するためのプラグインです。
+`UBT.nvim` は、Unreal Engine のビルド、`compile_commands.json` 生成、プロジェクトファイル生成、静的解析といった機能を、Neovimから直接、非同期で実行するためのプラグインです。
+
+その他、Unreal Engine開発を強化するためのプラグイン群 ([`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim)) があります。
 
 [English](./README.md) | [日本語](./README_ja.md)
 
@@ -17,18 +19,14 @@
 
 ## ✨ 機能 (Features)
 
-*   **非同期実行**: 純粋なneovimの機能で非同期でunreal build Toolをバックグラウンドで実行します。
+*   **非同期実行**: Neovimの標準機能（`vim.fn.jobstart`）のみを使用し、Unreal Build Toolをバックグラウンドで非同期に実行します。
 *   **柔軟な設定システム**:
-    *   グローバル設定に加え、プロジェクトルートに `.ubtrc` ファイルを置くことで、プロジェクト固有の設定を自動で読み込みます。
+    *   `UNL.nvim` の強力な設定システムをベースにしており、グローバル設定に加え、プロジェクトルートの `.unlrc.json` ファイルによるプロジェクト固有設定の上書きが可能です。
 *   **リッチなUIフィードバック**: [fidget.nvim](https://github.com/j-hui/fidget.nvim) と連携し、リアルタイムでビルドの進捗を表示します。(**オプション**)
-*   **対話的なエラーブラウジング**: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) との連携(**オプション**)
-    *   ビルドエラーやワーニングをTelescopeでファジー検索。
-    *   エラー箇所をプレビューし、Enterキー一発で該当ファイル・行へジャンプ。
-    *   ビルドターゲットや`compile_commands.json`生成ターゲットをTelescopeから選択して実行
-*   **fzf-lua 💓 UBT.nvim** [fzf-lua](https://github.com/ibhagwan/fzf-lua)と連携しTelescopeと連携した時と同様の操作が可能です(**オプション**)
-    *   fzf-lua用の連携にはすべて**lua coroutine** をつかっているのでサイズの大きなDiagnosticsを開いてもUIが止まりません
-
-    
+*   **統一されたUIピッカー**: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) や [fzf-lua](https://github.com/ibhagwan/fzf-lua) といった人気のUIプラグインを自動で認識し、統一された操作感を提供します。(**オプション**)
+    *   ビルドエラーや警告をファジー検索し、プレビューで確認後、Enterキー一発で該当ファイル・行へジャンプできます。
+    *   ビルドターゲットの選択も、使い慣れたUIピッカーから行えます。
+    *   `fzf-lua` との連携ではLuaコルーチンを使用しており、サイズの大きな診断ログを開いてもUIが固まりません。
 
 <table>
   <tr>
@@ -49,13 +47,13 @@
    <td>
     <div align=center>
       <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-telescope-diagnostics.gif" />
-      UBT Build と Telescope でエラー検索
+      Telescope でエラー検索
     </div>
    </td>
    <td>
    <div align=center>
     <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/telescope-build-select.gif" />
-     Telescope からUBT Build コマンド
+     Telescope からビルドターゲットを選択
     </div>
     </td>
   </tr>
@@ -63,13 +61,13 @@
    <td>
     <div align=center>
       <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua-diagnostics.gif" />
-      fzf-luaからUBT Build ログ検索
+      fzf-lua でエラー検索
     </div>
    </td>
    <td>
    <div align=center>
     <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua.gif" />
-      fzf-luaでUBT Buildターゲット選択
+      fzf-lua でビルドターゲットを選択
     </div>
     </td>
   </tr>
@@ -78,13 +76,13 @@
 ## 🔧 必要要件 (Requirements)
 
 *   Neovim v0.11.3 以上
+*   **[UNL.nvim](https://github.com/taku25/UNL.nvim)** (**必須**)
 *   [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (**オプション**)
-*   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**オプション**)
 *   [fzf-lua](https://github.com/ibhagwan/fzf-lua) (**オプション**)
+*   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**オプション**)
 *   Unreal Build Tool が利用可能な環境 (`dotnet` コマンドなど)
-*   Visual Studio 2022とVisual Studio Installerからインストールされたclang
-*   Windows環境でのみサポート(その他のOSは環境がなくて対応できていませんが環境ができれば対応する予定)
-
+*   Visual Studio 2022 (Clangツールチェインを含む)
+*   Windows (現在、他のOSでの動作確認は行っていません)
 
 ## 🚀 インストール (Installation)
 
@@ -92,203 +90,142 @@
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
+`UNL.nvim` が必須の依存関係です。`lazy.nvim` はこれを自動で解決します。
+
 ```lua
--- plugins/ubt.lua
+-- lua/plugins/ubt.lua
 
 return {
   'taku25/UBT.nvim',
-  dependencies = {
-      "j-hui/fidget.nvim",(オプション)
-  },
-  opt = {},
-}
-```
-
-Note: Telescope拡張を有効にするために、Telescope側の設定で UBT.nvim を依存関係に追加し、load_extension してください
-
-```lua
--- plugins/ubt.lua
--- plugins/telescope.lua
-return {
-  "nvim-telescope/telescope.nvim",
-  dependencies = { "taku25/UBT.nvim" },
-  config = function()
-    local telescope = require("telescope")
-    telescope.setup({ /* ... */ })
-    telescope.load_extension("ubt")
-  end,
-}
-```
-
-Note: fzf-lua拡張を有効にするために、fzf側で依存関係を持たせた状態でコマンドやキーマップを設定することをお勧めします
-
-``` lua
-{
-  "ibhagwan/fzf-lua",
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
-    "~/Documents/git/UBT.nvim",
-  },
-  opts={},
-  config = function ()
-    require("fzf-lua").setup(opts)
-
-    vim.api.nvim_create_user_command( "UBTFzfBuild", function() require("fzf-lua.ubt").build.exec() end,
-      { desc = "UBT: ビルドターゲットを選択するためのfzfピッカーを開く", nargs = 0, }
-    )
-    vim.api.nvim_create_user_command("UBTFzfGenCompileDB", function() require("fzf-lua.ubt").gen_compile_db.exec() end,
-      { desc = "UBT: compile_command.jsonを作るためにターゲットを選択するfzfピッカーを開く", nargs = 0, }
-    )
-    vim.api.nvim_create_user_command("UBTFzfDiagnostics", function() require("fzf-lua.ubt").diagnostics.exec() end,
-      { desc = "UBT: プロセスログを確認するためにfzfを開く",  nargs = 0,}
-    )
-
-    vim.api.nvim_set_keymap('n', '<c-b>', '<cmd>lua require("fzf-lua.ubt").build.exec()<cr>',  { noremap = true, silent = true })
-    vim.api.nvim_set_keymap('n', '<c-c>', '<cmd>lua require("fzf-lua.ubt").gen_compile_db.exec()<cr>',  { noremap = true, silent = true })
-    vim.api.nvim_set_keymap('n', '<c-d>', '<cmd>lua require("fzf-lua.ubt").diagnostics.exec()<cr>',  { noremap = true, silent = true })
-
-      
-  end
+  -- UBT.nvim は UNL.nvim に依存しています。
+  -- lazy.nvim が自動で解決するため、通常はこの行は不要です。
+  dependencies = { 'taku25/UNL.nvim' },
+  
+  -- もしautocmd（自動化）を使う場合は、即時読み込みを推奨します。
+  -- lazy = false,
+  
+  opts = {
+    -- ここに設定を記述します (詳細は後述)
+  }
 }
 ```
 
 ## ⚙️ 設定 (Configuration)
-Setup 関数にテーブルを渡すことで、プラグインの挙動をカスタマイズできます。 lazyでプラグインをインストールしている場合はoptsに書いてください
+
+`setup()` 関数（または `lazy.nvim` の `opts`）にテーブルを渡すことで、プラグインの挙動をカスタマイズできます。
 以下は、すべてのオプションと、そのデフォルト値です。
 
 ```lua
--- init.lua や ubt.lua の config ブロック内
+-- init.lua や ubt.lua の opts = { ... } の中身
 
-opts = {
+{
   -- ビルドターゲットの定義プリセット
   presets = {
-    -- 用意されているプリセットは
-    --  Win64DebugGame, Win64Develop, Win64Shipping, 
-    --  Win64DebugGameWithEditor, Win64DevelopWithEditor
-    -- になります
-    -- 新しいプリセットを追加したり既存のものを上書きする場合は下記のように書いてください
-    -- 上書き
-    { name = "Win64DevelopWithEditor", Platform = "Win64", IsEditor = true, Configuration = "Development" },
-    -- 追加
-    { name = "StreamOSShipping", Platform = "Stream", IsEditor = false, Configuration = "Shipping" },
+    -- デフォルトで Win64 用のプリセットが用意されています。
+    -- 独自のプリセットを追加したり、既存の設定を上書きできます。
+    -- 例: { name = "LinuxShipping", Platform = "Linux", IsEditor = false, Configuration = "Shipping" },
   },
 
-  -- :UBT Build や :UBT GenCompileDB で、引数が省略された際に使われるデフォルトのターゲット名
+  -- :UBT Build や :UBT GenCompileDB でターゲット名を省略した際のデフォルト
   preset_target = "Win64DevelopWithEditor",
 
-  -- :UBT Lint で、引数が省略された際に使われるデフォルトのlinter type
-  -- Default
-  -- VisualCpp
-  -- PVSStudio
-  -- Clang
-  -- 各タイプの違いはUnrealBuildToolのドキュメントを確認してください
+  -- :UBT Lint でlinterタイプを省略した際のデフォルト
   lint_type = "Default",
   
-  -- UBT.nvimの基本の動作は.uproject を読み込み EngineAssociation を使用し
-  -- 自動でUnreal Build Toolを検索しますが
-  -- エンジンパスを明示的に指定したい場合に使用してください
-  -- 例: "C:/Program Files/Epic Games/UE_5.4"
+  -- 通常は自動検出されますが、エンジンのパスを明示的に指定したい場合に使用します
   engine_path = nil,
 
-  -- === ログと通知の設定 ===
+  -- UBTが診断ログ（エラーや警告）を書き出すファイル名
+  progress_file_name = "progress.log",
 
-  -- notifyが、どのレベルのメッセージを通知として表示するか
-  -- vim.notifyが実行されます
-  -- "NONE", "ERROR", "WARN", "ALL"
-  notify_level = "NONE",
+  -- ===== UIとロギング設定 (UNL.nvimから継承) =====
+  
+  -- UIピッカー（Telescope, fzf-luaなど）の挙動設定
+  ui = {
+    picker = {
+      mode = "auto", -- "auto", "telescope", "fzf_lua", "native"
+      prefer = { "telescope", "fzf_lua", "native" },
+    },
+    progress = {
+      mode = "auto", -- "auto", "fidget", "window", "notify"
+    },
+  },
 
-  -- unreal build toolを実行中の出力がどのレベルで表示するか
-  -- fidget.nvimの通知が実行されます
-  -- "NONE", "ERROR", "WARN", "ALL"
-  progress_level = "ALL",
-
-
-  -- Messageがどのレベルで表示するか
-  -- vim.echoが実行されますのでmessageで見ることができます
-  -- "NONE", "ERROR", "WARN", "ALL"
-  message_level = "ERROR",
-
-  -- ログファイルの名前 (nvimのキャッシュディレクトリ内に作成されます)
-  -- neovim cache dir + ubt(dir) + logfile_name
-  log_file_name = "diagnostics.log",   -- UBT.nvimの全ログ
-  progress_file_name = "progress.log", -- 最新のunreal build tool実行ログ
-
-  -- fidget.nvim の表示をカスタマイズするかどうか
-  -- lsptype UBTとして内部でカスタマイズしています
-  -- ユーザ設定を使用する場合は falseにして
-  -- fidget.nvimのoptsでlsp UBTのスタイルを変更してください
-  enable_override_fidget = true,
-
-  -- vim.jobが動作するShell 現在はcmdのみ対応
-  -- powershellからneovimを起動してもlunch.batは指定したシェルで起動します
-  shell = "cmd",
-})
+  -- ログ出力の詳細設定
+  logging = {
+    level = "info", -- ログファイルに書き込む最低レベル
+    echo = { level = "warn" },
+    notify = { level = "error", prefix = "[UBT]" },
+    file = { 
+      enable = true, 
+      filename = "ubt.log", -- プラグイン全体の動作ログ
+    },
+  },
+}
 ```
 
+### プロジェクト固有の設定
 
-## ⚙️ プロジェクト固有の設定 (.ubtrc) 
-ルートディレクトリ（UBT コマンド実行時のneovimのカレントディレクトリ）に .ubtrc という名前のJSONファイルを作成することで、そのプロジェクトだけで有効な設定を定義できます。
-.ubtrc の設定は、グローバルな setup() 設定よりも優先されます。
-.ubtrc の例:
-```JSON
+プロジェクトのルートディレクトリ（`.uproject`ファイルがある場所）に `.unlrc.json` という名前のJSONファイルを作成することで、そのプロジェクトだけで有効な設定を定義できます。この設定は、グローバルな設定よりも優先されます。
+
+例: `.unlrc.json`
+```json
 {
-  "preset_target": "StreamOS",
-  "engine_path": "C:/Program Files/Epic Games/UE_5.6",
+  "preset_target": "LinuxShipping",
+  "engine_path": "D:/UE_Custom/UE_5.4_Linux",
   "presets": [
     {
-      "name": "StreamOSTest",
-      "Platform": "Win64",
-      "IsEditor": true,
-      "Configuration": "Test"
-    },
-    {
-      "name": "StreamOSShipping",
-      "Platform": "Stream",
+      "name": "LinuxShipping",
+      "Platform": "Linux",
       "IsEditor": false,
       "Configuration": "Shipping"
     }
   ]
 }
 ```
+
 ## ⚡ 使い方 (Usage)
 
-**neovimで.uprojectがあるディレクトリに移動してからコマンドを実行してください**
+コマンドは、Unreal Engineプロジェクトのディレクトリ内で実行してください。
 
-
-``` viml
-:UBT GenCompileDB [ターゲット名]     " compile_commands.json を生成します。
-:UBT Build [ターゲット名]            " 指定されたターゲット（またはデフォルト）でプロジェクトをビルドします。
+```vim
+:UBT Build[!] [ターゲット名]            " プロジェクトをビルドします。[!]付きで実行するとUIピッカーでターゲットを選択できます。
+:UBT GenCompileDB[!] [ターゲット名]     " compile_commands.json を生成します。[!]付きでUIピッカーを起動します。
+:UBT Diagnostics                      " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。
 :UBT GenProject                     " Visual Studioなどのプロジェクトファイルを生成します。
 :UBT Lint [linterタイプ] [ターゲット名] " 静的解析を実行します。
-``` 
+```
+
+### 💓 UIピッカー連携 (Telescope / fzf-lua)
+
+`UBT.nvim`は、設定に応じて `telescope.nvim` や `fzf-lua` を自動で利用します。
+
+UIピッカーは、以下のコマンドの `bang` 版 (`!`) を実行するか、`Diagnostics` コマンドを実行することで開くことができます。
+
+*   `:UBT Build!`
+*   `:UBT GenCompileDB!`
+*   `:UBT Diagnostics`
 
 ## 🤖 API & 自動化 (Automation Examples)
 
-`UBT.nvim` は、Lua APIを提供しているため、`autocmd`と組み合わせることで、開発ワークフローを少し楽にできます。
-すべてのAPIはdocumentで確認してください
-```viml
-:help ubt
-```
+`UBT.nvim` は、Lua APIを提供しているため、`autocmd`と組み合わせることで、開発ワークフローを効率化できます。
+詳細は `:help ubt.txt` で確認してください。
 
-### 📂 プロジェクトルートへ移動(auto cd)
-Unreal Engineのソースファイルを開いたとき、自動的にそのファイルのプロジェクトルート（`.uproject`があるディレクトリ）にカレントディレクトリを変更します
+### 📂 プロジェクトルートへ自動で移動
+
+Unreal Engineのソースファイルを開いたとき、自動的にカレントディレクトリをそのファイルのプロジェクトルート（`.uproject`があるディレクトリ）に変更します。
 
 ```lua
 -- init.lua or any setup file
-
 local ubt_auto_cd_group = vim.api.nvim_create_augroup("UBT_AutoCD", { clear = true })
-
 vim.api.nvim_create_autocmd("BufEnter", {
   group = ubt_auto_cd_group,
   pattern = { "*.cpp", "*.h", "*.hpp", "*.cs" },
   callback = function(args)
     local ok, ubt_api = pcall(require, "UBT.api")
-    if not ok then
-      return
-    end
-    -- プロジェクトルートを検索
-    local project_root, err = ubt_api.find_project_root(args.file)
-
+    if not (ok and ubt_api) then return end
+    
+    local project_root = ubt_api.find_project_root(args.file)
     if project_root and project_root ~= vim.fn.getcwd() then
       vim.cmd.cd(project_root)
     end
@@ -296,77 +233,35 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 ```
 
-### 📰 保存時のプロジェクト更新(auto make projct)
+### 📰 保存時にプロジェクトファイルを自動更新
 
 C++ヘッダーファイル (`.h`) やソースファイル (`.cpp`) を保存した際に、自動的に `:UBT GenProject` を実行します。
-APIをつかってファイル保存時にビルドすることもできますが、**パフォーマンスに影響を与える可能性があります。**
+**注意:** ビルドなどの重い処理をフックすると、パフォーマンスに影響を与える可能性があります。
 
-  <div align=center><img width="50%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/auto-cmd-gen-project.gif" /></div>
+<div align=center><img width="50%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/auto-cmd-gen-project.gif" /></div>
 
 ```lua
 -- init.lua or any setup file
-
-local ubt_auto_build_group = vim.api.nvim_create_augroup("UBT_AutoBuildOnSave", { clear = true })
-
+local ubt_auto_gen_proj_group = vim.api.nvim_create_augroup("UBT_AutoGenerateProject", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePost", {
-  group = ubt_auto_build_group,
+  group = ubt_auto_gen_proj_group,
   pattern = { "*.cpp", "*.h", "*.hpp" },
-  callback = function(args)
+  callback = function()
     local ok, ubt_api = pcall(require, "UBT.api")
-    if not ok then
-      return
-    end
-
-    local project_root, _ = ubt_api.find_project_root(args.file)
-    if not project_root then
-      return
-    end
+    if not (ok and ubt_api) then return end
     
-    ubt_api.gen_project()
+    if ubt_api.find_project_root(vim.fn.getcwd()) then
+      ubt_api.gen_project()
+    end
   end,
 })
 ```
 
-### 🔭 Telescope連携 
-
-``` viml
-:Telescope ubt diagnostics          " 直近のジョブ実行で発生した情報を一覧表示します
-:Telescope ubt build                " 設定されているビルドターゲットを一覧表示し、選択するだけでビルドを開始できます
-:Telescope ubt gencompiledb         " ビルドターゲットを選択し、compile_commands.jsonの生成を開始します。
-```
-
-### 💓 fzf-lua連携
-
-fzf-lua用のapiを使ってキーマッピングやコマンドを自由に定義してfzf-luaを呼び出すことが可能です
-  
-
-コマンドの定義
-``` lua
-      vim.api.nvim_create_user_command( "UBTFzfBuild",
-        function() require("fzf-lua.ubt").build.exec() end,
-        { desc = "UBT: ビルドターゲットを選択するためのfzfピッカーを開く", nargs = 0, }
-      )
-      vim.api.nvim_create_user_command("UBTFzfGenCompileDB",
-        function() require("fzf-lua.ubt").gen_compile_db.exec() end,
-        { desc = "UBT: compile_command.jsonを作るためにターゲットを選択するfzfピッカーを開く", nargs = 0, }
-      )
-      vim.api.nvim_create_user_command("UBTFzfDiagnostics",
-        function() require("fzf-lua.ubt").diagnostics.exec() end,
-        { desc = "UBT: プロセスログを確認するためにfzfを開く",  nargs = 0,}
-      )
-```
-
-コマンド使用時
-```viml
-:UBTFzfDiagnostics          " 直近のジョブ実行で発生した情報を一覧表示します
-:UBTFzfBuild                " 設定されているビルドターゲットを一覧表示し、選択するだけでビルドを開始できます
-:UBTFzfGenCompileDB         " ビルドターゲットを選択し、compile_commands.jsonの生成を開始します。
-```
-
 ## その他
-UnrealEngine の neovim プラグインリンク
-* [UCM.nvim](https://github.com/taku25/UCM.nvim) アンリアルエンジンクラスマネージャー.
 
+Unreal Engine 関連プラグイン:
+*   [UEP.nvim](https://github.com/taku25/UEP.nvim) - Unreal Engine プロジェクトマネージャー
+*   [UCM.nvim](https://github.com/taku25/UCM.nvim) - Unreal Engine クラスマネージャー
 
 ## 📜 ライセンス (License)
 MIT License
