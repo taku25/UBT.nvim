@@ -1,12 +1,14 @@
 -- lua/UBT/writer/progress_log.lua
 
 local ubt_path = require("UBT.path")
+local unl_log_level = require("UNL.logging.level")
 
 local M = {}
 
 function M.new()
   local self = {}
   local log_path
+  local enable = false;
 
   -- このwriterが書き込むべきログファイルのパスを取得する
   local function resolve_path()
@@ -21,15 +23,16 @@ function M.new()
     local path = resolve_path()
     if not path then return end
 
+    if enable == true then
     -- UBTのジョブランナーは、進捗行をINFOレベルでログに流している
     -- なので、INFOレベルのログの中から、進捗を表す "@progress" を含む行だけをフィルタリングする
     -- if msg_level == vim.log.levels.INFO and message:match("@progress") then
       local file, err = io.open(path, "a")
       if file then
-        file:write(message .. "\n")
+        file:write("["..unl_log_level.name(msg_level).."]" .. message .. "\n")
         file:close()
       end
-    -- end
+    end
   end
 
   -- ジョブ開始時にログファイルをクリアする
@@ -42,6 +45,11 @@ function M.new()
       file:write(string.format("--- Job '%s' started at %s ---\n", opts.name, os.date()))
       file:close()
     end
+    enable = true;
+  end
+
+  function self.on_job_finish(opts)
+    enable = false;
   end
 
   return self

@@ -18,6 +18,7 @@ end
 --
 function diagnostics_Previewer:parse_entry(entry_str)
     local line_info = model.line_info(entry_str)
+
     if not line_info.file_path then
       return {}
     end

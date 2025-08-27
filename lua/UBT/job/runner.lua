@@ -51,7 +51,11 @@ function M.start(name, cmd)
 
   -- 1. UNLの進捗UIインスタンスを作成
   local conf = require("UNL.config").get("UBT")
-  local progress, _ = unl_progress.create_for_refresh(conf, { title = name })
+  local progress, _ = unl_progress.create_for_refresh(conf,
+  {
+    title = name,
+    client_name = "UEP"
+  })
 
   progress:open()
   log.get().debug("Job starting: %s", table.concat(cmd, " "))
@@ -82,7 +86,9 @@ function M.start(name, cmd)
       -- 3. ジョブ終了をUIに通知
       progress:finish(code == 0)
       log.get().info("Job '%s' finished with code %d", name, code)
+      unl_log.dispatch_event("UBT", "on_job_finish", { name = name })
     end)
+
   end
 
   -- 4. ジョブを開始

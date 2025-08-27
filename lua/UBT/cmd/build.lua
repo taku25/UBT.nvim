@@ -26,9 +26,10 @@ function M.start(opts)
     -- `!`付きの場合は、UIピッカーを起動
     unl_picker.pick({
       kind = "ubt_build",
-      title = "UBT Build Targets",
+      title = "  UBT Build Targets",
       conf = require("UNL.config").get("UBT"),
       items = model.get_presets(),
+      logger_name = "UBT",
       format = function(entry) return entry.name end,
       on_submit = function(selected)
         if selected then

@@ -27,8 +27,9 @@ function M.start(opts)
   if opts.has_bang then
     -- `!`付きの場合は、UIピッカーを起動
     unl_picker.pick({
-      kind = "ubt_gencompiledb",
+      kind = "  ubt_gencompiledb",
       title = "UBT Generate Compile DB Targets",
+      logger_name = "UBT",
       conf = require("UNL.config").get("UBT"),
       items = picker_model.get_presets(),
       format = function(entry) return entry.name end,

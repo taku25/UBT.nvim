@@ -28,7 +28,8 @@ local function diagnostics(opts)
           filepath = result.file_path,
           filename = result.file_path, 
           lnum = result.row,
-          col = result.col
+          col = result.col,
+          text = info.row_message,
         }
       end,
     }),
