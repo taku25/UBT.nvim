@@ -33,6 +33,12 @@ local M = {
   lint_type = "Default",
   engine_path = nil,
   progress_file_name = "progress.log",
+
+  project = {
+    localrc_filename = ".ubtrc",
+    search_stop_at_home = true,
+    follow_symlink = true,
+  },
 }
 
 return M
