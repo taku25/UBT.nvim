@@ -1,4 +1,4 @@
-*UBT.txt*       For UBT.nvim                          vim: ft=help
+*ubt.txt*       For UBT.nvim                          vim: ft=help
 
 ==============================================================================
 CONTENTS                                                 *UBT-contents*
@@ -6,31 +6,27 @@ CONTENTS                                                 *UBT-contents*
   1. Introduction................................. |UBT-introduction|
   2. Usage........................................ |UBT-usage|
      - Commands................................... |UBT-commands|
-     - Telescope Integration...................... |UBT-telescope|
+     - UI Picker Integration...................... |UBT-picker-integration|
   3. Configuration................................ |UBT-configuration|
      - Setup...................................... |UBT-setup|
-     - Project-Specific Settings (.ubtrc)......... |UBT-ubtrc|
-     - Full Default Configuration................. |UBT-default-configuration|
+     - Project-Specific Settings.................. |UBT-project-config|
   4. Lua API...................................... |UBT-api|
-     - build...................................... |UBT-api-build| 
-     - gen_compile_db............................. |UBT.api.gen_compile_db|
-     - lint....................................... |UBT.api.lint|
-     - gen_project................................ |UBT.api.gen_project|
-     - find_project_root.......................... |UBT.api.find_project_root|
   5. License...................................... |UBT-license|
 
 ==============================================================================
 1. INTRODUCTION                                     *UBT-introduction*
 
-*UBT.nvim* is a plugin that allows you to run Unreal Engine's features such
-as building, project file generation, and static analysis directly from
-Neovim, asynchronously.
+*UBT.nvim* is a plugin that allows you to run Unreal Engine's build,
+`compile_commands.json` generation, project file generation, and static
+analysis tasks directly from Neovim, asynchronously.
+
+This plugin depends on the core library *UNL.nvim*.
 
 Main Features:
-- Asynchronous execution of UBT
-- Real-time progress display with fidget.nvim
-- Interactive error browsing with Telescope integration
-- Project-specific settings management with `.ubtrc`
+- Asynchronous execution of the Unreal Build Tool.
+- Real-time progress display with fidget.nvim (optional).
+- Interactive UI pickers with Telescope or fzf-lua (optional).
+- Project-specific settings management with `.unlrc.json`.
 
 ==============================================================================
 2. USAGE                                                      *UBT-usage*
@@ -38,40 +34,42 @@ Main Features:
 ------------------------------------------------------------------------------
 COMMANDS                                                   *UBT-commands*
 
-All commands must be executed from a directory containing a `.uproject` file.
+All commands must be executed from within an Unreal Engine project directory
+(i.e., a directory containing a `.uproject` file).
 
-:UBT Build {target_name}
-    Builds the project. If {target_name} is omitted, the configured
-    `preset_target` will be used.
+:UBT Build[!] [{target_name}]
+    Builds the project.
+    - If `{target_name}` is omitted, the configured |'UBT.preset_target'|
+      will be used.
+    - Execute with `!` to open a UI picker to select a build target.
 
-:UBT GenCompileDB {target_name}
-    Generates `compile_commands.json`. The handling of {target_name} is the
-    same as |:UBT Build|.
+:UBT GenCompileDB[!] [{target_name}]
+    Generates `compile_commands.json`.
+    - The handling of `{target_name}` is the same as |:UBT Build|.
+    - Execute with `!` to open a UI picker to select a target.
+
+:UBT Diagnostics
+    Lists errors and warnings from the most recent build in a UI picker.
+    You can preview the file and press <CR> to jump to the location.
 
 :UBT GenProject
-    Generates project files for Visual Studio, etc.
+    Generates project files for IDEs like Visual Studio.
 
-:UBT Lint {linter_type} {target_name}
+:UBT Lint [{linter_type}] [{target_name}]
     Runs static analysis. If arguments are omitted, the configured
-    `lint_type` and `preset_target` will be used.
+    |'UBT.lint_type'| and |'UBT.preset_target'| will be used.
 
 ------------------------------------------------------------------------------
-TELESCOPE INTEGRATION                                    *UBT-telescope*
+UI PICKER INTEGRATION                           *UBT-picker-integration*
 
-By loading the Telescope extension, the following pickers become available.
+If Telescope.nvim or fzf-lua is installed, `UBT.nvim` will automatically use
+them as a UI picker. You can configure which UI to use with the |'UBT.ui'|
+option.
 
-:Telescope ubt diagnostics
-    Lists errors and warnings from the most recent job run. Selecting an
-    item shows a preview of the file, and pressing <CR> jumps to the
-    corresponding location.
-
-:Telescope ubt targets
-    Lists the configured build targets, allowing you to start a build by
-    simply selecting one.
-
-:Telescope ubt gencompiledb
-    Allows you to select a build target to start generating
-    `compile_commands.json`.
+The UI picker can be opened with the following commands:
+- |:UBT Build!|
+- |:UBT GenCompileDB!|
+- |:UBT Diagnostics|
 
 ==============================================================================
 3. CONFIGURATION                                      *UBT-configuration*
@@ -83,18 +81,22 @@ If you are using `lazy.nvim`, pass your configuration table to the `opts` key.
 
 Example:
 >lua
-  require("UBT").setup({
-    preset_target = "Win64DebugGameWithEditor",
-    engine_path = "C:/Program Files/Epic Games/UE_5.4",
-  })
+  -- lua/plugins/ubt.lua
+  return {
+    'taku25/UBT.nvim',
+    dependencies = { 'taku25/UNL.nvim' },
+    opts = {
+      preset_target = "Win64DebugGameWithEditor",
+      engine_path = "C:/Program Files/Epic Games/UE_5.4",
+    }
+  }
 <
-
 The following are all available options.
 
 `presets`                                                 *'UBT.presets'*
     Type: `table`
-    A list of pre-defined build targets. You can add new presets to the
-    default list or override existing ones with the same `name`.
+    A list of pre-defined build targets. You can add new presets or
+    override existing ones by using the same `name`.
 
 `preset_target`                                           *'UBT.preset_target'*
     Type: `string`
@@ -104,233 +106,98 @@ The following are all available options.
 `lint_type`                                               *'UBT.lint_type'*
     Type: `string`
     Default: `"Default"`
-    The default linter type used when omitted in the `:UBT Lint` command.
+    The default linter type used when omitted in the |:UBT Lint| command.
 
-`engine_path`
-    Type: `string`
+`engine_path`                                             *'UBT.engine_path'*
+    Type: `string` or `nil`
     Default: `nil`
-    Specifies the root directory of Unreal Engine.
-    Use this for specific environments where the .uproject file does not
-    contain the Unreal Engine association.
+    Explicitly sets the engine root path. If `nil`, it will be auto-detected.
 
-`notify_level`
-    Type: `string`
-    Default: `"NONE"`
-    Notification output level for the entire plugin. Uses `vim.notify`.
-
-`message_level`
-    Type: `string`
-    Default: `"ERROR"`
-    Message output level for the entire plugin. Uses `vim.echo`.
-
-`progress_level`
-    Type: `string`
-    Default: `"ALL"`
-    Output level during command execution. Used by fidget.nvim.
-
-`progress_file_name`
+`progress_file_name`                                *'UBT.progress_file_name'*
     Type: `string`
     Default: `"progress.log"`
-    Log file name for command execution logs. Used by telescope.nvim, etc.
+    The filename for the build's diagnostic log (errors and warnings), which
+    is read by the |:UBT Diagnostics| command.
 
-`log_file_name`
-    Type: `string`
-    Default: `"diagnostics.log"`
-    Log file name for the entire plugin.
+`ui`                                                      *'UBT.ui'*
+    Type: `table`
+    UI settings inherited from `UNL.nvim`.
+    Example:
+>lua
+  ui = {
+    picker = {
+      mode = "auto", -- "auto", "telescope", "fzf_lua", "native"
+      prefer = { "telescope", "fzf_lua" },
+    },
+    progress = {
+      mode = "auto", -- "auto", "fidget", "window", "notify"
+    },
+  },
+<
 
-`enable_override_fidget`
-    Type: `bool`
-    Default: `true`
-    Whether UBT.nvim should override fidget's plugin settings. This applies
-    to the "UBT" LSP type.
-
-`shell`
-    Type: `string`
-    Default: `cmd`
-    The shell used to launch the batch script for running the Unreal
-    Build Tool.
+`logging`                                                 *'UBT.logging'*
+    Type: `table`
+    Logging settings inherited from `UNL.nvim`.
+    Example:
+>lua
+  logging = {
+    level = "info",
+    echo = { level = "warn" },
+    notify = { level = "error", prefix = "[UBT]" },
+    file = { filename = "ubt.log" },
+  },
+<
 
 ------------------------------------------------------------------------------
-PROJECT-SPECIFIC SETTINGS (.ubtrc)                        *UBT-ubtrc*
+PROJECT-SPECIFIC SETTINGS                       *UBT-project-config*
 
-You can override global settings by creating a JSON file named `.ubtrc` in
-your project's root directory.
+You can override your global settings by creating a JSON file named
+`.unlrc.json` in your project's root directory (where the `.uproject` file is).
 
-The options configurable in `.ubtrc` are the same as those explained in
-|UBT-setup|.
+The configurable options are the same as those explained in |UBT-setup|.
 
-Example:
+Example: `.unlrc.json`
 >json
   {
-    "preset_target": "StreamOS",
-    "engine_path": "C:/Program Files/Epic Games/UE_5.6"
+    "preset_target": "LinuxShipping",
+    "engine_path": "D:/UE_Custom/UE_5.4_Linux"
   }
 <
-     
 
-------------------------------------------------------------------------------
-FULL DEFAULT CONFIGURATION                   *UBT-default-configuration*
+==============================================================================
+4. LUA API                                                    *UBT-api*
 
-This is the full default configuration.
+`UBT.nvim` provides a stable Lua API that can be called from your configuration
+or other plugins.
 
-In `conf.lua`:
->lua
- {
-   -- Default presets
-   -- Please specify the 'name' when executing commands
-   presets = {
-     {
-       name = "Win64DebugGame",
-       Platform = "Win64",
-       IsEditor = false,
-       Configuration = "DebugGame",
-     },
-     {
-       name = "Win64Develop",
-       Platform = "Win64",
-       IsEditor = false,
-       Configuration = "Development",
-     },
-     {
-       name = "Win64Shipping",
-       Platform = "Win64",
-       IsEditor = false,
-       Configuration = "Shipping",
-     },
-     {
-       name = "Win64DebugGameWithEditor",
-       Platform = "Win64",
-       IsEditor = true,
-       Configuration = "DebugGame",
-     },
-     {
-       name = "Win64DevelopWithEditor",
-       Platform = "Win64",
-       IsEditor = true,
-       Configuration = "Development",
-     },
-   },
- 
-   -- Default argument used when no argument is provided to a command
-   preset_target = "Win64DevelopWithEditor",
-
-   -- Default linter type
-   -- Static analysis type
-   -- Default
-   -- VisualCpp,
-   -- PVSStudio
-   -- Clang
-   lint_type = "Default",
-
-   -- Shell for launching the Unreal Build Tool
-   shell = "cmd",
-
-   -- Path to Unreal Engine
-   -- Specify the root directory of Unreal Engine, not unrealeditor.exe
-   -- Example: "C:/Program Files/Epic Games/UE_5.4"
-   engine_path = nil,
- 
-   -- Notification output level for the entire UBT plugin
-   -- NONE
-   -- ALL
-   -- WARN
-   -- ERROR
-   notify_level = "NONE",
- 
-   -- Output level during UBT command execution
-   -- NONE
-   -- ALL
-   -- WARN
-   -- ERROR
-   progress_level = "ALL",
- 
-   -- Message output level for the entire UBT plugin
-   -- NONE
-   -- ALL
-   -- WARN
-   -- ERROR
-   message_level = "ERROR",
- 
-   -- Flag to override fidget settings with UBT.nvim's defaults
-   -- applies to LSP type "UBT"
-   enable_override_fidget = true,
- 
-   -- Enable file logging
-   enable_log_file = true,
- 
-   -- Name for the diagnostics log file
-   log_file_name = "diagnostics.log",
- 
-   -- Name for the progress log file
-   progress_file_name = "progress.log",
- }
-<
-------------------------------------------------------------------------------
-4. API FUNCTIONS                                            *UBT-api-functions*
-
-------------------------------------------------------------------------------
-
-*build*                                                       *UBT.api.build*
-ubt.build({opts})
-    Builds the project.
-    You can override command arguments with the `opts` table.
-    Examples:
->lua
-  -- Build with the default target
-  require("UBT.api").build()
-
-  -- Build with a specific target
-  require("UBT.api").build({ label = "Win64Debug" })
-<
-
-*gen_compile_db*                                    *UBT.api.gen_compile_db*
-ubt.gen_compile_db({opts})
-    Generates `compile_commands.json`.
-    You can override command arguments with the `opts` table.
-    Examples:
->lua
-  -- Generate compile_commands.json with the default target
-  require("UBT.api").gen_compile_db()
-
-  -- Generate compile_commands.json with a specific target
-  require("UBT.api").gen_compile_db({ label = "Win64Debug" })
-<
-
-*lint*                                                       *UBT.api.lint*
-ubt.lint({opts})
-    Runs static analysis.
-    You can override command arguments with the `opts` table.
-    Examples:
->lua
-  -- Run the linter with the default target
-  require("UBT.api").lint()
-
-  -- Run the linter with a specific linter type
-  require("UBT.api").lint({ lint_type = "VisualCpp" })
-<
-
-*gen_project*                                          *UBT.api.gen_project*
-ubt.gen_project()
-    Generates project files.
-    Example:
->lua
-  -- Generate project files for the .uproject in the root directory
-  require("UBT.api").gen_project()
-<
-
-*find_project_root*                                 *UBT.api.find_project_root*
-ubt.find_project_root({start_path})
-    Searches upwards from the given path to find the project root
-    directory, which is the directory containing a `.uproject` file.
-    Returns: `(string|nil, string|nil)` -- `(root_path, err_msg)`
-    Example:
+To require the API module:
 >lua
   local ubt_api = require("UBT.api")
-  local current_file = vim.api.nvim_buf_get_name(0)
-  local root, err = ubt_api.find_project_root(current_file)
-  if root then
-    print("Project root is:", root)
-  end     
+<
+
+ubt_api.build({opts})                                       *UBT.api.build*
+    Builds the project.
+    You can specify a `label` in the `opts` table.
+    Example: `ubt_api.build({ label = "Win64DebugGame" })`
+
+ubt_api.gen_compile_db({opts})                          *UBT.api.gen_compile_db*
+    Generates `compile_commands.json`.
+    You can specify a `label` in the `opts` table.
+
+ubt_api.diagnostics({opts})                             *UBT.api.diagnostics*
+    Opens the diagnostics picker. `opts` is currently not used.
+
+ubt_api.gen_project({opts})                             *UBT.api.gen_project*
+    Generates project files. `opts` is currently not used.
+
+ubt_api.lint({opts})                                        *UBT.api.lint*
+    Runs static analysis.
+    You can specify `label` and `lintType` in the `opts` table.
+
+ubt_api.find_project_root({start_path})             *UBT.api.find_project_root*
+    Searches upwards from a given path to find the project root.
+    Returns: `(string|nil)` -- `(root_path)`
+
 ==============================================================================
 5. LICENSE                                                    *UBT-license*
 
@@ -355,6 +222,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+...
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:

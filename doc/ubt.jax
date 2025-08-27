@@ -1,4 +1,4 @@
-*UBT.txt*       For UBT.nvim                          vim: ft=help
+*ubt.jax*       For UBT.nvim                          vim: ft=help
 
 ==============================================================================
 目次                                                     *UBT-contents*
@@ -6,30 +6,27 @@
   1. はじめに..................................... |UBT-introduction|
   2. 使い方....................................... |UBT-usage|
      - コマンド................................... |UBT-commands|
-     - Telescope連携.............................. |UBT-telescope|
+     - UIピッカー連携............................. |UBT-picker-integration|
   3. 設定......................................... |UBT-configuration|
      - セットアップ............................... |UBT-setup|
-     - プロジェクト固有の設定 (.ubtrc)............ |UBT-ubtrc|
-     - フルコンフィグ............................. |UBT-default-configuration|
+     - プロジェクト固有の設定..................... |UBT-project-config|
   4. Lua API...................................... |UBT-api|
-     - build...................................... |UBT-api-build| 
-     - gen_compile_db............................. |UBT.api.gen_compile_db|
-     - lint....................................... |UBT.api.lint|
-     - gen_project................................ |UBT.api.gen_project|
-     - find_project_root.......................... |UBT.api.find_project_root|
   5. ライセンス................................... |UBT-license|
 
 ==============================================================================
 1. はじめに                                         *UBT-introduction*
 
-*UBT.nvim* は、Unreal Engine のビルド、プロジェクトファイル生成、静的解析など
-強力な機能を、Neovimから直接、非同期で実行するためのプラグインです。
+*UBT.nvim* は、Unreal Engine のビルド、`compile_commands.json` 生成、プロジェ
+クトファイル生成、静的解析といった機能を、Neovimから直接、非同期で実行する
+ためのプラグインです。
+
+このプラグインはコアライブラリとして *UNL.nvim* に依存しています。
 
 主な機能:
-- UBTの非同期実行
-- fidget.nvimによるリアルタイムな進捗表示
-- Telescope連携による対話的なエラーブラウジング
-- プロジェクト固有の設定を`.ubtrc`で管理
+- Unreal Build Toolの非同期実行
+- fidget.nvimによるリアルタイムな進捗表示 (オプション)
+- Telescopeやfzf-luaによる対話的なUIピッカー (オプション)
+- プロジェクト固有の設定を`.unlrc.json`で管理
 
 ==============================================================================
 2. 使い方                                                     *UBT-usage*
@@ -37,39 +34,44 @@
 ------------------------------------------------------------------------------
 コマンド                                                   *UBT-commands*
 
-全てのコマンドは、`.uproject`ファイルが存在するディレクトリで実行する必要があります。
+全てのコマンドは、`.uproject`ファイルが存在するディレクトリ内で実行する必要が
+あります。
 
-:UBT Build {target_name}
-    プロジェクトをビルドします。{target_name}を省略した場合、設定された
-    `preset_target`が使用されます。
+:UBT Build[!] [{target_name}]
+    プロジェクトをビルドします。
+    - `{target_name}` を省略した場合、設定された |'UBT.preset_target'| が
+      使用されます。
+    - `!` を付けて実行すると、UIピッカーが起動し、ターゲットを選択して
+      ビルドできます。
 
-:UBT GenCompileDB {target_name}
-    `compile_commands.json`を生成します。{target_name}の扱いは|:UBT Build|
-    と同様です。
+:UBT GenCompileDB[!] [{target_name}]
+    `compile_commands.json`を生成します。
+    - `{target_name}` の扱いは |:UBT Build| と同様です。
+    - `!` を付けて実行すると、UIピッカーでターゲットを選択できます。
+
+:UBT Diagnostics
+    直近のビルドで発生したエラーや警告をUIピッカーで一覧表示します。
+    項目を選択すると、ファイルのプレビューが表示され、<CR>で該当箇所に
+    ジャンプできます。
 
 :UBT GenProject
     Visual Studioなどのプロジェクトファイルを生成します。
 
-:UBT Lint {linter_type} {target_name}
-    静的解析を実行します。引数を省略した場合、設定された`lint_type`と
-    `preset_target`が使用されます。
+:UBT Lint [{linter_type}] [{target_name}]
+    静的解析を実行します。引数を省略した場合、設定された |'UBT.lint_type'|
+    と |'UBT.preset_target'| が使用されます。
 
 ------------------------------------------------------------------------------
-Telescope連携                                            *UBT-telescope*
+UIピッカー連携                                  *UBT-picker-integration*
 
-Telescope拡張をロードすることで、以下のピッカーが利用可能になります。
+Telescope.nvim や fzf-lua がインストールされている場合、`UBT.nvim` はそれらを
+自動的にUIピッカーとして使用します。どのUIを使用するかは |'UBT.ui'| オプショ
+ンで設定できます。
 
-:Telescope ubt diagnostics
-    直近のジョブ実行で発生したエラーやワーニングを一覧表示します。
-    項目を選択すると、ファイルのプレビューが表示され、<CR>で該当箇所に
-    ジャンプできます。
-
-:Telescope ubt targets
-    設定されているビルドターゲットを一覧表示し、選択するだけでビルドを
-    開始できます。
-
-:Telescope ubt gencompiledb
-    ビルドターゲットを選択し、`compile_commands.json`の生成を開始します。
+UIピッカーは以下のコマンドで起動できます:
+- |:UBT Build!|
+- |:UBT GenCompileDB!|
+- |:UBT Diagnostics|
 
 ==============================================================================
 3. 設定                                               *UBT-configuration*
@@ -77,267 +79,125 @@ Telescope拡張をロードすることで、以下のピッカーが利用可�
 ------------------------------------------------------------------------------
 セットアップ                                                   *UBT-setup*
 
-`lazy.nvim`を使っている場合、`opts`キーに設定テーブルを渡します。
+`lazy.nvim` を使っている場合、`opts` キーに設定テーブルを渡します。
 
 例:
 >lua
-  require("UBT").setup({
-    preset_target = "Win64DebugGameWithEditor",
-    engine_path = "C:/Program Files/Epic Games/UE_5.4",
-  })
+  -- lua/plugins/ubt.lua
+  return {
+    'taku25/UBT.nvim',
+    dependencies = { 'taku25/UNL.nvim' },
+    opts = {
+      preset_target = "Win64DebugGameWithEditor",
+      engine_path = "C:/Program Files/Epic Games/UE_5.4",
+    }
+  }
 <
-
 利用可能な全てのオプションは以下の通りです。
 
 `presets`                                                 *'UBT.presets'*
     Type: `table`
     ビルドターゲットの定義プリセットのリスト。
-    デフォルトのプリセットに追加、または同じ`name`で上書きできます。
+    デフォルトのプリセットに追加したり、同じ `name` で上書きしたりできます。
 
 `preset_target`                                           *'UBT.preset_target'*
     Type: `string`
     Default: `"Win64DevelopWithEditor"`
-    コマンドでターゲット名を省略した際に使われる、デフォルトのターゲット。
+    コマンドでターゲット名を省略した際に使われるデフォルトのターゲット。
 
 `lint_type`                                               *'UBT.lint_type'*
     Type: `string`
     Default: `"Default"`
-    `:UBT Lint`でlinterタイプを省略した際に使われる、デフォルトのタイプ。
+    |:UBT Lint| でlinterタイプを省略した際に使われるデフォルトのタイプ。
 
-`engine_path`
-    Type: `string`
+`engine_path`                                             *'UBT.engine_path'*
+    Type: `string` or `nil`
     Default: `nil`
-    UnrealEngineのルートディレクトリを指定
-    特定の環境で.uprojectにUnrealEngineを含まない場合に使用
+    エンジンのルートパスを明示的に指定します。`nil` の場合は自動検出します。
 
-`notify_level`
-    Type: `string`
-    Default: `"NONE"`
-    プラグイン全体の通知出力レベル
-    vim.notify
-
-`message_level`
-    Type: `string`
-    Default: `"ERROR"`
-    プラグイン全体のメッセージ出力レベル
-    vim.echo
-
-`progress_level`
-    Type: `string`
-    Default: `"ALL"`
-    コマンド実行中の出力レベル
-    fidget.nvim使用時に使われます
-
-`progress_file_name`
+`progress_file_name`                                      *'UBT.progress_file_name'*
     Type: `string`
     Default: `"progress.log"`
-    コマンド実行時のログファイル名 
-    telescope.nvim などで使用されます
+    ビルドの診断ログ（エラーや警告）を書き出すファイル名。|:UBT Diagnostics|
+    で読み込まれます。
 
-`log_file_name`
-    Type: `string`
-    Default: `"diagnostics.log"`
-    プラグイン全体のログファイル名 
-
-`enable_override_fidget`
-    Type: `bool`
-    Default: `true`
-    UBT.nvimがfidgetのプラグイン設定を上書きするか
-    上書きするのはLsp UBTです
-
-`shell`
-    Type: `string`
-    Default: `cmd`
-    unreal build toolを起動するためのbatを起動するshell
-
-------------------------------------------------------------------------------
-プロジェクト固有の設定 (.ubtrc)                               *UBT-ubtrc*
-
-プロジェクトのルートディレクトリに`.ubtrc`という名前のJSONファイルを作成する
-ことで、グローバルな設定を上書きできます。
-
-`.ubtrc`で設定可能な項目は、|UBT-setup|で説明されているオプションと同じです。
-
-例:
->json
-  {
-    "preset_target": "StreamOS",
-    "engine_path": "C:/Program Files/Epic Games/UE_5.6"
-  }
-
-     
-
-------------------------------------------------------------------------------
-フルコンフィグ                                       *UBT-default-configuration*
-
-デフォルトのフルコンフィグです
-
-conf.lua:
+`ui`                                                      *'UBT.ui'*
+    Type: `table`
+    `UNL.nvim` から継承したUI設定。
+    例:
 >lua
- {
-   -- 標準プリセット
-   -- コマンド実行時はnameを指定ください
-   presets = {
-     {
-       name = "Win64DebugGame",
-       Platform = "Win64",
-       IsEditor = false,
-       Configuration = "DebugGame",
-     },
-     {
-       name = "Win64Develop",
-       Platform = "Win64",
-       IsEditor = false,
-       Configuration = "Development",
-     },
-     {
-       name = "Win64Shipping",
-       Platform = "Win64",
-       IsEditor = false,
-       Configuration = "Shipping",
-     },
-     {
-       name = "Win64DebugGameWithEditor",
-       Platform = "Win64",
-       IsEditor = true,
-       Configuration = "DebugGame",
-     },
-     {
-       name = "Win64DevelopWithEditor",
-       Platform = "Win64",
-       IsEditor = true,
-       Configuration = "Development",
-     },
-   },
- 
-   -- コマンドに引数がない場合のデフォルト引数
-   preset_target = "Win64DevelopWithEditor",
+  ui = {
+    picker = {
+      mode = "auto", -- "auto", "telescope", "fzf_lua", "native"
+      prefer = { "telescope", "fzf_lua" },
+    },
+    progress = {
+      mode = "auto", -- "auto", "fidget", "window", "notify"
+    },
+  },
+<
 
-   -- default lintertype
-   -- 静的解析のタイプ
-   -- Default
-   -- VisualCpp,
-   -- PVSStudio
-   -- Clang
-   lint_type = "Default",
-   -- unreal build toolを起動するためのshell
-   shell = "cmd",
-
-   -- unreal engineのパス
-   -- unrealeditor.exeではなく
-   -- UnrealEngineのルートディレクトリを指定
-  -- 例: "C:/Program Files/Epic Games/UE_5.4"
-   engine_path = nil,
- 
-   -- UBT プラグイン全体の通知出力レベル
-   -- NONE
-   -- ALL
-   -- WARN
-   -- ERROR.
-   notify_level = "NONE",
- 
-   -- UBT コマンド実行中の出力レベル
-   -- NONE
-   -- ALL
-   -- WARN
-   -- ERROR.
-   progress_level = "ALL",
- 
-   -- UBT プラグイン全体のメッセージ出力レベル
-   -- NONE
-   -- ALL
-   -- WARN
-   -- ERROR.
-   message_level = "ERROR",
- 
-   -- fidgetの設定をUBT.nvimで上書きするかのフラグ
-   -- lsp type UBT
-   enable_override_fidget = true,
- 
- 
-   -- ログファイルの出力
-   enable_log_file = true,
- 
-   -- ログファイルの名前
-   log_file_name = "diagnostics.log",
- 
-   -- progress ファイルの名前
-   progress_file_name = "progress.log",
- }
-     
-==============================================================================
-4. Lua API                                                     *UBT-api*
-
-UBT.nvimは、あなたの設定や他のプラグインから呼び出せる、安定したLua APIを
-提供します。
-
-APIモジュールを`require`する:
+`logging`                                                 *'UBT.logging'*
+    Type: `table`
+    `UNL.nvim` から継承したロギング設定。
+    例:
 >lua
-  local ubt = require("UBT.api")
+  logging = {
+    level = "info",
+    echo = { level = "warn" },
+    notify = { level = "error", prefix = "[UBT]" },
+    file = { filename = "ubt.log" },
+  },
 <
 
 ------------------------------------------------------------------------------
-API関数                                                  *UBT-api-functions*
+プロジェクト固有の設定                            *UBT-project-config*
 
-------------------------------------------------------------------------------
+プロジェクトのルートディレクトリ（`.uproject` がある場所）に `.unlrc.json`
+という名前のJSONファイルを作成することで、グローバルな設定を上書きできます。
 
-*build*                                                       *UBT.api.build*
-ubt.build({opts})
-    プロジェクトをビルドします。
-    `opts`テーブルで、コマンドの引数を上書きできます。
-    例:
->lua
-  -- デフォルトのターゲットでビルド
-  require("UBT.api").build()
+設定可能な項目は |UBT-setup| で説明されているオプションと同じです。
 
-  -- 特定のターゲットでビルド
-  require("UBT.api").build({ label = "Win64Debug" })
+例: `.unlrc.json`
+>json
+  {
+    "preset_target": "LinuxShipping",
+    "engine_path": "D:/UE_Custom/UE_5.4_Linux"
+  }
+<
 
-*gen_compile_db*                                            *UBT.api.gen_compile_db*
-ubt.gen_compile_db({opts})
-    compile_commands.jsonを作成します
-    `opts`テーブルで、コマンドの引数を上書きできます。
-    例:
->lua
-  -- デフォルトのターゲットでcompile_commands.jsonを作成します
-  require("UBT.api").gen_compile_db()
+==============================================================================
+4. Lua API                                                     *UBT-api*
 
-  -- 特定のターゲットでcompile_commands.jsonを作成します
-  require("UBT.api").gen_compile_db({ label = "Win64Debug" })
+`UBT.nvim` は、あなたの設定や他のプラグインから呼び出せるLua APIを提供します。
 
-*lint*                                                       *UBT.api.lint*
-ubt.lint({opts})
-    静的解析を行います
-    `opts`テーブルで、コマンドの引数を上書きできます。
-    例:
->lua
-  -- デフォルトのターゲットでcompile_commands.jsonを作成します
-  require("UBT.api").lint()
-
-  -- 特定のターゲットでcompile_commands.jsonを作成します
-  require("UBT.api").lint({ lint_type = "VisualCpp" })
-
-*gen_project*                                              *UBT.api.gen_project*
-ubt.gen_project()
-    プロジェクトを作成します
-    例:
->lua
-  -- root dirにあるuprjectのプロジェクトを作成します
-  require("UBT.api").gen_project()
-
-*find_project_root*                                *UBT.api.find_project_root*
-ubt.find_project_root({start_path})
-    指定されたパスから親ディレクトリを遡り、`.uproject`ファイルが存在する
-    プロジェクトルートのパスを返します。
-    返り値: `(string|nil, string|nil)` -- `(root_path, err_msg)`
-    例:
+APIモジュールを `require` する:
 >lua
   local ubt_api = require("UBT.api")
-  local current_file = vim.api.nvim_buf_get_name(0)
-  local root, err = ubt_api.find_project_root(current_file)
-  if root then
-    print("Project root is:", root)
-  end
+<
+
+ubt_api.build({opts})                                       *UBT.api.build*
+    プロジェクトをビルドします。
+    `opts` テーブルで `label` などを指定できます。
+    例: `ubt_api.build({ label = "Win64DebugGame" })`
+
+ubt_api.gen_compile_db({opts})                          *UBT.api.gen_compile_db*
+    `compile_commands.json` を生成します。
+    `opts` テーブルで `label` などを指定できます。
+
+ubt_api.diagnostics({opts})                             *UBT.api.diagnostics*
+    診断ピッカーを開きます。`opts` は現在使用されません。
+
+ubt_api.gen_project({opts})                             *UBT.api.gen_project*
+    プロジェクトファイルを生成します。`opts` は現在使用されません。
+
+ubt_api.lint({opts})                                        *UBT.api.lint*
+    静的解析を実行します。
+    `opts` テーブルで `label` や `lintType` を指定できます。
+
+ubt_api.find_project_root({start_path})             *UBT.api.find_project_root*
+    指定されたパスから親を遡り、プロジェクトルートのパスを返します。
+    返り値: `(string|nil)` -- `(root_path)`
 
 ==============================================================================
 5. ライセンス                                                 *UBT-license*
@@ -363,7 +223,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
+...
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:
