@@ -10,7 +10,7 @@ function M.start(opts)
   local cmd, err = core.create_command(opts.root_dir, "GenerateProjectFiles", {
     "-game",
     "-engine",
-    "-OutputDir=" .. opts.root_dir,
+    "-OutputDir=" .. '"'..opts.root_dir..'"',
   })
 
   if err then
