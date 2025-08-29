@@ -40,7 +40,7 @@ end
 -- 非同期ジョブを開始する
 -- @param name string ジョブの名前 (UIのタイトルになる)
 -- @param cmd table 実行するコマンド
-function M.start(name, cmd)
+function M.start(name, cmd, opts)
   if not cmd or type(cmd) ~= "table" or #cmd == 0 then
     return log.get().error("Job runner received an invalid or empty command for job: %s. This might be due to a failure in finding the project or engine.", name)
   end
@@ -83,12 +83,19 @@ function M.start(name, cmd)
       if stdout_buffer and stdout_buffer ~= "" then
         process_line(stdout_buffer, progress)
       end
-      -- 3. ジョブ終了をUIに通知
-      progress:finish(code == 0)
+      
+      local success = (code == 0)
+      progress:finish(success)
+
+      -- 変更点: on_finish コールバックに成功ステータスをテーブルで渡す
+      if opts and opts.on_finish then
+        -- 引数をテーブル { success = (true or false) } の形にする
+        opts.on_finish({ success = success }) 
+      end
+
       log.get().info("Job '%s' finished with code %d", name, code)
       unl_log.dispatch_event("UBT", "on_job_finish", { name = name })
     end)
-
   end
 
   -- 4. ジョブを開始

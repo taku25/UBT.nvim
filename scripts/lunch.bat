@@ -29,6 +29,14 @@ if /I "%~1"=="-project" (
   goto :arg_loop
 )
 
+rem Handle arguments that require quoted paths
+if /I "%~1"=="-OutputDir" (
+  set "OPTIONS=!OPTIONS! -OutputDir="%~2""
+  shift
+  shift
+  goto :arg_loop
+)
+
 rem Add all other arguments as-is
 set "OPTIONS=!OPTIONS! %~1"
 shift

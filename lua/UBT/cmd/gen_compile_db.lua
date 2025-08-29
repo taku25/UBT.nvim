@@ -3,24 +3,34 @@
 local core = require("UBT.cmd.core")
 local runner = require("UBT.job.runner") -- ジョブランナー
 local unl_picker = require("UNL.backend.picker")
-local model = require("UBT.model") -- プリセット取得用
 local log = require("UBT.logger")
-local unl_finder = require("UNL.finder")
+  local unl_types = require("UNL.event.types")
+  local unl_events = require("UNL.event.events")
 
 local M = {}
 
 -- ジョブを実際に実行するコア部分
 local function run_job(opts)
-
   local cmd, err = core.create_command_with_target_platforms(opts.root_dir, "GenerateClangDatabase", opts.label, {
     "-NoExecCodeGenActions",
-    "-OutputDir=" .. opts.root_dir,
+    "-OutputDir=" ..'"'.. opts.root_dir ..'"',
   })
 
   if err then
     return log.get().error(err)
   end
-  runner.start("GenerateClangDatabase", cmd)
+
+  -- 変更点: on_finish で結果テーブルを受け取り、ペイロードを作成する
+  runner.start("GenerateClangDatabase", cmd, {
+    on_finish = function(result_table) -- 引数としてテーブルを受け取る
+      -- result_table.success の値に基づいてステータスを決定
+      local result_payload = {
+        status = result_table.success and "success" or "failed"
+      }
+      -- 決定したペイロードを付けてイベントを発行
+      unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
+    end
+  })
 end
 
 function M.start(opts)
