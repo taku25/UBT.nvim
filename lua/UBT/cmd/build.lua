@@ -12,7 +12,9 @@ local M = {}
 local function run_job(opts)
 
   opts = core.ensure_command_args(opts, "Build")
-  local cmd, err = core.create_command_with_target_platforms(opts, { "-WaitMutex", "-FromMSBuild", })
+  local cmd, err = core.create_command_with_target_platforms(opts, {
+    "-WaitMutex",
+    "-FromMSBuild", })
 
   if err then
     return log.get().error(err)

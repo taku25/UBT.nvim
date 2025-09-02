@@ -38,8 +38,8 @@ local function create_label_target_args(uproject_path, label)
 end
 -------------------------------------------------
 
-function M.create_command(root_dir, mode, extra_opts)
-  local uproject_path, err = unl_finder.project.find_project_file(root_dir)
+function M.create_command(opts, mode, extra_opts)
+  local uproject_path, err = unl_finder.project.find_project_file(opts.root_dir)
   if not uproject_path then
     return nil, err or "Could not find .uproject file."
   end
@@ -62,8 +62,12 @@ function M.create_command(root_dir, mode, extra_opts)
     "-Progress",
   }
 
-  if mode then vim.list_extend(cmd, { "-mode=" .. mode }) end
-  if extra_opts then vim.list_extend(cmd, extra_opts) end
+  if mode then
+    vim.list_extend(cmd, { "-mode=" .. mode })
+  end
+  if extra_opts then
+    vim.list_extend(cmd, extra_opts)
+  end
 
   return cmd, nil
 end
@@ -82,7 +86,7 @@ function M.ensure_command_args(opts, mode)
   end
 
   if not opts.label then
-    opts.label = get_config().preset_targe
+    opts.label = require("UNL.config").get("UBT").preset_target
   end
 
   if not opts.label then

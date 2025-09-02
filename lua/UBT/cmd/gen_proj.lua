@@ -8,11 +8,12 @@ local M = {}
 
 function M.start(opts)
   opts = core.ensure_command_args(opts, "GenerateProjectFiles")
-  local cmd, err = core.create_command(opts, {
+  local cmd, err = core.create_command(opts.root_dir, opts.mode, {
     "-game",
     "-engine",
     "-OutputDir=" .. '"'..opts.root_dir..'"',
   })
+
 
   if err then
     return log.get().error(err)

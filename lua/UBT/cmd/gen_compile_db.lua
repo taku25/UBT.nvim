@@ -13,6 +13,7 @@ local M = {}
 local function run_job(opts)
 
   opts = core.ensure_command_args(opts, "GenerateClangDatabase")
+
   local cmd, err = core.create_command_with_target_platforms(opts, {
     "-NoExecCodeGenActions",
     "-OutputDir=" ..'"'.. opts.root_dir ..'"',
