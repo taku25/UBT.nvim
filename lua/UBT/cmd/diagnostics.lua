@@ -60,7 +60,6 @@ function M.start()
     kind = "file_location", -- quickfixが使えるようにkindを指定
     title = "  UBT Diagnostics",
     items = lines, -- データソースは生の文字列のテーブル
-
     entry_maker = entry_maker, -- ★★★ ここが新しいAPI ★★★
     on_submit = on_submit,
     

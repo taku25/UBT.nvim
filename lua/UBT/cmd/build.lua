@@ -48,6 +48,7 @@ function M.start(opts)
       items = model.get_presets(),
       logger_name = "UBT",
       format = function(entry) return entry.name end,
+      preview_enabled = false,
       on_submit = function(selected)
         if selected then
           -- ピッカーで選択されたものでジョブを実行

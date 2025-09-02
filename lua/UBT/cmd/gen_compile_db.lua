@@ -44,6 +44,7 @@ function M.start(opts)
       kind = "  ubt_gencompiledb",
       title = "UBT Generate Compile DB Targets",
       logger_name = "UBT",
+      preview_enabled = false,
       conf = require("UNL.config").get("UBT"),
       items = picker_model.get_presets(),
       format = function(entry) return entry.name end,
