@@ -7,7 +7,8 @@ local unl_events = require("UNL.event.events")
 local M = {}
 
 function M.start(opts)
-  local cmd, err = core.create_command(opts.root_dir, "GenerateProjectFiles", {
+  opts = core.ensure_command_args(opts, "GenerateProjectFiles")
+  local cmd, err = core.create_command(opts, {
     "-game",
     "-engine",
     "-OutputDir=" .. '"'..opts.root_dir..'"',

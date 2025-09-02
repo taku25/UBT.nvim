@@ -12,8 +12,9 @@ local M = {}
 function M.start(opts)
   -- この require はファイルの先頭に移動させるのが一般的です (機能はしますが)
   -- local unl_types = require("UNL.event.types") 
+  opts = core.ensure_command_args(opts,"")
 
-  local cmd, err = core.create_command_with_target_platforms(opts.root_dir, nil, opts.label, {
+  local cmd, err = core.create_command_with_target_platforms(opts,  {
     "-game",
     "-engine",
     "-StaticAnalyzer=" .. opts.lintType,

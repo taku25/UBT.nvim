@@ -2,6 +2,7 @@
 
 local unl_finder = require("UNL.finder")
 local path = require("UBT.path") -- UBT固有のパスヘルパー（batのパス取得など）
+local log = require("UBT.logger") -- UBT固有のパスヘルパー（batのパス取得など）
 
 -- UNLの設定システムから設定を取得するヘルパー
 local function get_config()
@@ -16,15 +17,23 @@ local M = {}
 
 -- ラベル名からプリセット設定を取得する
 local function get_preset_from_label(label)
-  for _, v in ipairs(get_config().presets or {}) do if v.name == label then return v end end
+  for _, v in ipairs(get_config().presets or {}) do
+    if v.name == label then
+      return v
+    end
+  end
   return nil
 end
 
 local function create_label_target_args(uproject_path, label)
+
   local preset = get_preset_from_label(label)
-  if not preset then return nil, "Preset not found: " .. tostring(label) end
+  if not preset then
+    return nil, "Preset not found: " .. tostring(label)
+  end
   local project_name = vim.fn.fnamemodify(uproject_path, ":t:r")
   local target_name = preset.IsEditor and (project_name .. "Editor") or project_name
+  log.get().info("Found build target: %s", target_name)
   return { target_name, preset.Platform, preset.Configuration }, nil
 end
 -------------------------------------------------
@@ -59,19 +68,46 @@ function M.create_command(root_dir, mode, extra_opts)
   return cmd, nil
 end
 
-function M.create_command_with_target_platforms(root_dir, mode, label, extra_opts)
-  local uproject_path, err = unl_finder.project.find_project_file(root_dir)
+
+function M.ensure_command_args(opts, mode)
+  opts = opts or {}
+
+  if not opts.root_dir then
+    opts.root_dir = unl_finder.project.find_project_root(vim.loop.cwd())
+  end
+
+  -- それでも見つからなければエラー
+  if not opts.root_dir then
+    return nil, "Not inside a valid Unreal project."
+  end
+
+  if not opts.label then
+    opts.label = get_config().preset_targe
+  end
+
+  if not opts.label then
+    return nil, "Not has label"
+  end
+  if not opts.mode then
+    opts.mode = mode
+  end
+
+  return opts, nil
+end
+
+function M.create_command_with_target_platforms(opts, extra)
+  local uproject_path, err = unl_finder.project.find_project_file(opts.root_dir)
   if not uproject_path then
     return nil, err
   end
 
-  local target_args, target_err = create_label_target_args(uproject_path, label)
+  local target_args, target_err = create_label_target_args(uproject_path, opts.label)
   if not target_args then
     return nil, target_err
   end
   
-  local final_opts = vim.list_extend(vim.deepcopy(target_args), extra_opts or {})
-  return M.create_command(root_dir, mode, final_opts)
+  local final_opts = vim.list_extend(vim.deepcopy(target_args), extra or {})
+  return M.create_command(opts.root_dir, opts.mode, final_opts)
 end
 
 return M

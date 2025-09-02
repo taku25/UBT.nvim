@@ -33,7 +33,7 @@ local function process_line(line, progress_handle)
   end
 
   -- 3. それ以外の行は通常のINFOログとして出力
-  log.get().info(line)
+  -- log.get().info(line)
 end
 
 ---

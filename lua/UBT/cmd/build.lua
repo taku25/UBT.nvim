@@ -10,10 +10,10 @@ local M = {}
 
 -- ジョブを実際に実行するコア部分
 local function run_job(opts)
-  local cmd, err = core.create_command_with_target_platforms(opts.root_dir, "Build", opts.label, {
-    "-WaitMutex",
-    "-FromMSBuild",
-  })
+
+  opts = core.ensure_command_args(opts, "Build")
+  local cmd, err = core.create_command_with_target_platforms(opts, { "-WaitMutex", "-FromMSBuild", })
+
   if err then
     return log.get().error(err)
   end
@@ -36,6 +36,7 @@ local function run_job(opts)
 end
 
 function M.start(opts)
+  opts = opts or {}
   if opts.has_bang then
     -- `!`付きの場合は、UIピッカーを起動
     unl_picker.pick({
