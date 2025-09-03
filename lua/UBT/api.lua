@@ -8,7 +8,7 @@ local cmd = {
   genproject = require("UBT.cmd.gen_proj"),
   lint = require("UBT.cmd.lint"),
   diagnostics = require("UBT.cmd.diagnostics"),
-}
+  genheader = require("UBT.cmd.gen_header"),}
 
 local M = {}
 
@@ -30,5 +30,9 @@ end
 
 function M.diagnostics(opts)
   cmd.diagnostics.start(opts)
+end
+
+function M.gen_header(opts)
+  cmd.genheader.start(opts)
 end
 return M

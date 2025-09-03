@@ -50,6 +50,15 @@ builder.create({
         { name = "label", required = false, default = function() return get_config().preset_target end },
       },
     },
+    ["genheader"] = {
+      handler = function(opts) ubt_api.gen_header(opts) end,
+      desc = "Generate headers using Unreal Header Tool. Use 'genheader!' to open a UI picker.",
+      bang = true,
+      args = {
+        { name = "label", required = false, default = function() return get_config().preset_target end },
+        { name = "module_name", required = false },
+      },
+    },
     ["genproject"] = {
       handler = function(opts) ubt_api.gen_project(opts) end,
       desc = "Generate project files.",

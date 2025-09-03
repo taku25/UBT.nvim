@@ -43,6 +43,12 @@ All commands must be executed from within an Unreal Engine project directory
       will be used.
     - Execute with `!` to open a UI picker to select a build target.
 
+:UBT GenHeader[!] [{target_name}] [{module_name}]
+Runs the Unreal Header Tool (UHT) to generate header files.
+    - The handling of {target_name} is the same as |:UBT Build|.
+    - {module_name} is optional and can be used to target a specific module.
+    - Execute with ! to open a UI picker to select a target.
+
 :UBT GenCompileDB[!] [{target_name}]
     Generates `compile_commands.json`.
     - The handling of `{target_name}` is the same as |:UBT Build|.
@@ -68,6 +74,7 @@ option.
 
 The UI picker can be opened with the following commands:
 - |:UBT Build!|
+- |:UBT GenHeader!|
 - |:UBT GenCompileDB!|
 - |:UBT Diagnostics|
 
@@ -179,6 +186,10 @@ ubt_api.build({opts})                                       *UBT.api.build*
     Builds the project.
     You can specify a `label` in the `opts` table.
     Example: `ubt_api.build({ label = "Win64DebugGame" })`
+
+ubt_api.gen_header({opts}) UBT.api.gen_header            *UBT.api.gen_header*
+    Runs UHT to generate headers.
+    You can specify a label and module in the `opts` table.
 
 ubt_api.gen_compile_db({opts})                          *UBT.api.gen_compile_db*
     Generates `compile_commands.json`.

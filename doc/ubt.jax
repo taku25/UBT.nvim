@@ -44,6 +44,12 @@
     - `!` を付けて実行すると、UIピッカーが起動し、ターゲットを選択して
       ビルドできます。
 
+:UBT GenHeader[!] [{target_name}]
+    Unreal Header Tool (UHT) を実行してヘッダーファイルを生成します。
+    - {target_name} の扱いは |:UBT Build| と同様です。
+    - {module_name} はオプションで、特定のモジュールのみを対象にできます。
+    - ! を付けて実行すると、UIピッカーでターゲットを選択できます。
+
 :UBT GenCompileDB[!] [{target_name}]
     `compile_commands.json`を生成します。
     - `{target_name}` の扱いは |:UBT Build| と同様です。
@@ -70,6 +76,7 @@ Telescope.nvim や fzf-lua がインストールされている場合、`UBT.nvi
 
 UIピッカーは以下のコマンドで起動できます:
 - |:UBT Build!|
+- |:UBT GenHeader!|
 - |:UBT GenCompileDB!|
 - |:UBT Diagnostics|
 
@@ -187,6 +194,10 @@ ubt_api.gen_compile_db({opts})                          *UBT.api.gen_compile_db*
 
 ubt_api.diagnostics({opts})                             *UBT.api.diagnostics*
     診断ピッカーを開きます。`opts` は現在使用されません。
+
+ubt_api.gen_header({opts})                             *UBT.api.gen_hader*
+    UHTを起動してヘッダーを作成します
+    `opts` テーブルで `label` などを指定できます。
 
 ubt_api.gen_project({opts})                             *UBT.api.gen_project*
     プロジェクトファイルを生成します。`opts` は現在使用されません。

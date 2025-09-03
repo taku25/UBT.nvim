@@ -9,9 +9,10 @@
   </tr>
 </table>
 
-`UBT.nvim` は、Unreal Engine のビルド、`compile_commands.json` 生成、プロジェクトファイル生成、静的解析といった機能を、Neovimから直接、非同期で実行するためのプラグインです。
+`UBT.nvim` は、Unreal Engine のビルド、ヘッダー生成（UHT）、`compile_commands.json` 生成、プロジェクトファイル生成、静的解析といった機能を、Neovimから直接、非同期で実行するためのプラグインです。
 
 その他、Unreal Engine開発を強化するためのプラグイン群 ([`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim)) があります。
+ ([`ULG.nvim`](https://github.com/taku25/ULG.nvim), [`neo-tree-unl.nvim`](https://github.com/taku25/neo-tree-unl.nvim)) があります。
 
 [English](./README.md) | [日本語](./README_ja.md)
 
@@ -27,6 +28,7 @@
     *   ビルドエラーや警告をファジー検索し、プレビューで確認後、Enterキー一発で該当ファイル・行へジャンプできます。
     *   ビルドターゲットの選択も、使い慣れたUIピッカーから行えます。
     *   `fzf-lua` との連携ではLuaコルーチンを使用しており、サイズの大きな診断ログを開いてもUIが固まりません。
+*   **差分更新による高速化**: Unreal Header Tool (`GenHeader`) 実行時にマニフェストファイル (`.uhtmanifest`) を自動で検出し、差分更新を利用して高速なヘッダー生成を実現します。
 
 <table>
   <tr>
@@ -189,11 +191,12 @@ return {
 コマンドは、Unreal Engineプロジェクトのディレクトリ内で実行してください。
 
 ```vim
-:UBT Build[!] [ターゲット名]            " プロジェクトをビルドします。[!]付きで実行するとUIピッカーでターゲットを選択できます。
-:UBT GenCompileDB[!] [ターゲット名]     " compile_commands.json を生成します。[!]付きでUIピッカーを起動します。
-:UBT Diagnostics                      " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。
-:UBT GenProject                     " Visual Studioなどのプロジェクトファイルを生成します。
-:UBT Lint [linterタイプ] [ターゲット名] " 静的解析を実行します。
+:UBT Build[!] [ターゲット名]                " プロジェクトをビルドします。[!]付きでUIピッカーを起動します。
+:UBT GenHeader[!] [ターゲット名] [モジュール名] " Unreal Header Toolを実行します。[!]付きでUIピッカーを起動。モジュール名はオプションです。
+:UBT GenCompileDB[!] [ターゲット名]         " compile_commands.json を生成します。[!]付きでUIピッカーを起動します。
+:UBT Diagnostics                          " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。
+:UBT GenProject                           " Visual Studioなどのプロジェクトファイルを生成します。
+:UBT Lint [linterタイプ] [ターゲット名]        " 静的解析を実行します。
 ```
 
 ### 💓 UIピッカー連携 (Telescope / fzf-lua)
@@ -202,9 +205,10 @@ return {
 
 UIピッカーは、以下のコマンドの `bang` 版 (`!`) を実行するか、`Diagnostics` コマンドを実行することで開くことができます。
 
-*   `:UBT Build!`
-*   `:UBT GenCompileDB!`
-*   `:UBT Diagnostics`
+  * `:UBT Build!`
+  * `:UBT GenHeader!`
+  * `:UBT GenCompileDB!`
+  * `:UBT Diagnostics`
 
 ## 🤖 API & 自動化 (Automation Examples)
 

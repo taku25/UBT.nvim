@@ -16,7 +16,7 @@ local M = {}
 -------------------------------------------------
 
 -- ラベル名からプリセット設定を取得する
-local function get_preset_from_label(label)
+function M.get_preset_from_label(label)
   for _, v in ipairs(get_config().presets or {}) do
     if v.name == label then
       return v
@@ -27,7 +27,7 @@ end
 
 local function create_label_target_args(uproject_path, label)
 
-  local preset = get_preset_from_label(label)
+  local preset = M.get_preset_from_label(label)
   if not preset then
     return nil, "Preset not found: " .. tostring(label)
   end

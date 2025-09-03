@@ -9,36 +9,38 @@
   </tr>
 </table>
 
-`UBT.nvim` is a Neovim plugin that allows you to run Unreal Engine's Build, `compile_commands.json` generation, project file generation, and static analysis tasks directly from Neovim, asynchronously.
+`UBT.nvim` is a plugin to asynchronously execute Unreal Engine tasks such as building, header generation (UHT), `compile_commands.json` generation, project file generation, and static analysis directly from Neovim.
 
-Check out the other plugins in the suite for enhancing Unreal Engine development: [`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim).
+Check out other plugins to enhance Unreal Engine development: ([`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim), [`ULG.nvim`](https://github.com/taku25/ULG.nvim), [`neo-tree-unl.nvim`](https://github.com/taku25/neo-tree-unl.nvim)).
 
-[English](./README.md) | [日本語 (Japanese)](./README_ja.md)
+[English](./README.md) | [日本語](./README_ja.md)
 
 ---
 
 ## ✨ Features
 
-*   **Asynchronous Execution**: Runs the Unreal Build Tool in the background using only native Neovim functionality (`vim.fn.jobstart`).
-*   **Flexible Configuration System**: Built upon the powerful configuration system of `UNL.nvim`, allowing global settings as well as project-specific overrides via an `.unlrc.json` file in your project root.
+*   **Asynchronous Execution**: Runs Unreal Build Tool asynchronously in the background using only Neovim's native functions (`vim.fn.jobstart`).
+*   **Flexible Configuration System**:
+    *   Based on the powerful configuration system of `UNL.nvim`, allowing project-specific settings via a `.unlrc.json` file in the project root to override global settings.
 *   **Rich UI Feedback**: Integrates with [fidget.nvim](https://github.com/j-hui/fidget.nvim) to display real-time build progress. (**Optional**)
-*   **Unified UI Pickers**: Automatically detects and integrates with popular UI plugins like [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) and [fzf-lua](https://github.com/ibhagwan/fzf-lua) to provide a consistent user experience. (**Optional**)
-    *   Fuzzy-find build errors and warnings, preview the location, and jump to the corresponding file and line with a single keypress.
+*   **Unified UI Picker**: Automatically detects popular UI plugins like [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) and [fzf-lua](https://github.com/ibhagwan/fzf-lua) to provide a consistent user experience. (**Optional**)
+    *   Fuzzy search for build errors and warnings, preview them, and jump to the corresponding file and line with a single key press.
     *   Select build targets from your familiar UI picker.
-    *   The `fzf-lua` integration uses Lua coroutines, ensuring the UI remains responsive even when opening large diagnostic logs.
+    *   The integration with `fzf-lua` uses Lua coroutines, preventing the UI from freezing even when opening large diagnostic logs.
+*   **Accelerated by Incremental Updates**: Automatically detects the manifest file (`.uhtmanifest`) when running the Unreal Header Tool (`GenHeader`) to perform incremental updates for faster header generation.
 
 <table>
   <tr>
    <td>
     <div align=center>
       <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build.gif" />
-      UBT Build Command
+      UBT Build command
     </div>
   </td>
    <td>
     <div align=center>
       <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-gencompile-db.gif" />
-      UBT GenCompileDB Command
+      UBT GenCompileDB command
     </div>
     </td>
   </tr>
@@ -46,7 +48,7 @@ Check out the other plugins in the suite for enhancing Unreal Engine development
    <td>
     <div align=center>
       <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-telescope-diagnostics.gif" />
-      Error searching with Telescope
+      Search errors with Telescope
     </div>
    </td>
    <td>
@@ -60,7 +62,7 @@ Check out the other plugins in the suite for enhancing Unreal Engine development
    <td>
     <div align=center>
       <img width="100%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/ubt-build-fzf-lua-diagnostics.gif" />
-      Error searching with fzf-lua
+      Search errors with fzf-lua
     </div>
    </td>
    <td>
@@ -74,18 +76,18 @@ Check out the other plugins in the suite for enhancing Unreal Engine development
 
 ## 🔧 Requirements
 
-*   Neovim v0.9.0 or later
+*   Neovim v0.11.3 or later
 *   **[UNL.nvim](https://github.com/taku25/UNL.nvim)** (**Required**)
 *   [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (**Optional**)
 *   [fzf-lua](https://github.com/ibhagwan/fzf-lua) (**Optional**)
 *   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**Optional**)
-*   An environment where Unreal Build Tool is available (e.g., `dotnet` command).
-*   Visual Studio 2022 (including the Clang toolchain).
-*   Windows (Currently, testing has only been done on Windows).
+*   An environment where Unreal Build Tool is available (e.g., `dotnet` command)
+*   Visual Studio 2022 (including the Clang toolchain)
+*   Windows (Operation on other operating systems is not currently tested)
 
 ## 🚀 Installation
 
-Install using your favorite plugin manager.
+Install with your favorite plugin manager.
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
@@ -97,50 +99,48 @@ Install using your favorite plugin manager.
 return {
   'taku25/UBT.nvim',
   -- UBT.nvim depends on UNL.nvim.
-  -- This line is usually not necessary as lazy.nvim resolves it automatically,
-  -- but you can specify it explicitly.
+  -- This line is usually not necessary as lazy.nvim resolves it automatically.
   dependencies = { 'taku25/UNL.nvim' },
   
-  -- If you use automation (autocmd), eager loading is recommended.
+  -- If you use autocmd (automation), eager loading is recommended.
   -- lazy = false,
   
   opts = {
-    -- Your configuration goes here (see below for details)
+    -- Add your settings here (details below)
   }
-}
-```
+}```
 
 ## ⚙️ Configuration
 
-You can customize the plugin's behavior by passing a table to the `setup()` function (or the `opts` table in `lazy.nvim`).
-Below are all available options with their default values.
+You can customize the plugin's behavior by passing a table to the `setup()` function (or to `opts` in `lazy.nvim`).
+Below are all the available options with their default values.
 
 ```lua
--- Inside your init.lua or opts = { ... } block for ubt.lua
+-- Inside init.lua or opts = { ... } for ubt.lua
 
 {
-  -- Preset definitions for build targets
+  -- Presets for build target definitions
   presets = {
-    -- Default presets for Win64 are provided.
-    -- You can add new presets or override existing ones.
-    -- Example: { name = "LinuxShipping", Platform = "Linux", IsEditor = false, Configuration = "Shipping" },
+    -- Presets for Win64 are provided by default.
+    -- You can add your own presets or override existing ones.
+    -- e.g., { name = "LinuxShipping", Platform = "Linux", IsEditor = false, Configuration = "Shipping" },
   },
 
-  -- Default target used when the target name is omitted in :UBT Build or :UBT GenCompileDB
-  preset_target = "Win6d64DevelopWithEditor",
+  -- Default target when target name is omitted in :UBT Build or :UBT GenCompileDB
+  preset_target = "Win64DevelopWithEditor",
 
-  -- Default linter type used when omitted in :UBT Lint
+  -- Default linter type when omitted in :UBT Lint
   lint_type = "Default",
   
-  -- The engine path is usually detected automatically, but you can specify it explicitly here.
+  -- Usually auto-detected, but you can use this to explicitly specify the engine path
   engine_path = nil,
 
-  -- The filename for the diagnostic log (errors and warnings)
+  -- Filename for UBT to write diagnostic logs (errors and warnings)
   progress_file_name = "progress.log",
 
   -- ===== UI and Logging Settings (Inherited from UNL.nvim) =====
   
-  -- Behavior of UI pickers (Telescope, fzf-lua, etc.)
+  -- Behavior settings for UI pickers (Telescope, fzf-lua, etc.)
   ui = {
     picker = {
       mode = "auto", -- "auto", "telescope", "fzf_lua", "native"
@@ -151,14 +151,14 @@ Below are all available options with their default values.
     },
   },
 
-  -- Detailed logging configuration
+  -- Detailed logging settings
   logging = {
     level = "info", -- Minimum level to write to the log file
     echo = { level = "warn" },
     notify = { level = "error", prefix = "[UBT]" },
     file = { 
       enable = true, 
-      filename = "ubt.log", -- Main log file for the plugin
+      filename = "ubt.log", -- Log file for the entire plugin's operations
     },
   },
 }
@@ -166,7 +166,7 @@ Below are all available options with their default values.
 
 ### Project-Specific Configuration
 
-You can define project-specific settings by creating an `.unlrc.json` file in your project's root directory (where the `.uproject` file is located). These settings will override your global configuration.
+You can define settings that are only active for a specific project by creating a JSON file named `.unlrc.json` in the project's root directory (where the `.uproject` file is located). These settings will take precedence over global settings.
 
 Example: `.unlrc.json`
 ```json
@@ -181,39 +181,40 @@ Example: `.unlrc.json`
       "Configuration": "Shipping"
     }
   ]
-}
-```
+}```
 
 ## ⚡ Usage
 
-Run the commands inside your Unreal Engine project directory.
+Run the commands within an Unreal Engine project directory.
 
 ```vim
-:UBT Build[!] [target_name]            " Build the project. Use [!] to select a target from the UI picker.
-:UBT GenCompileDB[!] [target_name]     " Generate compile_commands.json. Use [!] to open the UI picker.
-:UBT Diagnostics                      " Display errors and warnings from the last build in the UI picker.
-:UBT GenProject                     " Generate project files (e.g., for Visual Studio).
-:UBT Lint [linter_type] [target_name] " Run static analysis.
+:UBT Build[!] [target_name]                 " Builds the project. Use [!] to launch the UI picker.
+:UBT GenHeader[!] [target_name] [module_name] " Runs the Unreal Header Tool. Use [!] for UI picker. Module name is optional.
+:UBT GenCompileDB[!] [target_name]          " Generates compile_commands.json. Use [!] to launch the UI picker.
+:UBT Diagnostics                           " Displays errors and warnings from the last build in the UI picker.
+:UBT GenProject                            " Generates project files for Visual Studio, etc.
+:UBT Lint [linter_type] [target_name]         " Runs static analysis.
 ```
 
 ### 💓 UI Picker Integration (Telescope / fzf-lua)
 
-`UBT.nvim` automatically uses `telescope.nvim` or `fzf-lua` based on your configuration.
+`UBT.nvim` automatically uses `telescope.nvim` or `fzf-lua` according to your setup.
 
-You can open the UI picker by running the `bang` version (`!`) of a command or by running the `Diagnostics` command.
+The UI picker can be opened by running the `bang` version (`!`) of the following commands, or by using the `Diagnostics` command.
 
-*   `:UBT Build!`
-*   `:UBT GenCompileDB!`
-*   `:UBT Diagnostics`
+  * `:UBT Build!`
+  * `:UBT GenHeader!`
+  * `:UBT GenCompileDB!`
+  * `:UBT Diagnostics`
 
-## 🤖 API & Automation Examples
+## 🤖 API & Automation (Automation Examples)
 
-`UBT.nvim` provides a Lua API, which you can use with `autocmd` to streamline your development workflow.
-For more details, check `:help ubt.txt`.
+`UBT.nvim` provides a Lua API, allowing you to streamline your development workflow by combining it with `autocmd`.
+For more details, see `:help ubt.txt`.
 
-### 📂 Automatically `cd` to Project Root
+### 📂 Automatically change to the project root
 
-Automatically change the current directory to the project root (where the `.uproject` file is) when you open a source file.
+When you open an Unreal Engine source file, this automatically changes the current directory to the project root of that file (the directory containing the `.uproject` file).
 
 ```lua
 -- init.lua or any setup file
@@ -233,10 +234,10 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 ```
 
-### 📰 Automatically Update Project Files on Save
+### 📰 Automatically update project files on save
 
-Automatically run `:UBT GenProject` when you save a C++ header (`.h`) or source (`.cpp`) file.
-**Note:** Hooking heavy tasks like builds can impact performance.
+Automatically runs `:UBT GenProject` when you save a C++ header (`.h`) or source (`.cpp`) file.
+**Note:** Hooking heavy processes like building can impact performance.
 
 <div align=center><img width="50%" alt="image" src="https://raw.githubusercontent.com/taku25/UBT.nvim/images/assets/auto-cmd-gen-project.gif" /></div>
 
@@ -257,9 +258,9 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 })
 ```
 
-## See Also
+## Other
 
-Other Unreal Engine plugins:
+Unreal Engine related plugins:
 *   [UEP.nvim](https://github.com/taku25/UEP.nvim) - Unreal Engine Project Manager
 *   [UCM.nvim](https://github.com/taku25/UCM.nvim) - Unreal Engine Class Manager
 
