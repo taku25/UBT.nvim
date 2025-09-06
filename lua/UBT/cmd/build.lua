@@ -1,6 +1,8 @@
 -- lua/UBT/cmd/build.lua (UI判断ロジックを含む最終版)
 
 local core = require("UBT.cmd.core")
+
+local ubt_path = require("UBT.path")
 local runner = require("UBT.job.runner") -- ジョブランナー
 local unl_picker = require("UNL.backend.picker")
 local model = require("UBT.model") -- プリセット取得用
@@ -38,6 +40,10 @@ local function run_job(opts)
 end
 
 function M.start(opts)
+  local unl_types = require("UNL.event.types")
+  local unl_events = require("UNL.event.events")
+    
+  unl_events.publish(unl_types.ON_BEFORE_BUILD, {log_file_path = ubt_path.get_progress_log_file_path()})
   opts = opts or {}
   if opts.has_bang then
     -- `!`付きの場合は、UIピッカーを起動
