@@ -202,10 +202,10 @@ Run the commands within an Unreal Engine project directory.
 
 The UI picker can be opened by running the `bang` version (`!`) of the following commands, or by using the `Diagnostics` command.
 
-  * `:UBT Build!`
-  * `:UBT GenHeader!`
-  * `:UBT GenCompileDB!`
-  * `:UBT Diagnostics`
+  * `:UBT build!`
+  * `:UBT genheader!`
+  * `:UBT gencompiledb!`
+  * `:UBT diagnostics`
 
 ## 🤖 API & Automation (Automation Examples)
 

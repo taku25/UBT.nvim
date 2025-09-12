@@ -205,10 +205,10 @@ return {
 
 UIピッカーは、以下のコマンドの `bang` 版 (`!`) を実行するか、`Diagnostics` コマンドを実行することで開くことができます。
 
-  * `:UBT Build!`
-  * `:UBT GenHeader!`
-  * `:UBT GenCompileDB!`
-  * `:UBT Diagnostics`
+  * `:UBT build!`
+  * `:UBT genheader!`
+  * `:UBT gencompiledb!`
+  * `:UBT diagnostics`
 
 ## 🤖 API & 自動化 (Automation Examples)
 
