@@ -25,14 +25,10 @@ local function run_job(opts)
 
   -- 変更点: on_finish で結果テーブルを受け取り、ペイロードを作成する
   runner.start("GenerateClangDatabase", cmd, {
-    on_finish = function(result_table) -- 引数としてテーブルを受け取る
-      -- result_table.success の値に基づいてステータスを決定
-      local result_payload = {
-        status = result_table.success and "success" or "failed"
-      }
-      -- 決定したペイロードを付けてイベントを発行
+    on_finish = function(result_payload) -- ★ 変更
       unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
-    end
+    end,
+    on_complete = opts.on_complete -- ★ 追加
   })
 end
 

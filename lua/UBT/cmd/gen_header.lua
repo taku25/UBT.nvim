@@ -58,14 +58,10 @@ local function run_job(opts)
 
   -- ジョブを開始
   runner.start("GenerateHeader", cmd, {
-    on_finish = function(result_table) 
-      -- result_table.success の値に基づいてステータス文字列を決定
-      local result_payload = {
-        status = result_table.success and "success" or "failed"
-      }
-      -- 決定したステータスをペイロードとしてイベントを発行
+    on_finish = function(result_payload) -- ★ 変更
       unl_events.publish(unl_types.ON_AFTER_GENERATE_HEADER, result_payload)
-    end
+    end,
+    on_complete = opts.on_complete -- ★ 追加
   })
 end
 

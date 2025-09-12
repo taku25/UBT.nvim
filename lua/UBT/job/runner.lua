@@ -87,11 +87,22 @@ function M.start(name, cmd, opts)
       local success = (code == 0)
       progress:finish(success)
 
-      -- 変更点: on_finish コールバックに成功ステータスをテーブルで渡す
+      -- ★★★ ここからが変更点 ★★★
+
+      -- 1. 完了時のペイロードを一度だけ生成する
+      local result_payload = { success = success }
+
+      -- 2. (内部用) イベント発行のための on_finish を呼び出す
       if opts and opts.on_finish then
-        -- 引数をテーブル { success = (true or false) } の形にする
-        opts.on_finish({ success = success }) 
+        opts.on_finish(result_payload)
       end
+
+      -- 3. (外部用) カスタム処理のための on_complete を呼び出す
+      if opts and opts.on_complete then
+        opts.on_complete(result_payload)
+      end
+      
+      -- ★★★ ここまでが変更点 ★★★
 
       log.get().info("Job '%s' finished with code %d", name, code)
       unl_log.dispatch_event("UBT", "on_job_finish", { name = name })

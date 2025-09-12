@@ -21,13 +21,10 @@ function M.start(opts)
 
   -- 変更点: on_finish で結果テーブルを受け取り、ペイロードを作成
   runner.start("GenerateProject", cmd, {
-    on_finish = function(result_table) -- 引数としてテーブルを受け取る
-      local result_payload = {
-        status = result_table.success and "success" or "failed"
-      }
-      -- 成功/失敗ステータスを含むペイロードをイベントに渡す
+    on_finish = function(result_payload) -- ★ 変更
       unl_events.publish(unl_types.ON_AFTER_GENERATE_PROEJCT, result_payload)
-    end
+    end,
+    on_complete = opts.on_complete -- ★ 追加
   })
 end
 
