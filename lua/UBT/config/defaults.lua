@@ -39,6 +39,19 @@ local M = {
     search_stop_at_home = true,
     follow_symlink = true,
   },
+  automation = {
+    -- trueにすると、UEPの軽量リフレッシュ完了後('ON_AFTER_UEP_LIGHTWEIGHT_REFRESH'イベント)に
+    -- 自動で 'gen_header' コマンドを実行します。
+    auto_gen_header_after_lightweight_refresh = false,
+
+    -- 上記がtrueの場合、'gen_header'が成功した後に続けて'gen_proj'を実行します。
+    -- 'gen_header'だけを自動実行したい場合は、これをfalseに設定します。
+    auto_gen_project_after_gen_header_success = false,
+
+    -- trueにすると、完全なリフレッシュ完了後('ON_AFTER_REFRESH_COMPLETED'イベント)に
+    -- 自動で 'gen_proj' コマンドを実行します。
+    auto_gen_project_after_refresh_completed = false,
+  },
 }
 
 return M
