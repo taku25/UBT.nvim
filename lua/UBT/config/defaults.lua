@@ -22,6 +22,8 @@ local M = {
 
   cache = { dirname = "UBT" },
 
+  unreal_processes_name = { "UnrealEditor" , "UnrealBuildTool" },
+
   presets = {
     { name = "Win64DebugGame", Platform = "Win64", IsEditor = false, Configuration = "DebugGame" },
     { name = "Win64Develop", Platform = "Win64", IsEditor = false, Configuration = "Development" },
