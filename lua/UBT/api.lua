@@ -1,14 +1,13 @@
--- lua/UBT/api.lua (シンプルになったAPI)
-
-local unl_finder = require("UNL.finder")
-local log = require("UBT.logger")
+-- lua/UBT/api.lua (修正版)
 local cmd = {
   build = require("UBT.cmd.build"),
   gencompiledb = require("UBT.cmd.gen_compile_db"),
   genproject = require("UBT.cmd.gen_proj"),
   lint = require("UBT.cmd.lint"),
   diagnostics = require("UBT.cmd.diagnostics"),
-  genheader = require("UBT.cmd.gen_header"),}
+  genheader = require("UBT.cmd.gen_header"),
+  run = require("UBT.cmd.run"), -- ★ この行を追加
+}
 
 local M = {}
 
@@ -35,4 +34,10 @@ end
 function M.gen_header(opts)
   cmd.genheader.start(opts)
 end
+
+-- ★ この関数を追加
+function M.run(opts)
+  cmd.run.start(opts)
+end
+
 return M

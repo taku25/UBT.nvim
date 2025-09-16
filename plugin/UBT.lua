@@ -77,5 +77,13 @@ builder.create({
       desc = "Show build diagnostics from the last run.",
       args = {}, -- 引数は取らない
     },
+    ["run"] = {
+      handler = function(opts) ubt_api.run(opts) end,
+      desc = "Run the project. Default: Editor (-game). Use --standalone to run the binary.",
+      bang = true,
+      args = {
+        { name = "standalone_flag", required = false }, -- "--standalone" を受け取る
+      },
+    },
   },
 })

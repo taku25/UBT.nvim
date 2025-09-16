@@ -188,12 +188,13 @@ Example: `.unlrc.json`
 Run the commands within an Unreal Engine project directory.
 
 ```vim
-:UBT Build[!] [target_name]                 " Builds the project. Use [!] to launch the UI picker.
-:UBT GenHeader[!] [target_name] [module_name] " Runs the Unreal Header Tool. Use [!] for UI picker. Module name is optional.
-:UBT GenCompileDB[!] [target_name]          " Generates compile_commands.json. Use [!] to launch the UI picker.
-:UBT Diagnostics                           " Displays errors and warnings from the last build in the UI picker.
-:UBT GenProject                            " Generates project files for Visual Studio, etc.
-:UBT Lint [linter_type] [target_name]         " Runs static analysis.
+:UBT build[!] [target_name]                 " Builds the project. Use [!] to launch the UI picker.
+:UBT run[!]                                 " Runs the project. Default opens the editor. Use [!] to launch the UI picker to run a specific preset.
+:UBT genHeader[!] [target_name] [module_name] " Runs the Unreal Header Tool. Use [!] for UI picker. Module name is optional.
+:UBT genCompileDB[!] [target_name]          " Generates compile_commands.json. Use [!] to launch the UI picker.
+:UBT diagnostics                           " Displays errors and warnings from the last build in the UI picker.
+:UBT genProject                            " Generates project files for Visual Studio, etc.
+:UBT lint [linter_type] [target_name]         " Runs static analysis.
 ```
 
 ### 💓 UI Picker Integration (Telescope / fzf-lua)
@@ -203,6 +204,7 @@ Run the commands within an Unreal Engine project directory.
 The UI picker can be opened by running the `bang` version (`!`) of the following commands, or by using the `Diagnostics` command.
 
   * `:UBT build!`
+  * `:UBT run!`
   * `:UBT genheader!`
   * `:UBT gencompiledb!`
   * `:UBT diagnostics`

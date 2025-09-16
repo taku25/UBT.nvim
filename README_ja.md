@@ -191,12 +191,13 @@ return {
 コマンドは、Unreal Engineプロジェクトのディレクトリ内で実行してください。
 
 ```vim
-:UBT Build[!] [ターゲット名]                " プロジェクトをビルドします。[!]付きでUIピッカーを起動します。
-:UBT GenHeader[!] [ターゲット名] [モジュール名] " Unreal Header Toolを実行します。[!]付きでUIピッカーを起動。モジュール名はオプションです。
-:UBT GenCompileDB[!] [ターゲット名]         " compile_commands.json を生成します。[!]付きでUIピッカーを起動します。
-:UBT Diagnostics                          " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。
-:UBT GenProject                           " Visual Studioなどのプロジェクトファイルを生成します。
-:UBT Lint [linterタイプ] [ターゲット名]        " 静的解析を実行します。
+:UBT build[!] [ターゲット名]                " プロジェクトをビルドします。[!]付きでUIピッカーを起動します。
+:UBT run[!]                                 " プロジェクトを実行します。[!]付きでUIピッカーを起動し、プリセットに応じたバイナリまたはエディタを起動します。
+:UBT genHeader[!] [ターゲット名] [モジュール名] " Unreal Header Toolを実行します。[!]付きでUIピッカーを起動。モジュール名はオプションです。
+:UBT genCompileDB[!] [ターゲット名]         " compile_commands.json を生成します。[!]付きでUIピッカーを起動します。
+:UBT diagnostics                          " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。
+:UBT genProject                           " Visual Studioなどのプロジェクトファイルを生成します。
+:UBT lint [linterタイプ] [ターゲット名]        " 静的解析を実行します。
 ```
 
 ### 💓 UIピッカー連携 (Telescope / fzf-lua)
@@ -206,6 +207,7 @@ return {
 UIピッカーは、以下のコマンドの `bang` 版 (`!`) を実行するか、`Diagnostics` コマンドを実行することで開くことができます。
 
   * `:UBT build!`
+  * `:UBT run!`
   * `:UBT genheader!`
   * `:UBT gencompiledb!`
   * `:UBT diagnostics`
