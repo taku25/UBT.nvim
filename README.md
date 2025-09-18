@@ -11,8 +11,8 @@
 
 `UBT.nvim` is a plugin to asynchronously execute Unreal Engine tasks such as building, header generation (UHT), `compile_commands.json` generation, project file generation, and static analysis directly from Neovim.
 
-Check out other plugins to enhance Unreal Engine development: ([`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim), [`ULG.nvim`](https://github.com/taku25/ULG.nvim), [`neo-tree-unl.nvim`](https://github.com/taku25/neo-tree-unl.nvim)).
-
+Check out other plugins to enhance Unreal Engine development: ([`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim), [`ULG.nvim`](https://github.com/taku25/ULG.nvim), [`neo-tree-unl.nvim`](https://github.com/taku25/neo-tree-unl.nvim), [tree-sitter-unreal-cpp](https://github.com/taku25/tree-sitter-unreal-cpp)).
+.
 [English](./README.md) | [日本語](./README_ja.md)
 
 ---
