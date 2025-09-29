@@ -4,6 +4,7 @@ local unl_log = require("UNL.logging")
 local log = require("UBT.logger")
 local unl_progress = require("UNL.backend.progress")
 
+local provider = require("UNL.provider") --- ★ 変更点: providerをrequire
 local M = {}
 
 ---
@@ -15,6 +16,8 @@ local function process_line(line, progress_handle)
   if line == "" then return end
 
   log.get().info(line)
+  --- ★ 変更点: provider経由でログをリアルタイム通知 ---
+  provider.notify("ulg.build_log", { lines = { line } })
 
   -- 1. エラーや警告をログに出力
   if line:match("[Ee]rror") or line:match("failed") or line:match("fatal") then
@@ -48,6 +51,15 @@ function M.start(name, cmd, opts)
 
   -- ジョブを開始する直前に、"on_job_start" イベントを全てのwriterに通知する
   unl_log.dispatch_event("UBT", "on_job_start", { name = name })
+
+  provider.notify("ulg.build_log", {
+    clear = true,
+    lines = {
+      "--- Job '" .. name .. "' started at " .. os.date() .. " ---",
+      "CMD: " .. table.concat(cmd, " "),
+      "----------------------------------------------------------",
+    },
+  })
 
   -- 1. UNLの進捗UIインスタンスを作成
   local conf = require("UNL.config").get("UBT")
