@@ -181,7 +181,8 @@ Example: `.unlrc.json`
       "Configuration": "Shipping"
     }
   ]
-}```
+}
+```
 
 ## ⚡ Usage
 
