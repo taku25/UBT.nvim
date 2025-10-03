@@ -267,8 +267,13 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 ## その他
 
 Unreal Engine 関連プラグイン:
-*   [UEP.nvim](https://github.com/taku25/UEP.nvim) - Unreal Engine プロジェクトマネージャー
-*   [UCM.nvim](https://github.com/taku25/UCM.nvim) - Unreal Engine クラスマネージャー
+*   [UEP.nvim](https://github.com/taku25/UEP.nvim) - Unreal Engine Project Manager
+*   [UCM.nvim](https://github.com/taku25/UCM.nvim) - Unreal Engine Class Manager
+*   [ULG.nvim](https://github.com/taku25/ULG.nvim) - Unreal Enginea アウトプットログ & ビルドログビュー
+*   [USH.nvim](https://github.com/taku25/USH.nvim) - UnrealShell を nvim上で実行する
+*   [neo-tree-unl](https://github.com/taku25/neo-tree-unl.nvim),  IDEっぽくuprojectをツリー表示するneo-treeのソース
+*   [tree-sitter-unreal-cpp](https://github.com/taku25/tree-sitter-unreal-cpp), tree-sitter-unreal-cpp
+
 
 ## 📜 ライセンス (License)
 MIT License
