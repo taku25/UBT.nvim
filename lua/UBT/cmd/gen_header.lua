@@ -25,8 +25,6 @@ local function run_job(opts)
 
     local preset = core.get_preset_from_label(opts.label)
 
-  
-    
     if preset then
       -- ★ ここから修正箇所 ★
       -- find_uht_manifest から (path, err) の両方を受け取る
@@ -46,8 +44,6 @@ local function run_job(opts)
       end
     end
   end
-
-
 
   -- UBT実行コマンドを生成
   local cmd, err = core.create_command_with_target_platforms(opts, extra)

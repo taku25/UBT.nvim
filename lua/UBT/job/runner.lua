@@ -89,6 +89,22 @@ function M.start(name, cmd, opts)
       end
     end
   end
+  local on_stderr = function(_, data)
+    if not data then return end
+    local incoming_data = stdout_buffer .. table.concat(data, "")
+    local lines = vim.split(incoming_data, "[\r\n]+", { plain = false, trimempty = true })
+    if not incoming_data:match("[\r\n]$") and #lines > 0 then
+      stdout_buffer = table.remove(lines)
+    else
+      stdout_buffer = ""
+    end
+
+    for _, line in ipairs(lines) do
+      if line and line ~= "" then
+        process_line(line, progress)
+      end
+    end
+  end
 
   local on_exit = function(_, code)
     vim.schedule(function()
@@ -125,7 +141,7 @@ function M.start(name, cmd, opts)
   return vim.fn.jobstart(cmd, {
     stdout_buffered = true,
     on_stdout = on_stdout,
-    on_stderr = on_stdout, -- stderrも同じように処理
+    on_stderr = on_stderr, -- stderrも同じように処理
     on_exit = on_exit,
   })
 end

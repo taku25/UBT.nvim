@@ -32,11 +32,25 @@ end
 ---
 -- 実行するlunch.batスクリプトのフルパスを取得する
 -- @return string|nil
-function M.get_ubt_lanch_bat_path()
+function M.get_ubt_launch_script_path()
   local root = M.find_ubt_plugin_root()
-  return root and vim.fs.joinpath(root, "scripts", "lunch.bat") or nil
-end
+  if not root then
+    return nil
+  end
 
+  -- OSを判定
+  local is_windows = vim.fn.has("win32") == 1
+  local script_name = is_windows and "launch.bat" or "launch.sh"
+ 
+  local script_path = vim.fs.joinpath(root, "scripts", script_name)
+
+  -- 念のためファイルの存在を確認
+  if vim.fn.filereadable(script_path) == 1 then
+    return script_path
+  end
+ 
+  return nil
+end
 ---
 -- .uprojectファイルのパスからプロジェクト名（拡張子なし）を取得する
 -- @param uproject_path string
@@ -49,11 +63,11 @@ end
 -- パスをWindows形式に正規化し、クオートで囲む（バッチファイル用）
 -- @param path string
 -- @return string
-function M.to_winpath_quoted(path)
-  if type(path) ~= "string" then return path end
-  local normalized = vim.fn.fnamemodify(path, ":p"):gsub("\\", "/")
-  return '"' .. normalized .. '"'
-end
+-- function M.to_winpath_quoted(path)
+--   if type(path) ~= "string" then return path end
+--   local normalized = vim.fn.fnamemodify(path, ":p"):gsub("\\", "/")
+--   return '"' .. normalized .. '"'
+-- end
 
 ---
 -- UBT.nvimのメインログファイルのフルパスを取得する
