@@ -94,7 +94,7 @@ local function create_command_prefix(root_dir)
   local is_windows = vim.fn.has("win32") == 1
   local cmd_prefix
   if is_windows then
-    cmd_prefix = { "cmd.exe", "/c", script_path, engine_root }
+    cmd_prefix = { "cmd.exe", "/c", script_path, '"'..engine_root..'"' }
   else
     cmd_prefix = { script_path, engine_root }
   end
