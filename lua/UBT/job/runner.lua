@@ -75,23 +75,12 @@ function M.start(name, cmd, opts)
   -- 2. jobstartのコールバックを定義
   local on_stdout = function(_, data)
     if not data then return end
-    local incoming_data = stdout_buffer .. table.concat(data, "")
-    local lines = vim.split(incoming_data, "[\r\n]+", { plain = false, trimempty = true })
-    if not incoming_data:match("[\r\n]$") and #lines > 0 then
-      stdout_buffer = table.remove(lines)
-    else
-      stdout_buffer = ""
-    end
 
-    for _, line in ipairs(lines) do
-      if line and line ~= "" then
-        process_line(line, progress)
-      end
+    local concat_char = ""
+    if vim.fn.has('win32') ~= 1 then
+      concat_char = "\n"
     end
-  end
-  local on_stderr = function(_, data)
-    if not data then return end
-    local incoming_data = stdout_buffer .. table.concat(data, "")
+    local incoming_data = stdout_buffer .. table.concat(data, concat_char)
     local lines = vim.split(incoming_data, "[\r\n]+", { plain = false, trimempty = true })
     if not incoming_data:match("[\r\n]$") and #lines > 0 then
       stdout_buffer = table.remove(lines)
@@ -141,7 +130,7 @@ function M.start(name, cmd, opts)
   return vim.fn.jobstart(cmd, {
     stdout_buffered = true,
     on_stdout = on_stdout,
-    on_stderr = on_stderr, -- stderrも同じように処理
+    on_stderr = on_stdout, -- stderrも同じように処理
     on_exit = on_exit,
   })
 end
