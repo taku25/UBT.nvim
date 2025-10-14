@@ -11,8 +11,7 @@
 
 `UBT.nvim` is a plugin to asynchronously execute Unreal Engine tasks such as building, header generation (UHT), `compile_commands.json` generation, project file generation, and static analysis directly from Neovim.
 
-Check out other plugins to enhance Unreal Engine development: ([`UEP.nvim`](https://github.com/taku25/UEP.nvim), [`UCM.nvim`](https://github.com/taku25/UCM.nvim), [`ULG.nvim`](https://github.com/taku25/ULG.nvim), [`neo-tree-unl.nvim`](https://github.com/taku25/neo-tree-unl.nvim), [tree-sitter-unreal-cpp](https://github.com/taku25/tree-sitter-unreal-cpp)).
-.
+
 [English](./README.md) | [日本語](./README_ja.md)
 
 ---
@@ -261,16 +260,24 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 })
 ```
 
-## Other
+## Others
 
-Unreal Engine related plugins:
-*   [UEP.nvim](https://github.com/taku25/UEP.nvim) - Unreal Engine Project Manager
-*   [UCM.nvim](https://github.com/taku25/UCM.nvim) - Unreal Engine Class Manager
-*   [ULG.nvim](https://github.com/taku25/ULG.nvim) - Unreal Enginea Output & build log view 
-*   [USH.nvim](https://github.com/taku25/USH.nvim) - UnrealShell For nvim 
-*   [neo-tree-unl](https://github.com/taku25/neo-tree-unl.nvim), you can display an IDE-like project explorer.
-*   [tree-sitter-unreal-cpp](https://github.com/taku25/tree-sitter-unreal-cpp), tree-sitter-unreal-cpp
+**Unreal Engine Related Plugins:**
 
+* **[UEP](https://github.com/taku25/UEP.nvim)**
+    * Analyzes `uproject` files for easy file navigation.
+* **[UBT](https://github.com/taku25/UBT.nvim)**
+    * Asynchronously run Build, GenerateClangDataBase, and other tasks from Neovim.
+* **[UCM](https://github.com/taku25/UCM.nvim)**
+    * Add and delete classes directly from Neovim.
+* **[ULG](https://github.com/taku25/ULG.nvim)**
+    * View UE logs, live coding status, stat fps, and more within nvim.
+* **[USH](https://github.com/taku25/USH.nvim)**
+    * Interact with `ushell` from nvim.
+* **[neo-tree-unl](https://github.com/taku25/neo-tree-unl.nvim)**
+    * Display an IDE-like project explorer.
+* **[tree-sitter for Unreal Engine](https://github.com/taku25/tree-sitter-unreal-cpp)**
+    * Provides tree-sitter highlighting, including support for `UCLASS` and other Unreal Engine specific syntax.
 ## 📜 License
 MIT License
 
