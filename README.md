@@ -264,15 +264,15 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 **Unreal Engine Related Plugins:**
 
-* **[UEP](https://github.com/taku25/UEP.nvim)**
+* **[UEP.nvim](https://github.com/taku25/UEP.nvim)**
     * Analyzes `uproject` files for easy file navigation.
-* **[UBT](https://github.com/taku25/UBT.nvim)**
+* **[UBT.nvim](https://github.com/taku25/UBT.nvim)**
     * Asynchronously run Build, GenerateClangDataBase, and other tasks from Neovim.
-* **[UCM](https://github.com/taku25/UCM.nvim)**
+* **[UCM.nvim](https://github.com/taku25/UCM.nvim)**
     * Add and delete classes directly from Neovim.
-* **[ULG](https://github.com/taku25/ULG.nvim)**
+* **[ULG.nvim](https://github.com/taku25/ULG.nvim)**
     * View UE logs, live coding status, stat fps, and more within nvim.
-* **[USH](https://github.com/taku25/USH.nvim)**
+* **[USH.nvim](https://github.com/taku25/USH.nvim)**
     * Interact with `ushell` from nvim.
 * **[neo-tree-unl](https://github.com/taku25/neo-tree-unl.nvim)**
     * Display an IDE-like project explorer.

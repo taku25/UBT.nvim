@@ -12,15 +12,15 @@
 `UBT.nvim` は、Unreal Engine のビルド、ヘッダー生成（UHT）、`compile_commands.json` 生成、プロジェクトファイル生成、静的解析といった機能を、Neovimから直接、非同期で実行するためのプラグインです。
 
 Unreal プラグイン群
-* [UEP](https://github.com/taku25/UEP.nvim)
+* [UEP.nvim](https://github.com/taku25/UEP.nvim)
   * urpojectを解析してファイルナビゲートなどを簡単に行えるようになります
-* [UBT](https://github.com/taku25/UBT.nvim)
+* [UBT.nvim](https://github.com/taku25/UBT.nvim)
   * BuildやGenerateClangDataBaseなどを非同期でNeovim上から使えるようになります
-* [UCM](https://github.com/taku25/UCM.nvim)
+* [UCM.nvim](https://github.com/taku25/UCM.nvim)
   * クラスの追加や削除がNeovim上からできるようになります。
-* [ULG](https://github.com/taku25/ULG.nvim)
+* [ULG.nvim](https://github.com/taku25/ULG.nvim)
   * UEのログやliveCoding,stat fpsなどnvim上からできるようになります
-* [USH](https://github.com/taku25/USH.nvim)
+* [USH.nvim](https://github.com/taku25/USH.nvim)
   * ushellをnvimから対話的に操作できるようになります
 * [neo-tree-unl](https://github.com/taku25/neo-tree-unl.nvim)
   * IDEのようなプロジェクトエクスプローラーを表示できます。
