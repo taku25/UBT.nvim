@@ -1,4 +1,4 @@
--- plugin/ubt.lua (デバッグ最終版)
+-- plugin/ubt.lua (デフォルト値の処理をAPI側に移行)
 
 if vim.g.loaded_ubt then
   return
@@ -9,10 +9,7 @@ vim.g.loaded_ubt = true
 local function safe_require(name)
   local ok, mod = pcall(require, name)
   if not ok then
-    -- pcallが失敗した場合、`mod`にはエラーメッセージが入っている
     print("UBT.nvim: !!! FATAL ERROR! require('" .. name .. "') failed!")
-    -- vim.api.nvim_err_writeln("UBT.nvim FATAL ERROR while requiring '" .. name .. "':")
-    -- vim.api.nvim_err_writeln(tostring(mod))
     return nil
   end
   return mod
@@ -25,9 +22,7 @@ if not ubt_api then return end
 local log = safe_require("UBT.logger")
 if not log then return end
 
-local function get_config()
-  return require("UNL.config").get("UBT")
-end
+-- local function get_config() ... end -- ★ デフォルト指定に使っていたため削除
 
 builder.create({
   plugin_name = "UBT",
@@ -39,7 +34,7 @@ builder.create({
       desc = "Build a target. Use 'build!' to open a UI picker.",
       bang = true,
       args = {
-        { name = "label", required = false, default = function() return get_config().preset_target end },
+        { name = "label", required = false }, -- ★ default を削除
       },
     },
     ["gencompiledb"] = {
@@ -47,7 +42,7 @@ builder.create({
       desc = "Generate compile_commands.json. Use 'gencompiledb!' to open a UI picker.",
       bang = true,
       args = {
-        { name = "label", required = false, default = function() return get_config().preset_target end },
+        { name = "label", required = false }, -- ★ default を削除
       },
     },
     ["genheader"] = {
@@ -55,7 +50,7 @@ builder.create({
       desc = "Generate headers using Unreal Header Tool. Use 'genheader!' to open a UI picker.",
       bang = true,
       args = {
-        { name = "label", required = false, default = function() return get_config().preset_target end },
+        { name = "label", required = false }, -- ★ default を削除
         { name = "module_name", required = false },
       },
     },
@@ -68,21 +63,21 @@ builder.create({
       handler = function(opts) ubt_api.lint(opts) end,
       desc = "Run static analyzer for a target.",
       args = {
-        { name = "label", required = false, default = function() return get_config().preset_target end },
-        { name = "lintType", required = false, default = function() return get_config().lint_type end },
+        { name = "label", required = false }, -- ★ default を削除
+        { name = "lintType", required = false }, -- ★ default を削除
       },
     },
     ["diagnostics"] = {
       handler = function(opts) ubt_api.diagnostics(opts) end,
       desc = "Show build diagnostics from the last run.",
-      args = {}, -- 引数は取らない
+      args = {},
     },
     ["run"] = {
       handler = function(opts) ubt_api.run(opts) end,
       desc = "Run the project. Default: Editor (-game). Use --standalone to run the binary.",
       bang = true,
       args = {
-        { name = "standalone_flag", required = false }, -- "--standalone" を受け取る
+        { name = "standalone_flag", required = false },
       },
     },
   },

@@ -57,7 +57,6 @@ local function execute_build_if_safe(opts)
     end,
   })
 end
--- ★★★ ここまでが追加された関数です ★★★
 
 function M.start(opts)
   local unl_types = require("UNL.event.types")

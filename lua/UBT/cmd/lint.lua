@@ -7,12 +7,18 @@ local log = require("UBT.logger")
 local unl_types = require("UNL.event.types")
 local unl_events = require("UNL.event.events")
 
+local function get_config()
+  return require("UNL.config").get("UBT")
+end
+
+
 local M = {}
 
 function M.start(opts)
   -- この require はファイルの先頭に移動させるのが一般的です (機能はしますが)
   -- local unl_types = require("UNL.event.types") 
   opts = core.ensure_command_args(opts,"")
+  opts.lintType = opts.lintType or get_config().lint_type
 
   local cmd, err = core.create_command_with_target_platforms(opts,  {
     "-game",
