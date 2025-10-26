@@ -79,6 +79,7 @@
 *   **[UNL.nvim](https://github.com/taku25/UNL.nvim)** (**Required**)
 *   [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (**Optional**)
 *   [fzf-lua](https://github.com/ibhagwan/fzf-lua) (**Optional**)
+*   [snacks.nvim](https://github.com/folke/snacks.nvim) (**Optional**)
 *   [fidget.nvim](https://github.com/j-hui/fidget.nvim) (**Optional**)
 *   An environment where Unreal Build Tool is available (e.g., `dotnet` command)
 *   Visual Studio 2022 (including the Clang toolchain)
