@@ -65,7 +65,9 @@ end
 -------------------------------------------------
 
 function M.get_preset_from_label(label)
-  for _, v in ipairs(get_config().presets or {}) do
+  -- [!] model を require する
+  local model = require("UBT.model")
+  for _, v in ipairs(model.get_presets() or {}) do
     if v.name == label then return v end
   end
   return nil
@@ -74,8 +76,20 @@ end
 local function create_label_target_args(uproject_path, label)
   local preset = M.get_preset_from_label(label)
   if not preset then return nil, "Preset not found: " .. tostring(label) end
+  
   local project_name = vim.fn.fnamemodify(uproject_path, ":t:r")
-  local target_name = preset.IsEditor and (project_name .. "Editor") or project_name
+  
+  -- ▼▼▼【ここからが修正ロジック】▼▼▼
+  local target_name
+  if preset.TargetName then
+    -- 1. UEPが提供した動的ターゲットの場合 ("UnrealEditor", "Relocator" など)
+    target_name = preset.TargetName
+  else
+    -- 2. configに書かれた静的ターゲットの場合 (従来のロジック)
+    target_name = preset.IsEditor and (project_name .. "Editor") or project_name
+  end
+  -- ▲▲▲【修正ロジックここまで】▲▲▲
+  
   log.get().info("Found build target: %s", target_name)
   return { target_name, preset.Platform, preset.Configuration }, nil
 end

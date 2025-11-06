@@ -54,6 +54,13 @@ local M = {
     -- 自動で 'gen_proj' コマンドを実行します。
     auto_gen_project_after_refresh_completed = false,
   },
+
+  -- UBT.nvim が自動検出するプラットフォーム (Win64, Linux, Mac) に加えて、
+  -- ユーザーがクロスコンパイル用に SDK をセットアップ済みのプラットフォームを
+  -- ここにリストします。
+  -- 例: { "Android", "IOS", }
+  --
+  has_sdks = {},
 }
 
 return M
