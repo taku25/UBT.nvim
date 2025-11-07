@@ -31,6 +31,7 @@ local function run_job(opts)
   end
 
   runner.start("GenerateClangDatabase", cmd, {
+    label = opts.label,
     on_finish = function(result_payload)
       unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
     end,

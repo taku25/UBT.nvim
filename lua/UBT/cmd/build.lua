@@ -25,6 +25,7 @@ local function run_job(opts)
   local unl_events = require("UNL.event.events")
 
   runner.start("Build", cmd, {
+    label = opts.label,
     on_finish = function(result_payload)
       unl_events.publish(unl_types.ON_AFTER_BUILD, result_payload)
     end,

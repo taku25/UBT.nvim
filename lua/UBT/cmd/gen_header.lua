@@ -54,6 +54,7 @@ local function run_job(opts)
 
   -- ジョブを開始
   runner.start("GenerateHeader", cmd, {
+    label = opts.label,
     on_finish = function(result_payload) -- ★ 変更
       unl_events.publish(unl_types.ON_AFTER_GENERATE_HEADER, result_payload)
     end,

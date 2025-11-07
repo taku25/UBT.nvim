@@ -3,6 +3,7 @@
 local unl_finder = require("UNL.finder")
 local path = require("UBT.path")
 local log = require("UBT.logger")
+local context = require("UBT.context")
 
 local function get_config()
   return require("UNL.config").get("UBT")
@@ -120,7 +121,23 @@ function M.ensure_command_args(opts, mode)
   opts = opts or {}
   if not opts.root_dir then opts.root_dir = unl_finder.project.find_project_root(vim.loop.cwd()) end
   if not opts.root_dir then return nil, "Not inside a valid Unreal project." end
-  if not opts.label then opts.label = get_config().preset_target end
+  
+  if not opts.label then
+    local conf = get_config()
+    local use_last = conf.use_last_preset_as_default
+    local last_preset = context.get("last_preset") -- プロジェクト固有の値を取得
+
+    -- 1. フラグがtrue で、かつ記憶された値が存在する場合のみ、それを使用
+    if use_last == true and last_preset then
+      log.get().debug("Using last saved preset from context: %s", last_preset)
+      opts.label = last_preset
+    else
+      -- 2. それ以外（フラグがfalse or 記憶がない）は、configの静的な値を使用
+      log.get().debug("Using default preset from config: %s", conf.preset_target)
+      opts.label = conf.preset_target
+    end
+  end
+  
   if not opts.label then return nil, "Not has label" end
   opts.mode = mode
   return opts, nil

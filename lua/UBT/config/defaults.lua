@@ -32,6 +32,10 @@ local M = {
     { name = "Win64DevelopWithEditor", Platform = "Win64", IsEditor = true, Configuration = "Development" },
   },
   preset_target = "Win64DevelopWithEditor",
+-- trueの場合、!なしコマンド(UBT buildなど)は、
+  -- 最後に成功したプリセットをデフォルトとして使用します。
+  -- falseの場合、常に上記の preset_target を使用します。
+  use_last_preset_as_default = true,
   lint_type = "Default",
   engine_path = nil,
   progress_file_name = "progress.log",

@@ -32,6 +32,7 @@ function M.start(opts)
 
   -- 変更点: on_finish で結果テーブルを受け取り、ペイロードを作成
   runner.start("StaticAnalyzer", cmd, {
+    label = opts.label,
     on_finish = function(result_payload) -- ★ 変更
       unl_events.publish(unl_types.ON_AFTER_LINT, result_payload)
     end,

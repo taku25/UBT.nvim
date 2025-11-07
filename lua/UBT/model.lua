@@ -119,8 +119,8 @@ local function get_dynamic_targets_from_uep()
   local editor_platforms_list = {}
   if base_platform then table.insert(editor_platforms_list, base_platform) end
   local game_platforms_list = vim.tbl_keys(all_available_platforms)
-  local configs_editor = { "Development", "DebugGame" }
-  local configs_game_or_program = { "Development", "DebugGame", "Shipping" }
+  local configs_editor = { "Development", "DebugGame", "Debug" }
+  local configs_game_or_program = { "Development", "DebugGame", "Debug", "Test", "Shipping" }
 
   local dynamic_presets = {}
 

@@ -5,6 +5,12 @@ local log = require("UBT.logger")
 local unl_progress = require("UNL.backend.progress")
 
 local provider = require("UNL.provider") --- ★ 変更点: providerをrequire
+
+
+local context = require("UBT.context")
+local function get_config()
+  return require("UNL.config").get("UBT")
+end
 local M = {}
 
 ---
@@ -108,6 +114,13 @@ function M.start(name, cmd, opts)
 
       -- 1. 完了時のペイロードを一度だけ生成する
       local result_payload = { success = success }
+
+      if success == true and opts.label then
+        -- 設定フラグ(use_last_preset_as_default)に関わらず、
+        -- 常にコンテキストに保存する
+        context.set("last_preset", opts.label)
+        log.get().debug("Saved last preset to context: %s", opts.label)
+      end
 
       -- 2. (内部用) イベント発行のための on_finish を呼び出す
       if opts and opts.on_finish then
