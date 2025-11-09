@@ -16,11 +16,11 @@ CONTENTS                                                 *UBT-contents*
 ==============================================================================
 1. INTRODUCTION                                     *UBT-introduction*
 
-*UBT.nvim* is a plugin that allows you to run Unreal Engine's build,
+UBT.nvim is a plugin that allows you to run Unreal Engine's build,
 `compile_commands.json` generation, project file generation, and static
 analysis tasks directly from Neovim, asynchronously.
 
-This plugin depends on the core library *UNL.nvim*.
+This plugin depends on the core library UNL.nvim.
 
 Main Features:
 - Asynchronous execution of the Unreal Build Tool.

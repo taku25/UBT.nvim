@@ -16,11 +16,11 @@
 ==============================================================================
 1. はじめに                                         *UBT-introduction*
 
-*UBT.nvim* は、Unreal Engine のビルド、`compile_commands.json` 生成、プロジェ
+UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プロジェ
 クトファイル生成、静的解析といった機能を、Neovimから直接、非同期で実行する
 ためのプラグインです。
 
-このプラグインはコアライブラリとして *UNL.nvim* に依存しています。
+このプラグインはコアライブラリとして UNL.nvim に依存しています。
 
 主な機能:
 - Unreal Build Toolの非同期実行
