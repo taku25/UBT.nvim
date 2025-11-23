@@ -5,10 +5,26 @@ local log = require("UBT.logger")
 local fs = require("vim.fs")
 local unl_picker = require("UNL.backend.picker")
 local model = require("UBT.model")
+local context = require("UBT.context")
 
 local M = {}
 
--- スタンドアロンバイナリを起動する関数（変更なし）
+local function get_config()
+  return require("UNL.config").get("UBT")
+end
+
+-- プリセット名からプリセットオブジェクトを取得するヘルパー
+local function get_preset_by_name(name)
+  local presets = model.get_presets()
+  for _, p in ipairs(presets) do
+    if p.name == name then
+      return p
+    end
+  end
+  return nil
+end
+
+-- スタンドアロンバイナリを起動する関数
 local function run_standalone(project_info, preset)
   local logger = log.get()
   logger.info("Running standalone build with preset: %s", preset.name)
@@ -37,7 +53,7 @@ local function run_standalone(project_info, preset)
   vim.fn.jobstart({ binary_path }, { detach = true })
 end
 
--- ★★★ 修正箇所: エディタを起動する関数 ★★★
+-- エディタを起動する関数
 -- preset が nil の場合はデフォルトの動作（Development / UnrealEditor.exe）をします
 local function run_editor(project_info, preset)
   local logger = log.get()
@@ -58,7 +74,7 @@ local function run_editor(project_info, preset)
     if preset.Configuration then config = preset.Configuration end
   end
 
-  -- ★ 実行ファイル名の決定ロジック ★
+  -- 実行ファイル名の決定ロジック
   -- Development構成の場合は、サフィックスなしの "UnrealEditor.exe" が基本
   -- それ以外（Debug, DebugGameなど）の場合は "UnrealEditor-Win64-DebugGame.exe" のようになる
   local editor_exe = "UnrealEditor.exe"
@@ -102,7 +118,7 @@ function M.start(opts)
     unl_picker.pick({
       kind = "ubt_run_picker",
       title = "  Select Preset to Run",
-      conf = require("UNL.config").get("UBT"),
+      conf = get_config(),
       items = model.get_presets(),
       logger_name = "UBT",
       preview_enabled = false,
@@ -117,9 +133,13 @@ function M.start(opts)
       on_submit = function(selected_preset)
         if not selected_preset then return end
         
+        -- 選択したプリセットを「最後に使った構成」として保存
+        context.set("last_preset", selected_preset.name)
+        log.get().debug("Saved last preset to context: %s", selected_preset.name)
+
         -- IsEditorフラグを見て、呼び出す関数を動的に決定する
         if selected_preset.IsEditor then
-          -- ★ 修正点: selected_preset を run_editor に渡す
+          -- Editorビルドの場合は、通常のエディタを起動
           run_editor(project_info, selected_preset)
         else
           -- Gameビルドの場合は、スタンドアロンバイナリを起動
@@ -128,9 +148,36 @@ function M.start(opts)
       end,
     })
   else
-    -- `!`なしの場合は、これまで通りデフォルト（引数なし）で呼び出す
-    -- run_editor内部で nil チェックを行い、UnrealEditor.exe を起動します
-    run_editor(project_info, nil)
+    -- `!`なしの場合は、これまで通りデフォルト（引数なし）で呼び出すか、
+    -- コンテキストから前回の設定を読み込む
+    local conf = get_config()
+    local preset_to_use = nil
+    
+    -- 設定が有効なら、最後に使ったプリセット（buildで保存されたもの含む）を読み込む
+    if conf.use_last_preset_as_default then
+      local last_name = context.get("last_preset")
+      if last_name then
+        local found = get_preset_by_name(last_name)
+        if found then
+          log.get().info("Using last preset from context: %s", last_name)
+          preset_to_use = found
+        else
+          log.get().warn("Last preset '%s' not found in current presets. Falling back to default.", last_name)
+        end
+      end
+    end
+
+    -- プリセットが見つかった場合はそれを使用、なければデフォルト（nil -> Development/Editor）
+    if preset_to_use then
+      if preset_to_use.IsEditor then
+        run_editor(project_info, preset_to_use)
+      else
+        run_standalone(project_info, preset_to_use)
+      end
+    else
+      -- 従来通り（Development Editor）
+      run_editor(project_info, nil)
+    end
   end
 end
 
