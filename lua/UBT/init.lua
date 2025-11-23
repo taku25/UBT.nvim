@@ -14,7 +14,7 @@ function M.setup(user_opts)
   local log = unl_log.get("UBT")
 
   require("UBT.event.hub").setup()
-
+  require("UBT.provider").setup()
   if log then
     log.debug("UBT.nvim setup complete.")
   else
