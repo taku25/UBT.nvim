@@ -37,35 +37,43 @@ UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プ
 全てのコマンドは、`.uproject`ファイルが存在するディレクトリ内で実行する必要が
 あります。
 
-:UBT Build[!] [{target_name}]
+:UBT build[!] [{target_name}]
     プロジェクトをビルドします。
     - `{target_name}` を省略した場合、設定された |'UBT.preset_target'| が
       使用されます。
     - `!` を付けて実行すると、UIピッカーが起動し、ターゲットを選択して
       ビルドできます。
 
-:UBT GenHeader[!] [{target_name}]
+:UBT gen_header[!] [{target_name}]
     Unreal Header Tool (UHT) を実行してヘッダーファイルを生成します。
     - {target_name} の扱いは |:UBT Build| と同様です。
     - {module_name} はオプションで、特定のモジュールのみを対象にできます。
     - ! を付けて実行すると、UIピッカーでターゲットを選択できます。
 
-:UBT GenCompileDB[!] [{target_name}]
+:UBT gen_compiledb[!] [{target_name}]
     `compile_commands.json`を生成します。
     - `{target_name}` の扱いは |:UBT Build| と同様です。
     - `!` を付けて実行すると、UIピッカーでターゲットを選択できます。
 
-:UBT Diagnostics
+:UBT diagnostics
     直近のビルドで発生したエラーや警告をUIピッカーで一覧表示します。
     項目を選択すると、ファイルのプレビューが表示され、<CR>で該当箇所に
     ジャンプできます。
 
-:UBT GenProject
+:UBT gen_project
     Visual Studioなどのプロジェクトファイルを生成します。
 
-:UBT Lint [{linter_type}] [{target_name}]
+:UBT lint [{linter_type}] [{target_name}]
     静的解析を実行します。引数を省略した場合、設定された |'UBT.lint_type'|
     と |'UBT.preset_target'| が使用されます。
+
+:UBT run[!]
+    プロジェクトを実行します。
+    - `!` なし: デフォルトのエディタ (`UnrealEditor.exe`) を起動します。
+    - `!` あり: UIピッカーでプリセットを選択します。選択された構成
+      (例: DebugGame) に基づき、適切な実行ファイル (例:
+      `UnrealEditor-Win64-DebugGame.exe` やスタンドアローンバイナリ)
+      を自動的に判定して起動します。
 
 ------------------------------------------------------------------------------
 UIピッカー連携                                  *UBT-picker-integration*

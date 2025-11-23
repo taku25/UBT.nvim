@@ -37,34 +37,41 @@ COMMANDS                                                   *UBT-commands*
 All commands must be executed from within an Unreal Engine project directory
 (i.e., a directory containing a `.uproject` file).
 
-:UBT Build[!] [{target_name}]
+:UBT build[!] [{target_name}]
     Builds the project.
     - If `{target_name}` is omitted, the configured |'UBT.preset_target'|
       will be used.
     - Execute with `!` to open a UI picker to select a build target.
 
-:UBT GenHeader[!] [{target_name}] [{module_name}]
+:UBT gen_header[!] [{target_name}] [{module_name}]
 Runs the Unreal Header Tool (UHT) to generate header files.
     - The handling of {target_name} is the same as |:UBT Build|.
     - {module_name} is optional and can be used to target a specific module.
     - Execute with ! to open a UI picker to select a target.
 
-:UBT GenCompileDB[!] [{target_name}]
+:UBT gen_compiledb[!] [{target_name}]
     Generates `compile_commands.json`.
     - The handling of `{target_name}` is the same as |:UBT Build|.
     - Execute with `!` to open a UI picker to select a target.
 
-:UBT Diagnostics
+:UBT diagnostics
     Lists errors and warnings from the most recent build in a UI picker.
     You can preview the file and press <CR> to jump to the location.
 
-:UBT GenProject
+:UBT gen_project
     Generates project files for IDEs like Visual Studio.
 
-:UBT Lint [{linter_type}] [{target_name}]
+:UBT lint [{linter_type}] [{target_name}]
     Runs static analysis. If arguments are omitted, the configured
     |'UBT.lint_type'| and |'UBT.preset_target'| will be used.
 
+:UBT run[!]
+    Runs the project.
+    - Without `!`: Launches the default editor (`UnrealEditor.exe`).
+    - With `!`: Opens a UI picker to select a preset. It automatically
+      detects and launches the correct executable based on the selected
+      configuration (e.g., `UnrealEditor-Win64-DebugGame.exe` or
+      standalone game binary).
 ------------------------------------------------------------------------------
 UI PICKER INTEGRATION                           *UBT-picker-integration*
 

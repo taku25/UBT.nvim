@@ -205,7 +205,7 @@ return {
 
 ```vim
 :UBT build[!] [ターゲット名]                " プロジェクトをビルドします。[!]付きでUIピッカーを起動します。
-:UBT run[!]                                 " プロジェクトを実行します。[!]付きでUIピッカーを起動し、プリセットに応じたバイナリまたはエディタを起動します。
+:UBT run[!]                                 " プロジェクトを実行します。[!]付きでUIピッカーを起動すると、選択された構成（DebugGameなど）に合わせて適切な実行ファイル（例: UnrealEditor-Win64-DebugGame.exe）を自動判定して起動します。
 :UBT genHeader[!] [ターゲット名] [モジュール名] " Unreal Header Toolを実行します。[!]付きでUIピッカーを起動。モジュール名はオプションです。
 :UBT genCompileDB[!] [ターゲット名]         " compile_commands.json を生成します。[!]付きでUIピッカーを起動します。
 :UBT diagnostics                          " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。

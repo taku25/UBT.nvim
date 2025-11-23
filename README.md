@@ -190,7 +190,7 @@ Run the commands within an Unreal Engine project directory.
 
 ```vim
 :UBT build[!] [target_name]                 " Builds the project. Use [!] to launch the UI picker.
-:UBT run[!]                                 " Runs the project. Default opens the editor. Use [!] to launch the UI picker to run a specific preset.
+:UBT run[!]                                 " Runs the project. Use [!] to launch the UI picker. It automatically selects the correct executable (e.g., UnrealEditor-Win64-DebugGame.exe) based on the chosen configuration.
 :UBT genHeader[!] [target_name] [module_name] " Runs the Unreal Header Tool. Use [!] for UI picker. Module name is optional.
 :UBT genCompileDB[!] [target_name]          " Generates compile_commands.json. Use [!] to launch the UI picker.
 :UBT diagnostics                           " Displays errors and warnings from the last build in the UI picker.
