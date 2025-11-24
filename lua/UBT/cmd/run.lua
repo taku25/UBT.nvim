@@ -1,5 +1,3 @@
--- lua/UBT/cmd/run.lua
-
 local unl_finder = require("UNL.finder")
 local log = require("UBT.logger")
 local fs = require("vim.fs")
@@ -33,6 +31,10 @@ function M.resolve_launch_config(project_info, preset)
   local args = {}
   local cwd = project_info.root -- デフォルトはプロジェクトルート
 
+  -- ★ OS判定を行って拡張子を決定
+  local is_windows = vim.fn.has("win32") == 1
+  local ext = is_windows and ".exe" or ""
+
   if preset.IsEditor then
     -- Editor
     local engine_root, err = unl_finder.engine.find_engine_root(project_info.uproject)
@@ -43,10 +45,12 @@ function M.resolve_launch_config(project_info, preset)
 
     local platform = preset.Platform or "Win64"
     local config = preset.Configuration or "Development"
-    local editor_exe = "UnrealEditor.exe"
+    
+    -- ★ 拡張子を動的に付与
+    local editor_exe = "UnrealEditor" .. ext
     
     if config ~= "Development" then
-      editor_exe = string.format("UnrealEditor-%s-%s.exe", platform, config)
+      editor_exe = string.format("UnrealEditor-%s-%s%s", platform, config, ext)
     end
     
     exe_path = fs.joinpath(engine_root, "Engine", "Binaries", platform, editor_exe)
@@ -58,7 +62,9 @@ function M.resolve_launch_config(project_info, preset)
     if preset.Configuration ~= "Development" then
       table.insert(binary_name_parts, preset.Configuration)
     end
-    local binary_name = table.concat(binary_name_parts, "-") .. ".exe"
+    
+    -- ★ スタンドアロンゲームも同様に拡張子を制御
+    local binary_name = table.concat(binary_name_parts, "-") .. ext
     exe_path = fs.joinpath(project_info.root, "Binaries", preset.Platform, binary_name)
     
     table.insert(args, "-log") -- スタンドアロンの場合はログウィンドウを出すのが一般的
