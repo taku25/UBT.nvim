@@ -37,20 +37,20 @@ builder.create({
         { name = "label", required = false }, -- ★ default を削除
       },
     },
-    ["gencompiledb"] = {
+    ["gen_compile_db"] = {
       handler = function(opts) ubt_api.gen_compile_db(opts) end,
-      desc = "Generate compile_commands.json. Use 'gencompiledb!' to open a UI picker.",
+      desc = "Generate compile_commands.json. Use 'gen_compile_db!' to open a UI picker.",
       bang = true,
       args = {
-        { name = "label", required = false }, -- ★ default を削除
+        { name = "label", required = false },
       },
     },
-    ["genheader"] = {
+    ["gen_header"] = {
       handler = function(opts) ubt_api.gen_header(opts) end,
-      desc = "Generate headers using Unreal Header Tool. Use 'genheader!' to open a UI picker.",
+      desc = "Generate headers using Unreal Header Tool. Use 'gen_header!' to open a UI picker.",
       bang = true,
       args = {
-        { name = "label", required = false }, -- ★ default を削除
+        { name = "label", required = false },
         { name = "module_name", required = false },
       },
     },
