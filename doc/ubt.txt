@@ -49,7 +49,7 @@ Runs the Unreal Header Tool (UHT) to generate header files.
     - {module_name} is optional and can be used to target a specific module.
     - Execute with ! to open a UI picker to select a target.
 
-:UBT gen_compiledb[!] [{target_name}]
+:UBT gen_compile_db[!] [{target_name}]
     Generates `compile_commands.json`.
     - The handling of `{target_name}` is the same as |:UBT Build|.
     - Execute with `!` to open a UI picker to select a target.
@@ -80,10 +80,10 @@ them as a UI picker. You can configure which UI to use with the |'UBT.ui'|
 option.
 
 The UI picker can be opened with the following commands:
-- |:UBT Build!|
-- |:UBT GenHeader!|
-- |:UBT GenCompileDB!|
-- |:UBT Diagnostics|
+- |:UBT build!|
+- |:UBT gen_header!|
+- |:UBT gen_compile_db!|
+- |:UBT diagnostics|
 
 ==============================================================================
 3. CONFIGURATION                                      *UBT-configuration*

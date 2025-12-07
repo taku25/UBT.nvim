@@ -50,7 +50,7 @@ UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プ
     - {module_name} はオプションで、特定のモジュールのみを対象にできます。
     - ! を付けて実行すると、UIピッカーでターゲットを選択できます。
 
-:UBT gen_compiledb[!] [{target_name}]
+:UBT gen_compile_db[!] [{target_name}]
     `compile_commands.json`を生成します。
     - `{target_name}` の扱いは |:UBT Build| と同様です。
     - `!` を付けて実行すると、UIピッカーでターゲットを選択できます。
@@ -84,8 +84,8 @@ Telescope.nvim や fzf-lua がインストールされている場合、`UBT.nvi
 
 UIピッカーは以下のコマンドで起動できます:
 - |:UBT Build!|
-- |:UBT GenHeader!|
-- |:UBT GenCompileDB!|
+- |:UBT gen_header!|
+- |:UBT gen_compile_db!|
 - |:UBT Diagnostics|
 
 ==============================================================================
