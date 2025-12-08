@@ -54,7 +54,7 @@ builder.create({
         { name = "module_name", required = false },
       },
     },
-    ["genproject"] = {
+    ["gen_project"] = {
       handler = function(opts) ubt_api.gen_project(opts) end,
       desc = "Generate project files.",
       args = {},
