@@ -45,15 +45,35 @@ function M.resolve_launch_config(project_info, preset)
 
     local platform = preset.Platform or "Win64"
     local config = preset.Configuration or "Development"
+    local target_name = preset.TargetName or "UnrealEditor"
+
+    -- [Fix] まずプロジェクトのBinariesフォルダ内にターゲットが存在するか確認する
+    -- (Monolithic Editorターゲットや、ターゲット名がUnrealEditorでない場合への対応)
+    local project_bin_dir = fs.joinpath(project_info.root, "Binaries", platform)
+    local project_exe_name
     
-    -- ★ 拡張子を動的に付与
-    local editor_exe = "UnrealEditor" .. ext
-    
-    if config ~= "Development" then
-      editor_exe = string.format("UnrealEditor-%s-%s%s", platform, config, ext)
+    if config == "Development" then
+        project_exe_name = target_name .. ext
+    else
+        project_exe_name = string.format("%s-%s-%s%s", target_name, platform, config, ext)
     end
     
-    exe_path = fs.joinpath(engine_root, "Engine", "Binaries", platform, editor_exe)
+    local project_exe_path = fs.joinpath(project_bin_dir, project_exe_name)
+
+    if vim.fn.filereadable(project_exe_path) == 1 then
+        -- プロジェクト側に実行ファイルがあればそれを使用
+        exe_path = project_exe_path
+    else
+        -- なければ標準のエンジン側 UnrealEditor を使用 (Modular Build)
+        local editor_exe = "UnrealEditor" .. ext
+        
+        if config ~= "Development" then
+          editor_exe = string.format("UnrealEditor-%s-%s%s", platform, config, ext)
+        end
+        
+        exe_path = fs.joinpath(engine_root, "Engine", "Binaries", platform, editor_exe)
+    end
+    
     table.insert(args, project_info.uproject) -- プロジェクトパスを引数に
   else
     -- Standalone Game
