@@ -7,6 +7,7 @@ local unl_picker = require("UNL.backend.picker")
 local model = require("UBT.model")
 local log = require("UBT.logger")
 local unl_finder = require("UNL.finder")
+local context = require("UBT.context")
 
 local M = {}
 
@@ -83,6 +84,7 @@ function M.start(opts)
       on_submit = function(selected)
         if selected then
           opts.label = selected.name
+          context.set("last_preset", selected.name)
           run_job(opts)
         end
       end,

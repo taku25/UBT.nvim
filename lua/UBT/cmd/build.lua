@@ -6,6 +6,7 @@ local runner = require("UBT.job.runner")
 local unl_picker = require("UNL.backend.picker")
 local model = require("UBT.model")
 local log = require("UBT.logger")
+local context = require("UBT.context")
 
 local M = {}
 
@@ -77,6 +78,7 @@ function M.start(opts)
       on_submit = function(selected)
         if selected then
           opts.label = selected.name
+          context.set("last_preset", selected.name)
           -- ★ 変更点: 直接run_jobを呼ばず、安全チェック関数を呼ぶ
           execute_build_if_safe(opts)
         end
