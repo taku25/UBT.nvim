@@ -11,12 +11,13 @@ local function get_config()
   return require("UNL.config").get("UBT")
 end
 
-local function get_preset_by_name(name)
-  local presets = model.get_presets()
-  for _, p in ipairs(presets) do
-    if p.name == name then return p end
-  end
-  return nil
+local function get_preset_by_name(name, cb)
+  model.get_presets(function(presets)
+    for _, p in ipairs(presets) do
+      if p.name == name then return cb(p) end
+    end
+    cb(nil)
+  end)
 end
 
 ---
@@ -120,44 +121,50 @@ function M.start(opts)
   end
 
   if opts.has_bang then
-    unl_picker.pick({
-      kind = "ubt_run_picker",
-      title = "  Select Preset to Run",
-      conf = get_config(),
-      items = model.get_presets(),
-      logger_name = "UBT",
-      preview_enabled = false,
-      entry_maker = function(item)
-        return { value = item, display = item.name, ordinal = item.name }
-      end,
-      on_submit = function(selected_preset)
-        if not selected_preset then return end
-        context.set("last_preset", selected_preset.name)
-        
-        -- ★ 変更: 解決ロジックと実行ロジックを分離して呼び出す
-        local launch_conf = M.resolve_launch_config(project_info, selected_preset)
-        if launch_conf then execute_launch_config(launch_conf) end
-      end,
-    })
+    model.get_presets(function(presets)
+        unl_picker.pick({
+          kind = "ubt_run_picker",
+          title = "  Select Preset to Run",
+          conf = get_config(),
+          items = presets,
+          logger_name = "UBT",
+          preview_enabled = false,
+          entry_maker = function(item)
+            return { value = item, display = item.name, ordinal = item.name }
+          end,
+          on_submit = function(selected_preset)
+            if not selected_preset then return end
+            context.set("last_preset", selected_preset.name)
+            
+            -- ★ 変更: 解決ロジックと実行ロジックを分離して呼び出す
+            local launch_conf = M.resolve_launch_config(project_info, selected_preset)
+            if launch_conf then execute_launch_config(launch_conf) end
+          end,
+        })
+    end)
   else
     local conf = get_config()
-    local preset_to_use = nil
     
+    local function run_default(preset)
+        local launch_conf = M.resolve_launch_config(project_info, preset)
+        if launch_conf then execute_launch_config(launch_conf) end
+    end
+
     if conf.use_last_preset_as_default then
       local last_name = context.get("last_preset")
-      if last_name then preset_to_use = get_preset_by_name(last_name) end
+      if last_name then 
+          get_preset_by_name(last_name, function(p)
+              if p then run_default(p) else 
+                  -- Fallback if last preset not found
+                  run_default({ IsEditor = true, Platform = "Win64", Configuration = "Development", name = "Default" })
+              end
+          end)
+          return
+      end
     end
 
-    -- デフォルト(nil)または特定されたプリセットで実行
-    -- nilの場合、内部でデフォルト値(Development Editor)が補完されるように resolve_launch_config を調整するか、
-    -- ここでデフォルトプリセットオブジェクトを作る
-    if not preset_to_use then
-        -- デフォルトプリセットを動的生成
-        preset_to_use = { IsEditor = true, Platform = "Win64", Configuration = "Development", name = "Default" }
-    end
-
-    local launch_conf = M.resolve_launch_config(project_info, preset_to_use)
-    if launch_conf then execute_launch_config(launch_conf) end
+    -- デフォルトプリセットを動的生成
+    run_default({ IsEditor = true, Platform = "Win64", Configuration = "Development", name = "Default" })
   end
 end
 

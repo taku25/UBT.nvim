@@ -65,34 +65,40 @@ end
 -- Command Creation (新しいロジック)
 -------------------------------------------------
 
-function M.get_preset_from_label(label)
+function M.get_preset_from_label(label, callback)
   -- [!] model を require する
   local model = require("UBT.model")
-  for _, v in ipairs(model.get_presets() or {}) do
-    if v.name == label then return v end
-  end
-  return nil
+  if type(model) ~= "table" then model = package.loaded["UBT.model"] end
+  
+  model.get_presets(function(presets)
+      for _, v in ipairs(presets or {}) do
+        if v.name == label then 
+            callback(v)
+            return
+        end
+      end
+      callback(nil)
+  end)
 end
 
-local function create_label_target_args(uproject_path, label)
-  local preset = M.get_preset_from_label(label)
-  if not preset then return nil, "Preset not found: " .. tostring(label) end
-  
-  local project_name = vim.fn.fnamemodify(uproject_path, ":t:r")
-  
-  -- ▼▼▼【ここからが修正ロジック】▼▼▼
-  local target_name
-  if preset.TargetName then
-    -- 1. UEPが提供した動的ターゲットの場合 ("UnrealEditor", "Relocator" など)
-    target_name = preset.TargetName
-  else
-    -- 2. configに書かれた静的ターゲットの場合 (従来のロジック)
-    target_name = preset.IsEditor and (project_name .. "Editor") or project_name
-  end
-  -- ▲▲▲【修正ロジックここまで】▲▲▲
-  
-  log.get().info("Found build target: %s", target_name)
-  return { target_name, preset.Platform, preset.Configuration }, nil
+local function create_label_target_args(uproject_path, label, callback)
+  M.get_preset_from_label(label, function(preset)
+      if not preset then 
+          return callback(nil, "Preset not found: " .. tostring(label))
+      end
+      
+      local project_name = vim.fn.fnamemodify(uproject_path, ":r")
+      
+      local target_name
+      if preset.TargetName then
+        target_name = preset.TargetName
+      else
+        target_name = preset.IsEditor and (project_name .. "Editor") or project_name
+      end
+      
+      log.get().info("Found build target: %s", target_name)
+      callback({ target_name, preset.Platform, preset.Configuration }, nil)
+  end)
 end
 
 -- コマンドのベース部分（実行スクリプト + Engineパス）を作成するヘルパー
@@ -144,40 +150,38 @@ function M.ensure_command_args(opts, mode)
 end
 
 -- ターゲット情報を含むコマンドを生成する (build, gencompiledb, genheader, lint用)
-function M.create_command_with_target_platforms(opts, extra)
+function M.create_command_with_target_platforms(opts, extra, callback)
   local cmd_prefix, uproject_path, err = create_command_prefix(opts.root_dir)
-  if err then return nil, err end
+  if err then return callback(nil, err) end
 
-  local target_args, target_err = create_label_target_args(uproject_path, opts.label)
-  if not target_args then return nil, target_err end
-  
-  -- 正しい順序で引数を組み立て
-  local ubt_args = {}
-  
-  -- ▼▼▼ ここからが新しいロジック ▼▼▼
-  local is_windows = vim.fn.has("win32") == 1
+  create_label_target_args(uproject_path, opts.label, function(target_args, target_err)
+      if not target_args then return callback(nil, target_err) end
+      
+      -- 正しい順序で引数を組み立て
+      local ubt_args = {}
+      local is_windows = vim.fn.has("win32") == 1
 
+      vim.list_extend(ubt_args, target_args)
 
-  vim.list_extend(ubt_args, target_args)
+      -- 2. プロジェクトパスを追加
+      if is_windows then
+        table.insert(ubt_args, "-project=" .. '"' .. uproject_path .. '"')
+      else
+        table.insert(ubt_args, "-project=" .. uproject_path)
+      end
 
-  -- 2. プロジェクトパスを追加
-  if is_windows then
-    table.insert(ubt_args, "-project=" .. '"' .. uproject_path .. '"')
-  else
-    table.insert(ubt_args, "-project=" .. uproject_path)
-  end
+      -- 3. モードを追加
+      if opts.mode and opts.mode ~= "" then
+        table.insert(ubt_args, "-mode=" .. opts.mode)
+      end
+      
+      -- 4. その他の追加オプションを追加
+      if extra then
+        vim.list_extend(ubt_args, extra)
+      end
 
-  -- 3. モードを追加
-  if opts.mode and opts.mode ~= "" then
-    table.insert(ubt_args, "-mode=" .. opts.mode)
-  end
-  
-  -- 4. その他の追加オプションを追加
-  if extra then
-    vim.list_extend(ubt_args, extra)
-  end
-
-  return vim.list_extend(cmd_prefix, ubt_args), nil
+      callback(vim.list_extend(cmd_prefix, ubt_args), nil)
+  end)
 end
 
 -- ターゲット情報を含まないコマンドを生成する (genproject用)

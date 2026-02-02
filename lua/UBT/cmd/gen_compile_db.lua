@@ -25,40 +25,42 @@ local function run_job(opts)
   end
   -- ▲▲▲ ここまで ▲▲▲
 
-  local cmd, err = core.create_command_with_target_platforms(opts, extra)
+  core.create_command_with_target_platforms(opts, extra, function(cmd, err)
+      if err then
+        return log.get().error(err)
+      end
 
-  if err then
-    return log.get().error(err)
-  end
-
-  runner.start("GenerateClangDatabase", cmd, {
-    label = opts.label,
-    on_finish = function(result_payload)
-      unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
-    end,
-    on_complete = opts.on_complete,
-  })
+      runner.start("GenerateClangDatabase", cmd, {
+        label = opts.label,
+        on_finish = function(result_payload)
+          unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
+        end,
+        on_complete = opts.on_complete,
+      })
+  end)
 end
 
 function M.start(opts)
   opts = opts or {}
   if opts.has_bang then
-    unl_picker.pick({
-      kind = "ubt_gencompiledb",
-      title = "UBT Generate Compile DB Targets",
-      logger_name = "UBT",
-      preview_enabled = false,
-      conf = require("UNL.config").get("UBT"),
-      items = model.get_presets(),
-      format = function(entry) return entry.name end,
-      on_submit = function(selected)
-        if selected then
-          opts.label = selected.name
-          context.set("last_preset", selected.name)
-          run_job(opts)
-        end
-      end,
-    })
+    model.get_presets(function(presets)
+        unl_picker.pick({
+          kind = "ubt_gencompiledb",
+          title = "UBT Generate Compile DB Targets",
+          logger_name = "UBT",
+          preview_enabled = false,
+          conf = require("UNL.config").get("UBT"),
+          items = presets,
+          format = function(entry) return entry.name end,
+          on_submit = function(selected)
+            if selected then
+              opts.label = selected.name
+              context.set("last_preset", selected.name)
+              run_job(opts)
+            end
+          end,
+        })
+    end)
   else
     run_job(opts)
   end
