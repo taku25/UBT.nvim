@@ -1,6 +1,6 @@
 -- lua/UBT/cmd/diagnostics.lua
 
-local unl_picker = require("UNL.backend.picker")
+local unl_picker = require("UNL.picker")
 local ubt_model = require("UBT.model")
 local ubt_logger = require("UBT.logger")
 
@@ -52,7 +52,7 @@ function M.start()
     return ubt_logger.get().warn(err)
   end
 
-  unl_picker.pick({
+  unl_picker.open({
     -- UEP側の設定を使いたいので、confを渡す
     conf = require("UNL.config").get("UBT"),
     logger_name = "UBT",
@@ -69,3 +69,4 @@ function M.start()
 end
 
 return M
+

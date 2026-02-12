@@ -3,7 +3,7 @@
 
 local core = require("UBT.cmd.core")
 local runner = require("UBT.job.runner")
-local unl_picker = require("UNL.backend.picker")
+local unl_picker = require("UNL.picker")
 local model = require("UBT.model")
 local log = require("UBT.logger")
 local unl_finder = require("UNL.finder")
@@ -70,7 +70,7 @@ function M.start(opts)
   if opts.has_bang then
     -- `!`付きの場合は、UIピッカーを起動
     model.get_presets(function(presets)
-        unl_picker.pick({
+        unl_picker.open({
           kind = "ubt_genheader",
           title = " UBT Generate Header Targets",
           conf = require("UNL.config").get("UBT"),
@@ -99,3 +99,4 @@ function M.start(opts)
 end
 
 return M
+

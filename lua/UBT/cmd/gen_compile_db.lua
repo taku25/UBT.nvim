@@ -2,7 +2,7 @@
 
 local core = require("UBT.cmd.core")
 local runner = require("UBT.job.runner")
-local unl_picker = require("UNL.backend.picker")
+local unl_picker = require("UNL.picker")
 local model = require("UBT.model")
 local log = require("UBT.logger")
 local unl_types = require("UNL.event.types")
@@ -44,7 +44,7 @@ function M.start(opts)
   opts = opts or {}
   if opts.has_bang then
     model.get_presets(function(presets)
-        unl_picker.pick({
+        unl_picker.open({
           kind = "ubt_gencompiledb",
           title = "UBT Generate Compile DB Targets",
           logger_name = "UBT",
@@ -67,3 +67,4 @@ function M.start(opts)
 end
 
 return M
+

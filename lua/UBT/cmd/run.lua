@@ -1,7 +1,7 @@
 local unl_finder = require("UNL.finder")
 local log = require("UBT.logger")
 local fs = require("vim.fs")
-local unl_picker = require("UNL.backend.picker")
+local unl_picker = require("UNL.picker")
 local model = require("UBT.model")
 local context = require("UBT.context")
 
@@ -122,7 +122,7 @@ function M.start(opts)
 
   if opts.has_bang then
     model.get_presets(function(presets)
-        unl_picker.pick({
+        unl_picker.open({
           kind = "ubt_run_picker",
           title = "  Select Preset to Run",
           conf = get_config(),
@@ -169,3 +169,4 @@ function M.start(opts)
 end
 
 return M
+

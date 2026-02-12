@@ -2,7 +2,7 @@
 local core = require("UBT.cmd.core")
 local ubt_path = require("UBT.path")
 local runner = require("UBT.job.runner")
-local unl_picker = require("UNL.backend.picker")
+local unl_picker = require("UNL.picker")
 local log = require("UBT.logger")
 local context = require("UBT.context")
 
@@ -64,7 +64,7 @@ function M.start(opts)
     if type(model) ~= "table" then model = package.loaded["UBT.model"] end
 
     model.get_presets(function(presets)
-        unl_picker.pick({
+        unl_picker.open({
           kind = "ubt_build",
           title = "  UBT Build Targets",
           conf = require("UNL.config").get("UBT"),
