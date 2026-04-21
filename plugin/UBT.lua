@@ -80,5 +80,10 @@ builder.create({
         { name = "standalone_flag", required = false },
       },
     },
+    ["cancel_build"] = {
+      handler = function() ubt_api.cancel_build() end,
+      desc = "Cancel the current UBT job.",
+      args = {},
+    },
   },
 })

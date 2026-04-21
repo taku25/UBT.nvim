@@ -75,7 +75,16 @@ end
 function M.get_log_file_path()
   local conf = get_config()
   local base_dir = unl_cache_core.get_cache_dir(conf)
-  local filename = conf.log_file_name or "ubt.log" -- デフォルトファイル名
+  local filename = conf.log_file_name or "ubt.log"
+
+  -- プロジェクトごとにファイルを分ける
+  local unl_finder = require("UNL.finder.project")
+  local project_root = unl_finder.find_project_root(vim.loop.cwd())
+  if project_root then
+    local project_name = M.get_project_name(project_root)
+    filename = project_name .. "_" .. filename
+  end
+
   return vim.fs.joinpath(base_dir, filename)
 end
 
@@ -85,7 +94,16 @@ end
 function M.get_progress_log_file_path()
   local conf = get_config()
   local base_dir = unl_cache_core.get_cache_dir(conf)
-  local filename = conf.progress_file_name or "progress.log" -- デフォルトファイル名
+  local filename = conf.progress_file_name or "progress.log"
+
+  -- プロジェクトごとにファイルを分ける
+  local unl_finder = require("UNL.finder.project")
+  local project_root = unl_finder.find_project_root(vim.loop.cwd())
+  if project_root then
+    local project_name = M.get_project_name(project_root)
+    filename = project_name .. "_" .. filename
+  end
+
   return vim.fs.joinpath(base_dir, filename)
 end
 

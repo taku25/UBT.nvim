@@ -29,4 +29,12 @@ function M.run(opts)
   require("UBT.cmd.run").start(opts)
 end
 
+function M.cancel_build()
+  local success = require("UBT.job.runner").stop()
+  if not success then
+    require("UBT.logger").get().info("No active UBT job to cancel.")
+  end
+  return success
+end
+
 return M
