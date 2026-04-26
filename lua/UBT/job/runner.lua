@@ -17,6 +17,34 @@ local M = {}
 local current_job_id = nil
 local current_log_file_handle = nil
 
+-- 現在のジョブの集計値
+local job_metrics = {
+  error_count   = 0,
+  warning_count = 0,
+}
+
+-- -----------------------------------------------------------------------
+-- エラー／警告行の判定
+-- -----------------------------------------------------------------------
+
+-- MSVC: "foo.cpp(10): error C2065:"  "LINK : fatal error LNK1120:"
+-- UBT:  "ERROR: could not find ..."
+local function is_error_line(line)
+  if line:match(":%s*error%s+[A-Z%d]")   then return true end
+  if line:match(":%s*fatal%s+error%s+")  then return true end
+  if line:match("^ERROR%s*:")            then return true end
+  if line:match("^Build FAILED")         then return true end
+  return false
+end
+
+-- MSVC: "foo.cpp(10): warning C4101:"
+-- UBT:  "WARNING: ..."
+local function is_warning_line(line)
+  if line:match(":%s*warning%s+[A-Z%d]") then return true end
+  if line:match("^WARNING%s*:")          then return true end
+  return false
+end
+
 ---
 -- 実行中のジョブを停止する
 function M.stop()
@@ -39,22 +67,23 @@ end
 -- @param line string
 -- @param progress_handle table UNL.progressのインスタンス
 local function process_line(line, progress_handle)
-  ---
   if line == "" then return end
 
   log.get().info(line)
-  
+
   -- ログファイルへの書き出し
   if current_log_file_handle then
     current_log_file_handle:write(line .. "\n")
     current_log_file_handle:flush()
   end
 
-  -- 1. エラーや警告をログに出力
-  if line:match("[Ee]rror") or line:match("failed") or line:match("fatal") then
+  -- 1. エラー／警告を判定してカウント＆ログ出力
+  if is_error_line(line) then
+    job_metrics.error_count = job_metrics.error_count + 1
     return log.get().error(line)
   end
-  if line:match("[Ww]arning") then
+  if is_warning_line(line) then
+    job_metrics.warning_count = job_metrics.warning_count + 1
     return log.get().warn(line)
   end
 
@@ -65,9 +94,6 @@ local function process_line(line, progress_handle)
     if progress_handle.stage_update then progress_handle:stage_update(label, tonumber(percent_str), label) end
     return -- 進捗行は通常のログには流さない
   end
-
-  -- 3. それ以外の行は通常のINFOログとして出力
-  -- log.get().info(line)
 end
 
 ---
@@ -81,6 +107,10 @@ function M.start(name, cmd, opts)
 
   -- 既存のジョブがあれば停止（念のため）
   M.stop()
+
+  -- カウンターをリセット
+  job_metrics.error_count   = 0
+  job_metrics.warning_count = 0
 
   local stdout_buffer = ""
 
@@ -151,7 +181,21 @@ function M.start(name, cmd, opts)
       local success = (code == 0)
       progress:finish(success)
 
-      -- ★★★ ここからが変更点 ★★★
+      -- ビルドサマリーを通知
+      if success then
+        local msg
+        if job_metrics.warning_count > 0 then
+          msg = string.format("[UBT] %s succeeded — %d warning(s)", name, job_metrics.warning_count)
+          vim.notify(msg, vim.log.levels.WARN)
+        else
+          msg = string.format("[UBT] %s succeeded", name)
+          vim.notify(msg, vim.log.levels.INFO)
+        end
+      else
+        local msg = string.format("[UBT] %s FAILED — %d error(s), %d warning(s)",
+          name, job_metrics.error_count, job_metrics.warning_count)
+        vim.notify(msg, vim.log.levels.ERROR)
+      end
 
       -- 1. 完了時のペイロードを一度だけ生成する
       local result_payload = { success = success }
@@ -172,8 +216,6 @@ function M.start(name, cmd, opts)
       if opts and opts.on_complete then
         opts.on_complete(result_payload)
       end
-      
-      -- ★★★ ここまでが変更点 ★★★
 
       log.get().info("Job '%s' finished with code %d", name, code)
       unl_log.dispatch_event("UBT", "on_job_finish", { name = name })
