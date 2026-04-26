@@ -19,6 +19,9 @@
 ## ✨ Features
 
 *   **Asynchronous Execution**: Runs Unreal Build Tool asynchronously in the background using only Neovim's native functions (`vim.fn.jobstart`).
+*   **Build Conflict Dialog**: When a build is already running, `:UBT build` shows a `vim.ui.select` "Restart build?" dialog instead of silently failing. If Unreal Engine is already running (detected via `tasklist`), a second "Build anyway?" dialog is shown.
+*   **Build Summary**: On build completion, a summary is logged: e.g., `Build succeeded in 12s (0 errors, 3 warnings)` or `Build FAILED in 8s (5 errors, 2 warnings)`.
+*   **Elapsed Time**: All build/compile/gen operations report elapsed time on completion (e.g., `Compile DB generated in 45s`).
 *   **Flexible Configuration System**:
     *   Based on the powerful configuration system of `UNL.nvim`, allowing project-specific settings via a `.unlrc.json` file in the project root to override global settings.
 *   **Rich UI Feedback**: Integrates with [fidget.nvim](https://github.com/j-hui/fidget.nvim) to display real-time build progress. (**Optional**)
@@ -138,6 +141,18 @@ Below are all the available options with their default values.
   -- Filename for UBT to write diagnostic logs (errors and warnings)
   progress_file_name = "progress.log",
 
+  -- ===== Automation Settings =====
+  automation = {
+    -- When true, automatically runs :LspRestart after a successful gen_compile_db
+    restart_lsp_after_gen_compile_db = false,
+    -- When true, automatically runs gen_header after a lightweight refresh
+    auto_gen_header_after_lightweight_refresh = false,
+    -- When true, automatically generates project files after gen_header succeeds
+    auto_gen_project_after_gen_header_success = false,
+    -- When true, automatically generates project files after a full refresh
+    auto_gen_project_after_refresh_completed  = false,
+  },
+
   -- ===== UI and Logging Settings (Inherited from UNL.nvim) =====
   
   -- Behavior settings for UI pickers (Telescope, fzf-lua, etc.)
@@ -196,6 +211,7 @@ Run the commands within an Unreal Engine project directory.
 :UBT diagnostics                           " Displays errors and warnings from the last build in the UI picker.
 :UBT genProject                            " Generates project files for Visual Studio, etc.
 :UBT lint [linter_type] [target_name]         " Runs static analysis.
+:UBT cancel_build                          " Cancels the currently running build job.
 ```
 
 ### 💓 UI Picker Integration (Telescope / fzf-lua)

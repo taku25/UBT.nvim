@@ -34,6 +34,9 @@ Unreal プラグイン群
 ## ✨ 機能 (Features)
 
 *   **非同期実行**: Neovimの標準機能（`vim.fn.jobstart`）のみを使用し、Unreal Build Toolをバックグラウンドで非同期に実行します。
+*   **ビルド競合ダイアログ**: ビルドがすでに実行中の場合、`:UBT build` はサイレントに失敗する代わりに `vim.ui.select` で「Restart build?」ダイアログを表示します。Unreal Engine がすでに起動中（`tasklist` で検出）の場合は、さらに「Build anyway?」ダイアログも表示されます。
+*   **ビルドサマリー**: ビルド完了時に結果サマリーが記録されます（例: `Build succeeded in 12s (0 errors, 3 warnings)` や `Build FAILED in 8s (5 errors, 2 warnings)`）。
+*   **経過時間表示**: すべてのビルド/コンパイル/生成操作が完了時に経過時間を表示します（例: `Compile DB generated in 45s`）。
 *   **柔軟な設定システム**:
     *   `UNL.nvim` の強力な設定システムをベースにしており、グローバル設定に加え、プロジェクトルートの `.unlrc.json` ファイルによるプロジェクト固有設定の上書きが可能です。
 *   **リッチなUIフィードバック**: [fidget.nvim](https://github.com/j-hui/fidget.nvim) と連携し、リアルタイムでビルドの進捗を表示します。(**オプション**)
@@ -153,6 +156,18 @@ return {
   -- UBTが診断ログ（エラーや警告）を書き出すファイル名
   progress_file_name = "progress.log",
 
+  -- ===== 自動化設定 =====
+  automation = {
+    -- true にすると、gen_compile_db 成功後に自動で :LspRestart を実行します
+    restart_lsp_after_gen_compile_db = false,
+    -- true にすると、軽量リフレッシュ後に自動でgen_headerを実行します
+    auto_gen_header_after_lightweight_refresh = false,
+    -- true にすると、gen_header 成功後に自動でプロジェクトファイルを生成します
+    auto_gen_project_after_gen_header_success = false,
+    -- true にすると、フルリフレッシュ完了後に自動でプロジェクトファイルを生成します
+    auto_gen_project_after_refresh_completed  = false,
+  },
+
   -- ===== UIとロギング設定 (UNL.nvimから継承) =====
   
   -- UIピッカー（Telescope, fzf-luaなど）の挙動設定
@@ -211,6 +226,7 @@ return {
 :UBT diagnostics                          " 直近のビルドで発生したエラーや警告をUIピッカーで表示します。
 :UBT gen_project                           " Visual Studioなどのプロジェクトファイルを生成します。
 :UBT lint [linterタイプ] [ターゲット名]        " 静的解析を実行します。
+:UBT cancel_build                          " 現在実行中のビルドジョブをキャンセルします。
 ```
 
 ### 💓 UIピッカー連携 (Telescope / fzf-lua)

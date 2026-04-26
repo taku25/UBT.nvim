@@ -24,6 +24,9 @@ This plugin depends on the core library UNL.nvim.
 
 Main Features:
 - Asynchronous execution of the Unreal Build Tool.
+- Build conflict dialog: if a build is running, prompts to restart; if UE is
+  running, prompts to build anyway.
+- Build summary logged on completion with error/warning counts and elapsed time.
 - Real-time progress display with fidget.nvim (optional).
 - Interactive UI pickers with Telescope or fzf-lua (optional).
 - Project-specific settings management with `.unlrc.json`.
@@ -42,6 +45,11 @@ All commands must be executed from within an Unreal Engine project directory
     - If `{target_name}` is omitted, the configured |'UBT.preset_target'|
       will be used.
     - Execute with `!` to open a UI picker to select a build target.
+    - If a build is already running, a "Restart build?" dialog appears.
+      If Unreal Engine is detected as running via `tasklist`, a second
+      "Build anyway?" dialog is shown.
+    - On completion, a summary is logged with error/warning counts and
+      elapsed time (e.g., `Build succeeded in 12s (0 errors, 3 warnings)`).
 
 :UBT gen_header[!] [{target_name}] [{module_name}]
 Runs the Unreal Header Tool (UHT) to generate header files.
@@ -53,6 +61,9 @@ Runs the Unreal Header Tool (UHT) to generate header files.
     Generates `compile_commands.json`.
     - The handling of `{target_name}` is the same as |:UBT Build|.
     - Execute with `!` to open a UI picker to select a target.
+    - Elapsed time is reported on completion.
+    - If `automation.restart_lsp_after_gen_compile_db` is `true`,
+      runs `:LspRestart` automatically on success.
 
 :UBT diagnostics
     Lists errors and warnings from the most recent build in a UI picker.
@@ -72,6 +83,10 @@ Runs the Unreal Header Tool (UHT) to generate header files.
       detects and launches the correct executable based on the selected
       configuration (e.g., `UnrealEditor-Win64-DebugGame.exe` or
       standalone game binary).
+
+:UBT cancel_build                                     *UBT-cancel-build*
+    Cancels the currently running build job. Has no effect if no build
+    is in progress.
 ------------------------------------------------------------------------------
 UI PICKER INTEGRATION                           *UBT-picker-integration*
 
@@ -132,6 +147,20 @@ The following are all available options.
     Default: `"progress.log"`
     The filename for the build's diagnostic log (errors and warnings), which
     is read by the |:UBT Diagnostics| command.
+
+`automation`                                              *'UBT.automation'*
+    Type: `table`
+    Automation settings.
+    Fields:
+      - `restart_lsp_after_gen_compile_db` (boolean, default: `false`)
+        When `true`, automatically runs `:LspRestart` after a successful
+        |:UBT gen_compile_db|.
+      - `auto_gen_header_after_lightweight_refresh` (boolean, default: `false`)
+        When `true`, runs gen_header after a lightweight project refresh.
+      - `auto_gen_project_after_gen_header_success` (boolean, default: `false`)
+        When `true`, generates project files after gen_header succeeds.
+      - `auto_gen_project_after_refresh_completed` (boolean, default: `false`)
+        When `true`, generates project files after a full refresh completes.
 
 `ui`                                                      *'UBT.ui'*
     Type: `table`

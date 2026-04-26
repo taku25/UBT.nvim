@@ -24,6 +24,8 @@ UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プ
 
 主な機能:
 - Unreal Build Toolの非同期実行
+- ビルド競合ダイアログ: ビルド中は再起動の確認、UE起動中はビルド続行の確認
+- ビルド完了時のエラー/警告数と経過時間を含むサマリーをログ記録
 - fidget.nvimによるリアルタイムな進捗表示 (オプション)
 - Telescopeやfzf-luaによる対話的なUIピッカー (オプション)
 - プロジェクト固有の設定を`.unlrc.json`で管理
@@ -43,6 +45,11 @@ UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プ
       使用されます。
     - `!` を付けて実行すると、UIピッカーが起動し、ターゲットを選択して
       ビルドできます。
+    - ビルドがすでに実行中の場合は「Restart build?」ダイアログが表示されます。
+      Unreal Engine が起動中（`tasklist` で検出）の場合は「Build anyway?」
+      ダイアログも追加表示されます。
+    - ビルド完了時にエラー/警告数と経過時間を含むサマリーが記録されます
+      (例: `Build succeeded in 12s (0 errors, 3 warnings)`)。
 
 :UBT gen_header[!] [{target_name}]
     Unreal Header Tool (UHT) を実行してヘッダーファイルを生成します。
@@ -54,6 +61,9 @@ UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プ
     `compile_commands.json`を生成します。
     - `{target_name}` の扱いは |:UBT Build| と同様です。
     - `!` を付けて実行すると、UIピッカーでターゲットを選択できます。
+    - 完了時に経過時間が報告されます。
+    - `automation.restart_lsp_after_gen_compile_db` が `true` の場合、
+      成功後に自動で `:LspRestart` を実行します。
 
 :UBT diagnostics
     直近のビルドで発生したエラーや警告をUIピッカーで一覧表示します。
@@ -74,6 +84,10 @@ UBT.nvim は、Unreal Engine のビルド、`compile_commands.json` 生成、プ
       (例: DebugGame) に基づき、適切な実行ファイル (例:
       `UnrealEditor-Win64-DebugGame.exe` やスタンドアローンバイナリ)
       を自動的に判定して起動します。
+
+:UBT cancel_build                                     *UBT-cancel-build*
+    現在実行中のビルドジョブをキャンセルします。ビルドが実行中でない場合は
+    何も行いません。
 
 ------------------------------------------------------------------------------
 UIピッカー連携                                  *UBT-picker-integration*
@@ -135,6 +149,20 @@ UIピッカーは以下のコマンドで起動できます:
     Default: `"progress.log"`
     ビルドの診断ログ（エラーや警告）を書き出すファイル名。|:UBT Diagnostics|
     で読み込まれます。
+
+`automation`                                              *'UBT.automation'*
+    Type: `table`
+    自動化の設定。
+    フィールド:
+      - `restart_lsp_after_gen_compile_db` (boolean, デフォルト: `false`)
+        `true` にすると、|:UBT gen_compile_db| 成功後に自動で
+        `:LspRestart` を実行します。
+      - `auto_gen_header_after_lightweight_refresh` (boolean, デフォルト: `false`)
+        `true` にすると、軽量リフレッシュ後に gen_header を自動実行します。
+      - `auto_gen_project_after_gen_header_success` (boolean, デフォルト: `false`)
+        `true` にすると、gen_header 成功後にプロジェクトファイルを自動生成します。
+      - `auto_gen_project_after_refresh_completed` (boolean, デフォルト: `false`)
+        `true` にすると、フルリフレッシュ完了後にプロジェクトファイルを自動生成します。
 
 `ui`                                                      *'UBT.ui'*
     Type: `table`
