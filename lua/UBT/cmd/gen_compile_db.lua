@@ -14,7 +14,6 @@ local M = {}
 local function run_job(opts)
   opts = core.ensure_command_args(opts, "GenerateClangDatabase")
 
-  -- ▼▼▼ ここで -NoExecCodeGenActions を追加します ▼▼▼
   local extra = {
     "-NoExecCodeGenActions",
   }
@@ -23,7 +22,6 @@ local function run_job(opts)
   else
     table.insert(extra, "-OutputDir=" .. opts.root_dir)
   end
-  -- ▲▲▲ ここまで ▲▲▲
 
   core.create_command_with_target_platforms(opts, extra, function(cmd, err)
       if err then
@@ -34,6 +32,16 @@ local function run_job(opts)
         label = opts.label,
         on_finish = function(result_payload)
           unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
+
+          if result_payload.success then
+            local conf = require("UNL.config").get("UBT")
+            if conf.automation and conf.automation.restart_lsp_after_gen_compile_db then
+              vim.schedule(function()
+                log.get().info("Restarting LSP clients after compile DB generation...")
+                vim.cmd("LspRestart")
+              end)
+            end
+          end
         end,
         on_complete = opts.on_complete,
       })

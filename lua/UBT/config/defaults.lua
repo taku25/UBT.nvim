@@ -57,6 +57,10 @@ local M = {
     -- trueにすると、完全なリフレッシュ完了後('ON_AFTER_REFRESH_COMPLETED'イベント)に
     -- 自動で 'gen_proj' コマンドを実行します。
     auto_gen_project_after_refresh_completed = false,
+
+    -- trueにすると、'gen_compile_db' 成功後に ':LspRestart' を自動実行します。
+    -- clangd など compile_commands.json を参照する LSP サーバーに有効です。
+    restart_lsp_after_gen_compile_db = false,
   },
 
   -- UBT.nvim が自動検出するプラットフォーム (Win64, Linux, Mac) に加えて、

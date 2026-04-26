@@ -118,6 +118,7 @@ function M.start(name, cmd, opts)
   job_metrics.warning_count = 0
 
   local stdout_buffer = ""
+  local start_time = vim.uv and vim.uv.hrtime() or vim.loop.hrtime()
 
   -- ジョブを開始する直前に、"on_job_start" イベントを全てのwriterに通知する
   unl_log.dispatch_event("UBT", "on_job_start", { name = name })
@@ -184,22 +185,25 @@ function M.start(name, cmd, opts)
       end
       
       local success = (code == 0)
+      local elapsed_s = math.floor(
+        ((vim.uv and vim.uv.hrtime() or vim.loop.hrtime()) - start_time) / 1e9
+      )
       progress:finish(success)
 
-      -- ビルドサマリーをログ出力
+      -- ビルドサマリーをログ出力（経過時間付き）
       if success then
         if job_metrics.warning_count > 0 then
-          log.get().warn("%s succeeded — %d warning(s)", name, job_metrics.warning_count)
+          log.get().warn("%s succeeded in %ds — %d warning(s)", name, elapsed_s, job_metrics.warning_count)
         else
-          log.get().info("%s succeeded", name)
+          log.get().info("%s succeeded in %ds", name, elapsed_s)
         end
       else
-        log.get().error("%s FAILED — %d error(s), %d warning(s)",
-          name, job_metrics.error_count, job_metrics.warning_count)
+        log.get().error("%s FAILED in %ds — %d error(s), %d warning(s)",
+          name, elapsed_s, job_metrics.error_count, job_metrics.warning_count)
       end
 
       -- 1. 完了時のペイロードを一度だけ生成する
-      local result_payload = { success = success }
+      local result_payload = { success = success, elapsed_s = elapsed_s }
 
       if success == true and opts.label then
         -- 設定フラグ(use_last_preset_as_default)に関わらず、
