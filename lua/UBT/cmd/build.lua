@@ -34,20 +34,51 @@ end
 
 ---
 -- プロセスチェックを行い、安全であればビルドを実行するラッパー関数
+-- 実行中の場合は確認ダイアログを表示する
 -- @param opts table
 local function execute_build_if_safe(opts)
+  -- 既にビルドジョブが走っている場合は即座に確認する
+  if runner.is_running() then
+    vim.schedule(function()
+      vim.ui.select(
+        { "Cancel", "Restart build" },
+        { prompt = "A build is already in progress. Restart?" },
+        function(choice)
+          if choice == "Restart build" then
+            run_job(opts)
+          else
+            log.get().info("Build cancelled by user (already running).")
+          end
+        end
+      )
+    end)
+    return
+  end
+
   local conf = require("UNL.config").get("UBT")
   local processes_to_check = conf.unreal_processes_name or {}
 
   core.is_unreal_engine_busy({
     target_process = processes_to_check,
     on_finish = function(is_busy)
-      if is_busy then
-        local message = "Unreal Engine process is running. Build skipped to prevent conflicts."
-        log.get().warn(message)
-      else
+      if not is_busy then
         run_job(opts)
+        return
       end
+
+      vim.schedule(function()
+        vim.ui.select(
+          { "Cancel", "Build anyway" },
+          { prompt = "Unreal Engine is running. Building may cause conflicts." },
+          function(choice)
+            if choice == "Build anyway" then
+              run_job(opts)
+            else
+              log.get().info("Build cancelled by user (Unreal Engine is running).")
+            end
+          end
+        )
+      end)
     end,
   })
 end

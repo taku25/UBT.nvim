@@ -62,6 +62,11 @@ function M.stop()
   return false
 end
 
+--- ジョブが実行中かどうかを返す
+function M.is_running()
+  return current_job_id ~= nil
+end
+
 ---
 -- ジョブの標準出力を一行ずつ処理するヘルパー
 -- @param line string
@@ -181,20 +186,16 @@ function M.start(name, cmd, opts)
       local success = (code == 0)
       progress:finish(success)
 
-      -- ビルドサマリーを通知
+      -- ビルドサマリーをログ出力
       if success then
-        local msg
         if job_metrics.warning_count > 0 then
-          msg = string.format("[UBT] %s succeeded — %d warning(s)", name, job_metrics.warning_count)
-          vim.notify(msg, vim.log.levels.WARN)
+          log.get().warn("%s succeeded — %d warning(s)", name, job_metrics.warning_count)
         else
-          msg = string.format("[UBT] %s succeeded", name)
-          vim.notify(msg, vim.log.levels.INFO)
+          log.get().info("%s succeeded", name)
         end
       else
-        local msg = string.format("[UBT] %s FAILED — %d error(s), %d warning(s)",
+        log.get().error("%s FAILED — %d error(s), %d warning(s)",
           name, job_metrics.error_count, job_metrics.warning_count)
-        vim.notify(msg, vim.log.levels.ERROR)
       end
 
       -- 1. 完了時のペイロードを一度だけ生成する
