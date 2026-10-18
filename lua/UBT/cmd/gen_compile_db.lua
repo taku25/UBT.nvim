@@ -24,27 +24,33 @@ local function run_job(opts)
   end
 
   core.create_command_with_target_platforms(opts, extra, function(cmd, err)
-      if err then
-        return log.get().error(err)
-      end
+    if err then
+      return log.get().error(err)
+    end
 
-      runner.start("GenerateClangDatabase", cmd, {
-        label = opts.label,
-        on_finish = function(result_payload)
-          unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
+    runner.start("GenerateClangDatabase", cmd, {
+      label = opts.label,
+      on_finish = function(result_payload)
+        unl_events.publish(unl_types.ON_AFTER_GENERATE_COMPILE_DATABASE, result_payload)
 
-          if result_payload.success then
-            local conf = require("UNL.config").get("UBT")
-            if conf.automation and conf.automation.restart_lsp_after_gen_compile_db then
-              vim.schedule(function()
-                log.get().info("Restarting LSP clients after compile DB generation...")
+        if result_payload.success then
+          local conf = require("UNL.config").get("UBT")
+          if conf.automation and conf.automation.restart_lsp_after_gen_compile_db then
+            vim.schedule(function()
+              log.get().info("Restarting LSP clients after compile DB generation...")
+              if vim.fn.exists(":lsp") == 2 then
+                vim.cmd("lsp restart")
+              elseif vim.fn.exists(":LspRestart") == 2 then
                 vim.cmd("LspRestart")
-              end)
-            end
+              else
+                log.get().warn("Cannot restart LSP: no restart command available")
+              end
+            end)
           end
-        end,
-        on_complete = opts.on_complete,
-      })
+        end
+      end,
+      on_complete = opts.on_complete,
+    })
   end)
 end
 
@@ -52,22 +58,24 @@ function M.start(opts)
   opts = opts or {}
   if opts.has_bang then
     model.get_presets(function(presets)
-        unl_picker.open({
-          kind = "ubt_gencompiledb",
-          title = "UBT Generate Compile DB Targets",
-          logger_name = "UBT",
-          preview_enabled = false,
-          conf = require("UNL.config").get("UBT"),
-          items = presets,
-          format = function(entry) return entry.name end,
-          on_submit = function(selected)
-            if selected then
-              opts.label = selected.name
-              context.set("last_preset", selected.name)
-              run_job(opts)
-            end
-          end,
-        })
+      unl_picker.open({
+        kind = "ubt_gencompiledb",
+        title = "UBT Generate Compile DB Targets",
+        logger_name = "UBT",
+        preview_enabled = false,
+        conf = require("UNL.config").get("UBT"),
+        items = presets,
+        format = function(entry)
+          return entry.name
+        end,
+        on_submit = function(selected)
+          if selected then
+            opts.label = selected.name
+            context.set("last_preset", selected.name)
+            run_job(opts)
+          end
+        end,
+      })
     end)
   else
     run_job(opts)
@@ -75,4 +83,3 @@ function M.start(opts)
 end
 
 return M
-
